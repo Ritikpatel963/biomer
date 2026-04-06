@@ -16,6 +16,9 @@
     {{-- Main Stylesheet --}}
     <link rel="stylesheet" href="{{ asset('assets/css/frontcss/style.css') }}" />
 
+    {{-- Remixicon Icon Library --}}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.0.1/remixicon.min.css" rel="stylesheet" />
+
     {{-- Page-specific styles --}}
     @stack('styles')
 </head>

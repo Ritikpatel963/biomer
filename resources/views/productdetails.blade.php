@@ -403,12 +403,19 @@
           @if($isLoggedIn && !$alreadyReviewed)
           <div class="rv__form-card mb-4" id="reviewFormWrap">
             <h5 class="rv__form-title">Write a Review</h5>
-            <div class="rv__star-picker mb-3" id="starPicker">
-              @for($i = 1; $i <= 5; $i++)
-                <i class="ri-star-line rv__pick-star" data-value="{{ $i }}" id="pickStar{{ $i }}"></i>
-              @endfor
-              <span class="rv__pick-label ms-2" id="starLabel">Select rating</span>
+            
+            {{-- Star Rating Section --}}
+            <div class="rv__rating-section mb-4">
+              <label class="rv__rating-label">Rating <span class="text-danger">*</span></label>
+              <div class="rv__star-picker mt-2" id="starPicker">
+                @for($i = 1; $i <= 5; $i++)
+                  <i class="ri-star-line rv__pick-star" data-value="{{ $i }}" id="pickStar{{ $i }}" title="Click to rate"></i>
+                @endfor
+                <span class="rv__pick-label ms-3" id="starLabel">Select rating</span>
+              </div>
+              <small class="rv__rating-hint" id="ratingHint">Click on stars to rate this product</small>
             </div>
+
             <textarea id="reviewText" class="rv__textarea form-control mb-3" rows="3"
                       placeholder="Share your experience with this product (optional)…" maxlength="1000"></textarea>
             <button class="pd__cta-btn pd__cta-btn--primary" id="submitReviewBtn" style="width:auto;padding:10px 28px;">
@@ -460,6 +467,13 @@
 
 @push('styles')
 <style>
+  /* ── Animation for validation feedback ────────────── */
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+  }
+
   /* ── Image Gallery ─────────────────────────── */
   .pd__img-main-wrap {
     position: relative;
@@ -635,10 +649,56 @@
     padding: 20px 22px;
   }
   .rv__form-title { color: #2d7a45; font-weight: 700; margin-bottom: 12px; font-size: 1rem; }
-  .rv__star-picker { display: flex; align-items: center; gap: 4px; }
-  .rv__pick-star { font-size: 1.8rem; color: #d1d5db; cursor: pointer; transition: color .15s, transform .15s; }
-  .rv__pick-star:hover, .rv__pick-star.active { color: #f59e0b; transform: scale(1.15); }
-  .rv__pick-label { font-size: 0.82rem; color: #6b7280; }
+  
+  /* ── Rating Section ─────────────────────────────── */
+  .rv__rating-section { 
+    background: #f9fcf8;
+    padding: 16px;
+    border-radius: 12px;
+    border-left: 4px solid #f59e0b;
+  }
+  .rv__rating-label { 
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #2d7a45;
+    margin-bottom: 8px;
+  }
+  
+  .rv__star-picker { 
+    display: flex; 
+    align-items: center; 
+    gap: 6px;
+  }
+  .rv__pick-star { 
+    font-size: 2rem;
+    color: #d1d5db;
+    cursor: pointer;
+    transition: color 0.2s, transform 0.15s;
+    display: inline-block;
+    line-height: 1;
+  }
+  .rv__pick-star:hover { 
+    color: #fbbf24;
+    transform: scale(1.2);
+  }
+  .rv__pick-star.active { 
+    color: #f59e0b;
+  }
+  .rv__pick-label { 
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #2d7a45;
+    min-width: 140px;
+  }
+  .rv__rating-hint {
+    display: block;
+    margin-top: 8px;
+    color: #6b7280;
+    font-size: 0.8rem;
+    font-style: italic;
+  }
+  
   .rv__textarea { border: 1.5px solid #c8e6c9; border-radius: 10px; resize: vertical; font-size: 0.9rem; }
   .rv__textarea:focus { border-color: #2d7a45; box-shadow: 0 0 0 3px rgba(45,122,69,.12); outline: none; }
 
@@ -752,30 +812,88 @@
   // ── Star Picker ──────────────────────────────────────────────────────
   const pickStars = document.querySelectorAll('.rv__pick-star');
   let selectedRating = 0;
-  const starLabels = ['','Terrible','Poor','Average','Good','Excellent'];
+  const starLabels = ['','⭐ Terrible','⭐⭐ Poor','⭐⭐⭐ Average','⭐⭐⭐⭐ Good','⭐⭐⭐⭐⭐ Excellent'];
 
   pickStars.forEach(star => {
     star.addEventListener('mouseover', () => {
       const val = parseInt(star.dataset.value);
-      pickStars.forEach(s => {
-        s.classList.toggle('active', parseInt(s.dataset.value) <= val);
-        s.classList.replace('ri-star-line','ri-star-fill');
-        if (parseInt(s.dataset.value) > val) s.classList.replace('ri-star-fill','ri-star-line');
+      pickStars.forEach((s, idx) => {
+        const starValue = parseInt(s.dataset.value);
+        if (starValue <= val) {
+          s.classList.add('active');
+          s.classList.remove('ri-star-line');
+          s.classList.add('ri-star-fill');
+        } else {
+          s.classList.remove('active');
+          s.classList.remove('ri-star-fill');
+          s.classList.add('ri-star-line');
+        }
       });
+      // Show hover label
+      document.getElementById('starLabel').textContent = starLabels[val];
+      document.getElementById('starLabel').style.color = '#f59e0b';
     });
+
     star.addEventListener('mouseout', () => {
       pickStars.forEach(s => {
         const v = parseInt(s.dataset.value);
         s.classList.toggle('active', v <= selectedRating);
-        s.classList.replace(v <= selectedRating ? 'ri-star-line' : 'ri-star-fill',
-                            v <= selectedRating ? 'ri-star-fill' : 'ri-star-line');
+        if (v <= selectedRating) {
+          s.classList.remove('ri-star-line');
+          s.classList.add('ri-star-fill');
+        } else {
+          s.classList.remove('ri-star-fill');
+          s.classList.add('ri-star-line');
+        }
       });
+      // Reset label if no selection
+      if (selectedRating === 0) {
+        document.getElementById('starLabel').textContent = 'Select rating';
+        document.getElementById('starLabel').style.color = '#6b7280';
+      }
     });
-    star.addEventListener('click', () => {
-      selectedRating = parseInt(star.dataset.value);
-      document.getElementById('starLabel').textContent = starLabels[selectedRating];
+
+    star.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const val = parseInt(star.dataset.value);
+      selectedRating = val;
+      
+      // Update all stars to show selection
+      pickStars.forEach(s => {
+        const sVal = parseInt(s.dataset.value);
+        if (sVal <= val) {
+          s.classList.add('active');
+          s.classList.remove('ri-star-line');
+          s.classList.add('ri-star-fill');
+        } else {
+          s.classList.remove('active');
+          s.classList.remove('ri-star-fill');
+          s.classList.add('ri-star-line');
+        }
+      });
+      
+      // Update label with selected value
+      document.getElementById('starLabel').textContent = starLabels[val];
+      document.getElementById('starLabel').style.color = '#2d7a45';
+      
+      // Visual feedback for selection
+      const ratingHint = document.getElementById('ratingHint');
+      if (ratingHint) {
+        ratingHint.textContent = `✓ Rating selected: ${val} star${val !== 1 ? 's' : ''}`;
+        ratingHint.style.color = '#2d7a45';
+        ratingHint.style.fontWeight = '600';
+      }
     });
   });
+
+  // Initialize first star display
+  if (pickStars.length > 0) {
+    pickStars.forEach(s => {
+      s.classList.remove('ri-star-fill');
+      s.classList.add('ri-star-line');
+    });
+  }
 
   // ── Submit review ────────────────────────────────────────────────────
   const submitBtn = document.getElementById('submitReviewBtn');
@@ -784,6 +902,13 @@
       if (!selectedRating) {
         document.getElementById('starLabel').textContent = '⚠ Please select a rating!';
         document.getElementById('starLabel').style.color = '#dc3545';
+        document.getElementById('ratingHint').textContent = 'You must select a star rating before submitting';
+        document.getElementById('ratingHint').style.color = '#dc3545';
+        document.getElementById('ratingHint').style.fontWeight = '600';
+        // Add shake animation
+        const starPicker = document.getElementById('starPicker');
+        starPicker.style.animation = 'none';
+        setTimeout(() => { starPicker.style.animation = 'shake 0.3s'; }, 10);
         return;
       }
       const text    = document.getElementById('reviewText').value;
