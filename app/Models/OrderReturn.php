@@ -30,7 +30,6 @@ class OrderReturn extends Model
         'refunded_at' => 'datetime',
     ];
 
-    // ── Relationships ──────────────────────────────────────
     public function order()
     {
         return $this->belongsTo(Order::class);
@@ -41,7 +40,32 @@ class OrderReturn extends Model
         return $this->belongsTo(Customer::class);
     }
 
-    // ── Status Helpers ─────────────────────────────────────
+    public function orderItem()
+    {
+        return $this->belongsTo(OrderItem::class, 'order_item_id');
+    }
+
+    // Backward-compatible aliases for the actual DB columns.
+    public function getReasonAttribute()
+    {
+        return $this->attributes['return_reason'] ?? null;
+    }
+
+    public function setReasonAttribute($value): void
+    {
+        $this->attributes['return_reason'] = $value;
+    }
+
+    public function getDescriptionAttribute()
+    {
+        return $this->attributes['customer_notes'] ?? null;
+    }
+
+    public function setDescriptionAttribute($value): void
+    {
+        $this->attributes['customer_notes'] = $value;
+    }
+
     public function isPending(): bool
     {
         return $this->status === 'pending';

@@ -137,7 +137,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="javascript:void(0)">
+                        <a href="{{ route('dashboard.returns.index') }}">
                             <i class="ri-circle-fill circle-icon text-warning-main w-auto"></i> Order Returns
                         </a>
                     </li>

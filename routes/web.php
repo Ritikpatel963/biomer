@@ -27,11 +27,13 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\OrderReturnController;
 use App\Http\Controllers\AdminCustomerController;
 use App\Http\Controllers\AdminOrderController;
+use App\Http\Controllers\AdminOrderReturnController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\CustomerDashboardController;
 use App\Http\Controllers\ProductReviewController;
-use App\Http\Controllers\Admin\PageController;
+use App\Http\Controllers\Admin\PageController as AdminPageController;
+use App\Http\Controllers\PageController;
 
 // ══════════════════════════════════════════════════════════════════════
 //  PUBLIC FRONTEND ROUTES
@@ -46,6 +48,8 @@ Route::view('/contact', 'contact');
 Route::get('/', fn() => view('index'));
 Route::get('/products', [ProductController::class , 'shopIndex'])->name('products.index');
 Route::get('/products/{product:slug}', [ProductController::class , 'shopShow'])->name('products.show');
+
+// ── Dynamic Pages with SEO ────────────────────────────────────
 
 // ══════════════════════════════════════════════════════════════════════
 //  ADMIN AUTH ROUTES — public (no login required)
@@ -102,6 +106,7 @@ Route::middleware('customer.auth')->group(function () {
     // ── Order Returns (customer login required) ──────────────────
     Route::get('/order-returns', [OrderReturnController::class, 'index'])->name('order-returns.index');
     Route::get('/order-returns/create/{orderNumber}', [OrderReturnController::class, 'create'])->name('order-returns.create');
+    Route::get('/order-returns/store/{orderNumber}', fn ($orderNumber) => redirect()->route('order-returns.create', $orderNumber));
     Route::post('/order-returns/store/{orderNumber}', [OrderReturnController::class, 'store'])->name('order-returns.store');
     Route::get('/order-returns/{id}', [OrderReturnController::class, 'show'])->name('order-returns.show');
 
@@ -311,6 +316,9 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/orders', [AdminOrderController::class , 'index'])->name('dashboard.orders.index');
             Route::get('/orders/{orderNumber}', [AdminOrderController::class , 'show'])->name('dashboard.orders.show');
             Route::patch('/orders/{orderNumber}/status', [AdminOrderController::class , 'updateStatus'])->name('dashboard.orders.updateStatus');
+            Route::get('/returns', [AdminOrderReturnController::class, 'index'])->name('dashboard.returns.index');
+            Route::get('/returns/{id}', [AdminOrderReturnController::class, 'show'])->name('dashboard.returns.show');
+            Route::post('/returns/{id}', [AdminOrderReturnController::class, 'update'])->name('dashboard.returns.update');
             //stock
     
 
@@ -432,3 +440,9 @@ Route::middleware(['auth'])->group(function () {
             }
             );
         });
+
+// Dynamic pages catch-all
+// Keep this route last so it doesn't override explicit routes above.
+Route::get('/{page:slug}', [PageController::class, 'show'])->name('pages.show');
+
+

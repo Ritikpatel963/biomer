@@ -91,174 +91,168 @@
          NAVBAR
     ═══════════════════════════ --}}
     <nav class="bb-navbar navbar navbar-expand-lg">
-        <div class="container">
+    <div class="container">
 
-            {{-- Brand / Logo --}}
-            <a class="navbar-brand" href="{{ url('/') }}">
-                <img class="bb-logo-icon" src="{{ asset('assets/images/home-img/bb logo.png') }}"
-                    alt="Bharat Biomer Logo" />
+        {{-- Brand / Logo --}}
+        <a class="navbar-brand" href="{{ url('/') }}">
+            <img class="bb-logo-icon" src="{{ asset('assets/images/home-img/bb logo.png') }}"
+                alt="Bharat Biomer Logo" />
+        </a>
+
+        {{-- Mobile: Cart + Toggler --}}
+        @php $cartCount = collect(session('cart', []))->sum('quantity'); @endphp
+        <div class="d-flex align-items-center gap-2 d-lg-none">
+            <a href="{{ route('cart.index') }}" class="bb-cart-icon">
+                <img src="{{ asset('assets/images/trolley.png') }}" alt="Cart" style="width:20px;height:20px;">
+                @if ($cartCount > 0)
+                    <span class="bb-cart-badge">{{ $cartCount }}</span>
+                @endif
             </a>
-
-            {{-- Mobile: Cart + Toggler --}}
-            <div class="d-flex align-items-center gap-2 d-lg-none">
-                <a href="{{ route('cart.index') }}" class="bb-cart-icon">
-                    <img src="{{ asset('assets/images/trolley.png') }}" alt="Cart"
-                        @php $cartCount = collect(session('cart', []))->sum('quantity'); @endphp
-                        @if ($cartCount > 0) <span class="bb-cart-badge">{{ $cartCount }}</span> @endif
-                        </a>
-                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#bbNavMenu"
-                        aria-controls="bbNavMenu" aria-expanded="false" aria-label="Toggle navigation">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
-            </div>
-
-            {{-- Nav Links --}}
-            <div class="collapse navbar-collapse" id="bbNavMenu">
-                <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1 py-3 py-lg-0">
-
-                    {{-- Dynamic Navigation from Database --}}
-                    @php
-                        $headerLinks = \App\Models\HeaderLink::getActive();
-                    @endphp
-                    @foreach ($headerLinks as $link)
-                        <li class="nav-item">
-                            <a class="nav-link bb-nav-link" href="{{ $link->url }}" target="{{ $link->target }}">
-                                @if ($link->icon)
-                                    <iconify-icon icon="{{ $link->icon }}"></iconify-icon>
-                                @endif
-                                {{ $link->label }}
-                            </a>
-                        </li>
-                    @endforeach
-
-                    {{-- ── Divider ── --}}
-                    <li class="nav-item d-lg-none">
-                        <hr style="border-color:#e8f0e4;margin:.5rem 0;">
-                    </li>
- <a href="{{ route('cart.index') }}" class="bb-cart-icon">
-                            <img src="{{ asset('assets/images/trolley.png') }}" alt="Cart"
-                                style="width:20px;height:20px;">
-                            @if ($cartCount > 0)
-                                <span class="bb-cart-badge">{{ $cartCount }}</span>
-                            @endif
-                        </a>
-                    {{-- ── Cart (desktop) ── --}}
-                    <li class="nav-item ms-lg-2 d-none d-lg-block">
-                        @php $cartCount = collect(session('cart', []))->sum('quantity'); @endphp
-                       
-                        <a href="{{ route('wishlist.index') }}" style="position:relative; text-decoration:none;">
-                            <img src="{{ asset('assets/images/love.png') }}" alt="Cart"
-                                style="width:20px;height:20px;">
-                            @auth('customer')
-                                @php $wlCount = Auth::guard('customer')->user()->wishlists()->count(); @endphp
-                                @if ($wlCount > 0)
-                                    <span id="wishlist-count"
-                                        style="position:absolute; top:-8px; right:-8px;
-                 background:#e74c3c; color:#fff;
-                 font-size:0.65rem; font-weight:700;
-                 width:18px; height:18px; border-radius:50%;
-                 display:flex; align-items:center; justify-content:center;">
-                                        {{ $wlCount }}
-                                    </span>
-                                @endif
-                            @endauth
-                        </a>
-                    </li>
-
-                    {{-- ── Auth Links ── --}}
-                    @auth('customer')
-                        {{-- Logged in: My Orders + Dropdown --}}
-                        {{-- <li class="nav-item ms-lg-1">
-        <a class="nav-link bb-nav-link {{ request()->routeIs('orders.*') ? 'active' : '' }}"
-           href="{{ route('orders.index') }}">My Orders</a>
-    </li> --}}
-                        <li class="nav-item ms-lg-1 mt-2 mt-lg-0">
-                            <div class="dropdown">
-                                <button class="bb-btn-contact-nav dropdown-toggle" type="button" data-bs-toggle="dropdown"
-                                    aria-expanded="false" style="border:none;cursor:pointer;">
-                                    👤 {{ Str::limit(Auth::guard('customer')->user()->name, 12) }}
-                                </button>
-                                <ul class="dropdown-menu dropdown-menu-end"
-                                    style="border:1px solid #e8f0e4;border-radius:10px;padding:8px;">
-
-                                    {{-- ✅ Dashboard --}}
-                                    <li>
-                                        <a class="dropdown-item" href="{{ route('customer.dashboard') }}"
-                                            style="font-size:.88rem;color:#1a2e1a;padding:8px 16px;border-radius:6px;">
-                                            Dashboard
-                                        </a>
-                                    </li>
-
-                                    <li>
-                                        <a class="dropdown-item" href="{{ route('orders.index') }}"
-                                            style="font-size:.88rem;color:#2d7a45;padding:8px 16px;border-radius:6px;">
-                                            My Orders
-                                        </a>
-                                    </li>
-
-                                    {{-- ✅ My Returns --}}
-                                    <li>
-                                        <a class="dropdown-item" href="{{ route('order-returns.index') }}"
-                                            style="font-size:.88rem;color:#6b7c6b;padding:8px 16px;border-radius:6px;">
-                                            My Returns
-                                        </a>
-                                    </li>
-
-                                    {{-- ✅ Wishlist --}}
-                                    <li>
-                                        <a class="dropdown-item" href="{{ route('wishlist.index') }}"
-                                            style="font-size:.88rem;color:#e74c3c;padding:8px 16px;border-radius:6px;">
-                                            Wishlist
-                                            @php $wlCount = Auth::guard('customer')->user()->wishlists()->count(); @endphp
-                                            @if ($wlCount > 0)
-                                                <span
-                                                    style="background:#e74c3c;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:20px;margin-left:4px;">{{ $wlCount }}</span>
-                                            @endif
-                                        </a>
-                                    </li>
-
-                                    {{-- ✅ My Account --}}
-                                    <li>
-                                        <a class="dropdown-item" href="{{ route('customer.account') }}"
-                                            style="font-size:.88rem;color:#1a2e1a;padding:8px 16px;border-radius:6px;">
-                                            My Account
-                                        </a>
-                                    </li>
-
-                                    <li>
-                                        <hr class="dropdown-divider" style="border-color:#e8f0e4;">
-                                    </li>
-
-                                    <li>
-                                        <form action="{{ route('customer.logout') }}" method="POST">
-                                            @csrf
-                                            <button type="submit" class="dropdown-item"
-                                                style="font-size:.88rem;color:#dc3545;padding:8px 16px;border-radius:6px;background:none;border:none;width:100%;text-align:left;cursor:pointer;">
-                                                Logout
-                                            </button>
-                                        </form>
-                                    </li>
-
-                                </ul>
-                            </div>
-                        </li>
-                    @else
-                        {{-- Guest: Login + Register --}}
-                        <li class="nav-item ms-lg-1 mt-2 mt-lg-0">
-                            <a class="nav-link bb-nav-link {{ request()->routeIs('customer.login') ? 'active' : '' }}"
-                                href="{{ route('customer.login') }}">Login</a>
-                        </li>
-                        <li class="nav-item ms-lg-1 mt-2 mt-lg-0">
-                            <a class="bb-btn-contact-nav {{ request()->routeIs('customer.register') ? 'active' : '' }}"
-                                href="{{ route('customer.register') }}">Register</a>
-                        </li>
-                    @endauth
-
-                </ul>
-            </div>
-
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#bbNavMenu"
+                aria-controls="bbNavMenu" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
         </div>
-    </nav>
+
+        {{-- Nav Links --}}
+        <div class="collapse navbar-collapse" id="bbNavMenu">
+            <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1 py-3 py-lg-0">
+
+                {{-- Dynamic Navigation from Database --}}
+                @php
+                    $headerLinks = \App\Models\HeaderLink::getActive();
+                @endphp
+                @foreach ($headerLinks as $link)
+                    <li class="nav-item">
+                        <a class="nav-link bb-nav-link" href="{{ $link->url }}" target="{{ $link->target }}">
+                            @if ($link->icon)
+                                <iconify-icon icon="{{ $link->icon }}"></iconify-icon>
+                            @endif
+                            {{ $link->label }}
+                        </a>
+                    </li>
+                @endforeach
+
+                {{-- ── Divider (mobile only) ── --}}
+                <li class="nav-item d-lg-none">
+                    <hr style="border-color:#e8f0e4;margin:.5rem 0;">
+                </li>
+
+                {{-- ── Cart + Wishlist (desktop only) ── --}}
+                <li class="nav-item ms-lg-2 d-none d-lg-flex align-items-center gap-2">
+
+                    {{-- Cart --}}
+                    <a href="{{ route('cart.index') }}" class="bb-cart-icon">
+                        <img src="{{ asset('assets/images/trolley.png') }}" alt="Cart" style="width:20px;height:20px;">
+                        @if ($cartCount > 0)
+                            <span class="bb-cart-badge">{{ $cartCount }}</span>
+                        @endif
+                    </a>
+
+                    {{-- Wishlist --}}
+                    <a href="{{ route('wishlist.index') }}" style="position:relative; text-decoration:none;">
+                        <img src="{{ asset('assets/images/love.png') }}" alt="Wishlist" style="width:20px;height:20px;">
+                        @auth('customer')
+                            @php $wlCount = Auth::guard('customer')->user()->wishlists()->count(); @endphp
+                            @if ($wlCount > 0)
+                                <span id="wishlist-count"
+                                    style="position:absolute; top:-8px; right:-8px;
+                                    background:#e74c3c; color:#fff;
+                                    font-size:0.65rem; font-weight:700;
+                                    width:18px; height:18px; border-radius:50%;
+                                    display:flex; align-items:center; justify-content:center;">
+                                    {{ $wlCount }}
+                                </span>
+                            @endif
+                        @endauth
+                    </a>
+
+                </li>
+
+                {{-- ── Auth Links ── --}}
+                @auth('customer')
+                    <li class="nav-item ms-lg-1 mt-2 mt-lg-0">
+                        <div class="dropdown">
+                            <button class="bb-btn-contact-nav dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                                aria-expanded="false" style="border:none;cursor:pointer;">
+                                👤 {{ Str::limit(Auth::guard('customer')->user()->name, 12) }}
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end"
+                                style="border:1px solid #e8f0e4;border-radius:10px;padding:8px;">
+
+                                <li>
+                                    <a class="dropdown-item" href="{{ route('customer.dashboard') }}"
+                                        style="font-size:.88rem;color:#1a2e1a;padding:8px 16px;border-radius:6px;">
+                                        Dashboard
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a class="dropdown-item" href="{{ route('orders.index') }}"
+                                        style="font-size:.88rem;color:#2d7a45;padding:8px 16px;border-radius:6px;">
+                                        My Orders
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a class="dropdown-item" href="{{ route('order-returns.index') }}"
+                                        style="font-size:.88rem;color:#6b7c6b;padding:8px 16px;border-radius:6px;">
+                                        My Returns
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a class="dropdown-item" href="{{ route('wishlist.index') }}"
+                                        style="font-size:.88rem;color:#e74c3c;padding:8px 16px;border-radius:6px;">
+                                        Wishlist
+                                        @php $wlCount = Auth::guard('customer')->user()->wishlists()->count(); @endphp
+                                        @if ($wlCount > 0)
+                                            <span
+                                                style="background:#e74c3c;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:20px;margin-left:4px;">{{ $wlCount }}</span>
+                                        @endif
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a class="dropdown-item" href="{{ route('customer.account') }}"
+                                        style="font-size:.88rem;color:#1a2e1a;padding:8px 16px;border-radius:6px;">
+                                        My Account
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <hr class="dropdown-divider" style="border-color:#e8f0e4;">
+                                </li>
+
+                                <li>
+                                    <form action="{{ route('customer.logout') }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="dropdown-item"
+                                            style="font-size:.88rem;color:#dc3545;padding:8px 16px;border-radius:6px;background:none;border:none;width:100%;text-align:left;cursor:pointer;">
+                                            Logout
+                                        </button>
+                                    </form>
+                                </li>
+
+                            </ul>
+                        </div>
+                    </li>
+                @else
+                    <li class="nav-item ms-lg-1 mt-2 mt-lg-0">
+                        <a class="nav-link bb-nav-link {{ request()->routeIs('customer.login') ? 'active' : '' }}"
+                            href="{{ route('customer.login') }}">Login</a>
+                    </li>
+                    <li class="nav-item ms-lg-1 mt-2 mt-lg-0">
+                        <a class="bb-btn-contact-nav {{ request()->routeIs('customer.register') ? 'active' : '' }}"
+                            href="{{ route('customer.register') }}">Register</a>
+                    </li>
+                @endauth
+
+            </ul>
+        </div>
+
+    </div>
+</nav>
     {{-- END NAVBAR --}}
 
     {{-- Flash Messages --}}
@@ -344,8 +338,16 @@
         </div>
     </footer>
 
+    {{-- Shared frontend dependencies --}}
+    <script src="{{ asset('assets/js/lib/jquery-3.7.1.min.js') }}"></script>
+    <script src="{{ asset('assets/js/lib/iconify-icon.min.js') }}"></script>
+
     {{-- Bootstrap 5 JS --}}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    {{-- GSAP for page motion --}}
+    <script src="{{ asset('assets/js/lib/gsap.min.js') }}"></script>
+    <script src="{{ asset('assets/js/lib/ScrollTrigger.min.js') }}"></script>
 
     {{-- Main JS --}}
     <script src="{{ asset('assets/js/app.js') }}"></script>

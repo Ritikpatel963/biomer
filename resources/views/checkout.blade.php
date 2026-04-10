@@ -485,10 +485,15 @@
             {{ $gateway->display_name }}
         </label>
     @endforeach
+</div>
 
 <p style="text-align:center; font-size:0.72rem; color:#9aab9a; margin-top:0.75rem; margin-bottom:0;">
     🔒 Your information is secure and encrypted
 </p>
+
+<button type="button" id="placeOrderBtn" class="chk__place-btn" onclick="startPayment()">
+    Complete Purchase
+</button>
 
                 </div>
             </div>

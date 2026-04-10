@@ -536,7 +536,7 @@ class OrderController extends Controller
     // ── My Orders ──────────────────────────────────────────────────────
     public function myOrders()
     {
-        $orders = Order::with('items')
+        $orders = Order::with(['items', 'orderReturn'])
             ->where('customer_id', $this->customer()->id)
             ->latest()
             ->paginate(10);
@@ -546,7 +546,7 @@ class OrderController extends Controller
     // ── Order Detail ───────────────────────────────────────────────────
     public function show($orderNumber)
     {
-        $order = Order::with('items.product')
+        $order = Order::with(['items.product', 'orderReturn'])
             ->where('order_number', $orderNumber)
             ->where('customer_id', $this->customer()->id)
             ->firstOrFail();

@@ -153,6 +153,17 @@
                 📦 {{ $order->city }}, {{ $order->state }} – {{ $order->pincode }}
             </div>
             <div class="d-flex align-items-center gap-2">
+                @if($order->canRequestReturn())
+                    <a href="{{ route('order-returns.create', $order->order_number) }}"
+                       class="mo__view-btn" style="background:#fff4e5; color:#9a5b00; border:1px solid #f3c77a;">
+                        Return Product
+                    </a>
+                @elseif($order->orderReturn)
+                    <a href="{{ route('order-returns.show', $order->orderReturn->id) }}"
+                       class="mo__view-btn" style="background:#f4faf0; color:#2d7a45; border:1px solid #a8d5b5;">
+                        Return Status
+                    </a>
+                @endif
                 <a href="{{ route('orders.invoice', $order->order_number) }}"
                    class="mo__view-btn" style="background:#1a6fa8;" target="_blank">
                     ⬇ Invoice

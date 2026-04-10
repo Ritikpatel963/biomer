@@ -180,6 +180,17 @@
             <p style="font-size:0.85rem; color:#6b7c6b; margin-bottom:1rem;">
                 For any queries about this order, please contact our support team.
             </p>
+            @if($order->canRequestReturn())
+            <a href="{{ route('order-returns.create', $order->order_number) }}"
+               style="display:inline-block; padding:0.6rem 1.5rem; background:#fff4e5; color:#9a5b00; font-weight:700; font-size:0.85rem; border-radius:8px; text-decoration:none; border:1px solid #f3c77a; margin-bottom:0.75rem;">
+                Return Product
+            </a>
+            @elseif($order->orderReturn)
+            <a href="{{ route('order-returns.show', $order->orderReturn->id) }}"
+               style="display:inline-block; padding:0.6rem 1.5rem; background:#f4faf0; color:#2d7a45; font-weight:700; font-size:0.85rem; border-radius:8px; text-decoration:none; border:1px solid #a8d5b5; margin-bottom:0.75rem;">
+                View Return Status
+            </a>
+            @endif
             <a href="mailto:support@bharatbiomer.com"
                style="display:inline-block; padding:0.6rem 1.5rem; background:#2d7a45; color:#fff; font-weight:700; font-size:0.85rem; border-radius:8px; text-decoration:none;">
                 📧 Email Support

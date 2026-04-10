@@ -31,6 +31,14 @@
     display: flex; align-items: center; gap: 1rem;
     padding: 1rem; background: #f9fbf8; border-radius: 10px;
     border: 1px solid #e8f0e4;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+.orc__item input[type="radio"] { margin-top: 0.2rem; }
+.orc__item:has(input:checked) {
+    border-color: #2d7a45;
+    background: #eef8f1;
+    box-shadow: 0 0 0 3px rgba(45,122,69,0.08);
 }
 .orc__item-img {
     width: 60px; height: 60px; object-fit: contain;
@@ -107,11 +115,16 @@
                 </div>
 
                 <div class="orc__body">
+                    <form action="{{ route('order-returns.store', $order->order_number) }}" method="POST" class="orc__form">
+                        @csrf
+
                     <div class="orc__section">
-                        <h3 class="orc__section-title">Order Items</h3>
+                        <h3 class="orc__section-title">Select Item to Return</h3>
                         <div class="orc__items">
                             @foreach($order->orderItems as $item)
-                            <div class="orc__item">
+                            <label class="orc__item">
+                                <input type="radio" name="order_item_id" value="{{ $item->id }}"
+                                       {{ old('order_item_id') == $item->id || ($loop->first && !old('order_item_id')) ? 'checked' : '' }}>
                                 @if($item->product->featured_image)
                                     <img src="{{ Storage::url($item->product->featured_image) }}" alt="{{ $item->product->name }}" class="orc__item-img">
                                 @else
@@ -126,13 +139,13 @@
                                         @endif
                                     </div>
                                 </div>
-                            </div>
+                            </label>
                             @endforeach
                         </div>
+                        @error('order_item_id')
+                            <div class="text-danger mt-2" style="font-size:0.85rem;">{{ $message }}</div>
+                        @enderror
                     </div>
-
-                    <form action="{{ route('order-returns.store', $order->order_number) }}" method="POST" class="orc__form">
-                        @csrf
 
                         <div class="orc__section">
                             <h3 class="orc__section-title">Return Details</h3>

@@ -26,4 +26,9 @@ class OrderItem extends Model
     {
         return $this->belongsTo(ProductVariation::class, 'variation_id');
     }
+
+    public function getPriceAttribute()
+    {
+        return $this->unit_price;
+    }
 }

@@ -51,6 +51,7 @@
 @endpush
 
 @section('content')
+<div class="pd-page">
 
   <!-- ========================
        SECTION 1: Hero
@@ -523,8 +524,9 @@
         </div>
       </div>
     </div>
-  </section>
+</section>
 
+</div>
 @endsection
 
 
