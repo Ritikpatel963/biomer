@@ -247,10 +247,6 @@
                                             </li>
                                         </ul>
                                     </div>
-                                    <form class="navbar-search d-lg-block d-none">
-                                        <input type="text" class="bg-base h-40-px w-auto" name="search" placeholder="Search">
-                                        <iconify-icon icon="ion:search-outline" class="icon"></iconify-icon>
-                                    </form>
                                 </div>
                                 <div class="d-flex align-items-center gap-3">
                                     <span class="text-secondary-light line-height-1">1-12 of 1,253</span>

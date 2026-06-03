@@ -3,7 +3,6 @@
     <ul class="d-flex align-items-center gap-2">
         <li class="fw-medium">
             <a href="{{ route('index') }}" class="d-flex align-items-center gap-1 hover-text-primary">
-                <iconify-icon icon="solar:home-smile-angle-outline" class="icon text-lg"></iconify-icon>
                 Dashboard
             </a>
         </li>

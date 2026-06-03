@@ -1,6 +1,8 @@
 
 @extends('layout.frontlayout')
-@section('title', 'Bharat Biomer – Nature-Powered Biology')
+@section('title', 'Our Technology – Bharat Biomer')
+@section('seo_description', 'Discover Bharat Biomer’s PPFM technology and how our biological innovations improve crop growth, resilience, and soil health.')
+@section('seo_keywords', 'PPFM technology, agriculture biotechnology, crop resilience, soil health, Bharat Biomer technology')
 
 @section('content')
   <!-- ========================
@@ -167,7 +169,7 @@
   <!-- ========================
      SECTION 4: How PPFM Helps Plants
 ======================== -->
-<section class="hph__section">
+<section class="hph__section" id="technology-crop">
   <div class="container">
 
     <div class="row justify-content-center">
@@ -219,7 +221,7 @@
 <!-- ========================
      SECTION 5: Application Methods
 ======================== -->
-<section class="appm__section">
+<section class="appm__section" id="technology-solution">
   <div class="container">
 
     <!-- Heading -->

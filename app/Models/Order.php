@@ -13,7 +13,7 @@ class Order extends Model
         'total_amount', 'shipping_amount', 'tax_amount', 'status',
         'razorpay_order_id', 'razorpay_payment_id', 'payment_status',
         'payment_gateway', 'cashfree_order_id', 'cashfree_payment_id',
-        'shiprocket_order_id',
+        'shiprocket_order_id', 'coupon_id', 'discount_amount', 'net_amount',
     ];
 
     protected $casts = [

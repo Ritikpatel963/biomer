@@ -10,7 +10,7 @@
         .header { background: #2d7a45; color: white; padding: 20px; text-align: center; }
         .content { padding: 20px; background: #f9f9f9; }
         .footer { background: #333; color: white; padding: 20px; text-align: center; font-size: 12px; }
-        .btn { display: inline-block; background: #2d7a45; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; }
+        .btn { display: inline-block; background: #2d7a45; color: white !important; padding: 10px 20px; text-decoration: none; border-radius: 5px; }
         .order-details { background: white; padding: 15px; border-radius: 5px; margin: 20px 0; }
         .product-item { border-bottom: 1px solid #eee; padding: 10px 0; }
         .total { font-weight: bold; font-size: 18px; color: #2d7a45; }
@@ -19,8 +19,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>✅ Order Confirmed!</h1>
-            <p>Order #{{ $order->order_number }}</p>
+            <h1>Order Confirmed!</h1>
         </div>
 
         <div class="content">
@@ -67,7 +66,7 @@
             </ul>
 
             <p style="text-align: center; margin: 30px 0;">
-                <a href="{{ route('orders.show', $order->order_number) }}" class="btn">View Order Details</a>
+                <a href="{{ route('orders.show', $order->order_number) }}" class="btn" style="color:white">View Order Details</a>
             </p>
 
             <p>If you have any questions about your order, please contact our support team.</p>

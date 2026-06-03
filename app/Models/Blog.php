@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
+use App\Models\BlogReview;
 
 class Blog extends Model
 {
@@ -15,9 +16,14 @@ class Blog extends Model
         'title',
         'slug',
         'thumbnail',
+        'author',
+        'reading_time',
         'description',
         'tags',
         'status',
+        'meta_title',
+        'meta_tags',
+        'meta_description',
     ];
 
     protected static function booted(): void
@@ -45,6 +51,16 @@ class Blog extends Model
     public function category()
     {
         return $this->belongsTo(BlogCategory::class, 'category_id');
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(BlogReview::class);
+    }
+
+    public function approvedReviews()
+    {
+        return $this->hasMany(BlogReview::class)->where('status', 'approved');
     }
 
     public function getThumbnailUrlAttribute(): string

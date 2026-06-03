@@ -1,208 +1,226 @@
-{{-- resources/views/dashboard/variations/index.blade.php --}}
 @extends('layout.layout')
 
 @php
-    $title    = 'Variations';
+    $title = 'Variations';
     $subTitle = $product->name;
-    $script   = '<script>
-                    let table = new DataTable("#dataTable", {
-                        responsive: true,
-                        scrollX: false,
-                        autoWidth: false,
-                        columnDefs: [
-                            { orderable: false, targets: [0, 1, 7, 8] }
-                        ]
-                    });
-
-                    document.getElementById("checkAll").addEventListener("change", function () {
-                        document.querySelectorAll(".row-check").forEach(cb => cb.checked = this.checked);
-                    });
-
-                    // Toggle active status
-                    document.querySelectorAll(".toggle-status").forEach(toggle => {
-                        toggle.addEventListener("change", function () {
-                            fetch(`/dashboard/product-variations/${this.dataset.id}/toggle`, {
-                                method: "POST",
-                                headers: {
-                                    "X-CSRF-TOKEN": document.querySelector("meta[name=csrf-token]").content,
-                                    "Content-Type": "application/json"
-                                }
-                            })
-                            .then(r => r.json())
-                            .then(d => { this.checked = d.is_active; });
-                        });
-                    });
-                 </script>';
 @endphp
 
 @section('content')
-
-{{-- Page Header --}}
-<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+<div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-2">
     <div>
-        <a href="{{ route('dashboard.products.index') }}"
-           class="text-secondary-light text-decoration-none text-sm">
-            ← All Products
-        </a>
-        <h5 class="fw-bold mb-0 mt-1">
-            📦 Variations:
-            <span class="text-success-main">{{ $product->name }}</span>
-        </h5>
-        <small class="text-secondary-light">
-            SKU: <code>{{ $product->sku }}</code> &nbsp;|&nbsp; Base Price: ₹{{ number_format($product->base_price, 2) }}
-        </small>
+        <a href="{{ route('dashboard.products.index') }}" class="text-secondary-light text-decoration-none text-sm">Back to Products</a>
+        <h5 class="fw-bold mb-1 mt-1">{{ $product->name }}</h5>
+        <small class="text-secondary-light">SKU: <code>{{ $product->sku }}</code> | Base Price: Rs. {{ number_format($product->base_price, 2) }}</small>
     </div>
-    <a href="{{ route('dashboard.products.variations.create', $product) }}" class="btn btn-primary btn-sm">
-        + Add Variation
-    </a>
+    <div class="d-flex flex-wrap gap-2">
+        <a href="{{ route('dashboard.attributes.index') }}" class="btn btn-outline-secondary btn-sm">Manage Attributes</a>
+        <a href="{{ route('dashboard.products.variations.create', $product) }}" class="btn btn-primary btn-sm">Add Manual Variation</a>
+    </div>
 </div>
 
 @if(session('success'))
     <div class="alert alert-success alert-dismissible fade show">
-        ✅ {{ session('success') }}
+        {{ session('success') }}
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 @endif
 
+@if($errors->any())
+    <div class="alert alert-danger alert-dismissible fade show">
+        <ul class="mb-0">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+@endif
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-1">Create Variations From Attribute</h5>
+        <p class="text-secondary-light mb-0">Global attributes are created once and available on every product.</p>
+    </div>
+    <div class="card-body">
+        @if($globalAttributes->isEmpty())
+            <div class="border radius-8 p-4 text-center">
+                <h6 class="fw-semibold mb-1">No global attributes yet</h6>
+                <p class="text-secondary-light mb-3">Create attributes like Pack, Size, or Color before generating product variations.</p>
+                <a href="{{ route('dashboard.attributes.index') }}" class="btn btn-primary btn-sm">Create Attribute</a>
+            </div>
+        @else
+            <form action="{{ route('dashboard.products.variations.attributes.store', $product) }}" method="POST" id="attributeVariationForm">
+                @csrf
+                <div class="row g-3">
+                    <div class="col-lg-4 col-md-6">
+                        <label class="form-label fw-semibold">Attribute</label>
+                        <select name="global_attribute_id" id="globalAttributeSelect" class="form-select" required>
+                            @foreach($globalAttributes as $attribute)
+                                <option value="{{ $attribute->id }}" data-values="{{ e(json_encode($attribute->values ?? [])) }}" {{ old('global_attribute_id') == $attribute->id ? 'selected' : '' }}>
+                                    {{ $attribute->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-lg-2 col-md-6">
+                        <label class="form-label fw-semibold">Default Value</label>
+                        <input type="text" name="default_value" id="defaultValueInput" class="form-control" value="{{ old('default_value') }}" placeholder="Optional">
+                    </div>
+                    <div class="col-lg-2 col-md-4">
+                        <label class="form-label fw-semibold">Price</label>
+                        <input type="number" name="base_price" class="form-control" value="{{ old('base_price', $product->base_price) }}" min="0" step="0.01">
+                    </div>
+                    <div class="col-lg-2 col-md-4">
+                        <label class="form-label fw-semibold">Stock</label>
+                        <input type="number" name="stock_quantity" class="form-control" value="{{ old('stock_quantity', 0) }}" min="0">
+                    </div>
+                    <div class="col-lg-2 col-md-4 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">Generate</button>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Values</label>
+                        <div id="attributeValueChoices" class="d-flex flex-wrap gap-2"></div>
+                        <small class="text-secondary-light d-block mt-2">Checked values will become product variations. Leave all unchecked to use every value.</small>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Extra Values For This Product</label>
+                        <input type="text" name="custom_values" class="form-control" value="{{ old('custom_values') }}" placeholder="Optional: 25 KG, Trial Pack">
+                    </div>
+                </div>
+            </form>
+        @endif
+
+        @if($product->attributes->count())
+            <div class="mt-4 pt-3 border-top">
+                <p class="text-secondary-light mb-2">Attributes used on this product</p>
+                <div class="d-flex flex-wrap gap-2">
+                    @foreach($product->attributes as $attribute)
+                        <span class="bg-primary-light text-primary-600 px-12 py-4 rounded-pill fw-medium text-sm">
+                            {{ $attribute->name }}: {{ implode(', ', $attribute->values ?? []) }}
+                        </span>
+                    @endforeach
+                </div>
+            </div>
+        @endif
+    </div>
+</div>
+
 <div class="card basic-data-table">
     <div class="card-header">
-        <h5 class="card-title mb-0">Variations List</h5>
+        <h5 class="card-title mb-0">Product Variations</h5>
     </div>
-
     <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table bordered-table mb-0" id="dataTable" data-page-length='10' style="width:100%">
+            <table class="table bordered-table admin-data-table mb-0" data-page-length="10" data-no-sort-targets="0,1,8">
                 <thead>
                     <tr>
-                        <th scope="col">
-                            <div class="form-check style-check d-flex align-items-center">
-                                <input class="form-check-input" type="checkbox" id="checkAll">
-                                <label class="form-check-label">S.L</label>
-                            </div>
-                        </th>
-                        <th scope="col">Image</th>
-                        <th scope="col">SKU</th>
-                        <th scope="col">Attribute</th>
-                        <th scope="col">Value</th>
-                        <th scope="col">Price (₹)</th>
-                        <th scope="col">Stock</th>
-                        <th scope="col">Active</th>
-                        <th scope="col">Action</th>
+                        <th>S.L</th>
+                        <th>Image</th>
+                        <th>SKU</th>
+                        <th>Attribute</th>
+                        <th>Value</th>
+                        <th>Price</th>
+                        <th>Stock</th>
+                        <th>Status</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($variations as $i => $var)
-                    <tr>
-                        {{-- Checkbox + Serial --}}
-                        <td>
-                            <div class="form-check style-check d-flex align-items-center">
-                                <input class="form-check-input row-check" type="checkbox">
-                                <label class="form-check-label">
-                                    {{ str_pad($i + 1, 2, '0', STR_PAD_LEFT) }}
-                                </label>
-                            </div>
-                        </td>
-
-                        {{-- Image --}}
-                        <td>
-                            @if($var->image_path)
-                                <img src="{{ Storage::url($var->image_path) }}"
-                                     class="radius-8"
-                                     style="width:44px;height:44px;object-fit:cover;">
-                            @else
-                                <div class="d-flex align-items-center justify-content-center radius-8 bg-neutral-200"
-                                     style="width:44px;height:44px;font-size:1.1rem;">📦</div>
-                            @endif
-                        </td>
-
-                        {{-- SKU --}}
-                        <td><code class="text-secondary-light text-sm">{{ $var->sku }}</code></td>
-
-                        {{-- Attribute --}}
-                        <td>
-                            <h6 class="text-md mb-0 fw-medium">{{ $var->attribute_name }}</h6>
-                        </td>
-
-                        {{-- Value --}}
-                        <td>
-                            <span class="bg-success-focus text-success-main px-12 py-4 rounded-pill fw-medium text-sm">
-                                {{ $var->attribute_value }}
-                            </span>
-                        </td>
-
-                        {{-- Price --}}
-                        <td>
-                            <span class="fw-semibold">₹{{ number_format($var->price, 2) }}</span>
-                            @if($var->weight)
-                                <br><small class="text-secondary-light">{{ $var->weight }} kg</small>
-                            @endif
-                        </td>
-
-                        {{-- Stock --}}
-                        <td>
-                            @if($var->stock_quantity > 10)
-                                <span class="bg-success-focus text-success-main px-12 py-4 rounded-pill fw-medium text-sm">
-                                    {{ $var->stock_quantity }}
-                                </span>
-                            @elseif($var->stock_quantity > 0)
-                                <span class="bg-warning-focus text-warning-main px-12 py-4 rounded-pill fw-medium text-sm">
-                                    {{ $var->stock_quantity }}
-                                </span>
-                            @else
-                                <span class="bg-danger-focus text-danger-main px-12 py-4 rounded-pill fw-medium text-sm">
-                                    Out
-                                </span>
-                            @endif
-                        </td>
-
-                        {{-- Active Toggle --}}
-                        <td>
-                            <div class="form-check form-switch d-flex align-items-center gap-2">
-                                <input class="form-check-input toggle-status" type="checkbox" role="switch"
-                                       data-id="{{ $var->id }}"
-                                       {{ $var->is_active ? 'checked' : '' }}
-                                       style="cursor:pointer;width:2.5em;height:1.3em;">
-                                <label class="text-sm {{ $var->is_active ? 'text-success-main' : 'text-secondary-light' }}">
-                                    {{ $var->is_active ? 'Active' : 'Inactive' }}
-                                </label>
-                            </div>
-                        </td>
-
-                        {{-- Actions --}}
-                        <td>
-                            {{-- Edit --}}
-                            <a href="{{ route('dashboard.products.variations.edit', [$product, $var]) }}"
-                               class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center"
-                               title="Edit Variation">
-                                <iconify-icon icon="lucide:edit"></iconify-icon>
-                            </a>
-
-                            {{-- Delete --}}
-                            <form action="{{ route('dashboard.products.variations.destroy', [$product, $var]) }}"
-                                  method="POST" class="d-inline"
-                                  onsubmit="return confirm('Delete this variation?')">
-                                @csrf @method('DELETE')
-                                <button type="submit"
-                                        class="w-32-px h-32-px bg-danger-focus text-danger-main rounded-circle d-inline-flex align-items-center justify-content-center border-0"
-                                        style="background:transparent"
-                                        title="Delete Variation">
-                                    <iconify-icon icon="mingcute:delete-2-line"></iconify-icon>
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
+                        <tr>
+                            <td>{{ str_pad($i + 1, 2, '0', STR_PAD_LEFT) }}</td>
+                            <td>
+                                @if($var->image_path)
+                                    <img src="{{ Storage::url($var->image_path) }}" class="radius-8 border" style="width:44px;height:44px;object-fit:cover;">
+                                @else
+                                    <div class="radius-8 bg-neutral-200 border" style="width:44px;height:44px;"></div>
+                                @endif
+                            </td>
+                            <td><code>{{ $var->sku }}</code></td>
+                            <td class="fw-semibold">{{ $var->attribute_name }}</td>
+                            <td>
+                                <span class="bg-success-focus text-success-main px-12 py-4 rounded-pill fw-medium text-sm">{{ $var->attribute_value }}</span>
+                                @if($var->is_default)
+                                    <span class="bg-primary-light text-primary-600 px-12 py-4 rounded-pill fw-medium text-sm ms-1">Default</span>
+                                @endif
+                            </td>
+                            <td>
+                                <span class="fw-semibold">Rs. {{ number_format($var->price, 2) }}</span>
+                                @if($var->weight)
+                                    <div class="text-sm text-secondary-light">{{ $var->weight }} {{ $var->unit ?: 'kg' }}</div>
+                                @endif
+                            </td>
+                            <td>
+                                @if($var->stock_quantity > 10)
+                                    <span class="bg-success-focus text-success-main px-12 py-4 rounded-pill fw-medium text-sm">{{ $var->stock_quantity }}</span>
+                                @elseif($var->stock_quantity > 0)
+                                    <span class="bg-warning-focus text-warning-main px-12 py-4 rounded-pill fw-medium text-sm">{{ $var->stock_quantity }}</span>
+                                @else
+                                    <span class="bg-danger-focus text-danger-main px-12 py-4 rounded-pill fw-medium text-sm">Out</span>
+                                @endif
+                            </td>
+                            <td>
+                                <span class="{{ $var->is_active ? 'text-success-main' : 'text-secondary-light' }} fw-semibold">{{ $var->is_active ? 'Active' : 'Inactive' }}</span>
+                            </td>
+                            <td>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <a href="{{ route('dashboard.products.variations.edit', [$product, $var]) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+                                    <form action="{{ route('dashboard.products.variations.destroy', [$product, $var]) }}" method="POST" onsubmit="return confirm('Delete this variation?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
                     @empty
-                    <tr>
-                        <td colspan="9" class="text-center py-5 text-muted">
-                            No variations yet.
-                            <a href="{{ route('dashboard.products.variations.create', $product) }}">Add one!</a>
-                        </td>
-                    </tr>
+                        <tr>
+                            <td colspan="9" class="text-center py-5 text-muted">
+                                No variations yet. Create an attribute above or <a href="{{ route('dashboard.products.variations.create', $product) }}">add one manually.</a>
+                            </td>
+                        </tr>
                     @endforelse
                 </tbody>
             </table>
-        </div>{{-- end table-responsive --}}
+        </div>
     </div>
 </div>
-
 @endsection
+
+@push('scripts')
+<script>
+    const attributeSelect = document.getElementById('globalAttributeSelect');
+    const choicesWrap = document.getElementById('attributeValueChoices');
+    const defaultValueInput = document.getElementById('defaultValueInput');
+
+    function renderAttributeValues() {
+        if (!attributeSelect || !choicesWrap) return;
+
+        const option = attributeSelect.options[attributeSelect.selectedIndex];
+        const values = JSON.parse(option.dataset.values || '[]');
+        choicesWrap.innerHTML = '';
+
+        if (!values.length) {
+            choicesWrap.innerHTML = '<span class="text-secondary-light text-sm">No values found for this attribute.</span>';
+            return;
+        }
+
+        values.forEach((value, index) => {
+            const id = 'attributeValue' + index;
+            const label = document.createElement('label');
+            label.className = 'border radius-8 px-12 py-8 d-flex align-items-center gap-2 mb-0';
+            label.setAttribute('for', id);
+            label.innerHTML =
+                '<input class="form-check-input mt-0" type="checkbox" name="selected_values[]" value="' + String(value).replace(/"/g, '&quot;') + '" id="' + id + '">' +
+                '<span class="fw-medium text-sm">' + value + '</span>';
+            choicesWrap.appendChild(label);
+        });
+
+        if (!defaultValueInput.value && values[0]) {
+            defaultValueInput.value = values[0];
+        }
+    }
+
+    attributeSelect?.addEventListener('change', function () {
+        defaultValueInput.value = '';
+        renderAttributeValues();
+    });
+    renderAttributeValues();
+</script>
+@endpush

@@ -332,7 +332,7 @@
                                                  alt="{{ $item['name'] }}"
                                                  class="cart__product-img">
                                         @else
-                                            <div class="cart__product-img-placeholder">🌿</div>
+                                            <div class="cart__product-img-placeholder"><iconify-icon icon="mdi:leaf" class="icon"></iconify-icon></div>
                                         @endif
                                         <div>
                                             <div class="cart__product-name">{{ $item['name'] }}</div>
@@ -469,10 +469,13 @@
                     @endauth
 
                     <a href="{{ route('products.index') }}" class="cart__continue-btn">← Continue Shopping</a>
-                    <a href="{{ route('cart.clear') }}" class="cart__clear-btn"
-                       onclick="return confirm('Clear your entire cart?')">
-                       🗑 Clear Cart
-                    </a>
+                    <form action="{{ route('cart.clear') }}" method="POST" class="d-inline"
+                          onsubmit="return confirm('Clear your entire cart?')">
+                        @csrf
+                        <button type="submit" class="cart__clear-btn border-0">
+                           <iconify-icon icon="fa6-solid:trash" class="me-2"></iconify-icon> Clear Cart
+                        </button>
+                    </form>
 
                     {{-- Trust Badges --}}
                     <div class="cart__trust">
@@ -497,7 +500,7 @@
         @else
         {{-- ── Empty State ── --}}
         <div class="cart__empty">
-            <div class="cart__empty-icon">🛒</div>
+            <div class="cart__empty-icon"><iconify-icon icon="fa6-solid:cart-shopping" class="icon"></iconify-icon></div>
             <h3>Your cart is empty</h3>
             <p>Browse our bio-stimulant range and add products to your cart.</p>
             <a href="{{ route('products.index') }}" class="cart__empty-btn">Browse Products</a>

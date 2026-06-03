@@ -1,7 +1,7 @@
-@extends('layout.userpanel')
+@extends('layout.frontlayout')
 @section('title', 'Order #{{ $order->order_number }} – Bharat Biomer')
 
-@section('panel')
+@push('styles')
 <style>
 .od__back {
     display: inline-flex; align-items: center; gap: 0.4rem;
@@ -84,8 +84,18 @@
     .od__step-label { font-size: 0.6rem; }
 }
 </style>
+@endpush
 
-<a href="{{ route('orders.index') }}" class="od__back">← Back to My Orders</a>
+@section('content')
+<div class="container my-4">
+    <div class="row g-4">
+        <div class="col-lg-3">
+            @include('components.customer-sidebar')
+        </div>
+
+        <div class="col-lg-9">
+
+<a href="{{ route('orders.index') }}" class="od__back"><i class="ri-arrow-left-line" aria-hidden="true"></i> Back to My Orders</a>
 
 <h1 style="font-size:1.6rem; font-weight:800; color:#1a2e1a; margin-bottom:0.2rem;">Order Details</h1>
 <p style="font-size:0.88rem; color:#6b7c6b; margin-bottom:1.5rem;">Placed on {{ $order->created_at->format('d M Y, h:i A') }}</p>
@@ -112,7 +122,7 @@
         @foreach($steps as $i => $step)
             <div class="od__step {{ $i < $current ? 'done' : ($i == $current ? 'active' : '') }}">
                 <div class="od__step-circle">
-                    @if($i < $current) ✓ @else {{ $i + 1 }} @endif
+                    @if($i < $current) <i class="ri-check-line" aria-hidden="true"></i> @else {{ $i + 1 }} @endif
                 </div>
                 <div class="od__step-label">{{ ucfirst($step) }}</div>
             </div>
@@ -128,14 +138,14 @@
 
     <div class="col-12 col-lg-7">
         <div class="od__card">
-            <div class="od__card-title">🛒 Items Ordered</div>
+            <div class="od__card-title"><i class="ri-box-3-line" aria-hidden="true"></i> Items Ordered</div>
 
             @foreach($order->items as $item)
             <div class="od__item">
                 @if($item->product && $item->product->featured_image)
                     <img src="{{ Storage::url($item->product->featured_image) }}" alt="{{ $item->product_name }}" class="od__item-img">
                 @else
-                    <div class="od__item-placeholder">🌿</div>
+                    <div class="od__item-placeholder"><i class="ri-box-3-line" aria-hidden="true"></i></div>
                 @endif
                 <div style="flex:1; min-width:0;">
                     <div class="od__item-name">{{ $item->product_name }}</div>
@@ -162,7 +172,7 @@
 
     <div class="col-12 col-lg-5">
         <div class="od__card">
-            <div class="od__card-title">📦 Shipping Details</div>
+            <div class="od__card-title"><i class="ri-truck-line" aria-hidden="true"></i> Shipping Details</div>
             <div class="od__detail-row"><span class="od__detail-label">Name</span><span class="od__detail-value">{{ $order->name }}</span></div>
             <div class="od__detail-row"><span class="od__detail-label">Phone</span><span class="od__detail-value">{{ $order->phone }}</span></div>
             <div class="od__detail-row"><span class="od__detail-label">Email</span><span class="od__detail-value">{{ $order->email }}</span></div>
@@ -176,7 +186,7 @@
         </div>
 
         <div class="od__card" style="text-align:center;">
-            <div class="od__card-title" style="text-align:left;">🙋 Need Help?</div>
+            <div class="od__card-title" style="text-align:left;"><i class="ri-customer-service-2-line" aria-hidden="true"></i> Need Help?</div>
             <p style="font-size:0.85rem; color:#6b7c6b; margin-bottom:1rem;">
                 For any queries about this order, please contact our support team.
             </p>
@@ -193,16 +203,20 @@
             @endif
             <a href="mailto:support@bharatbiomer.com"
                style="display:inline-block; padding:0.6rem 1.5rem; background:#2d7a45; color:#fff; font-weight:700; font-size:0.85rem; border-radius:8px; text-decoration:none;">
-                📧 Email Support
+                <i class="ri-mail-line" aria-hidden="true"></i> Email Support
             </a>
             <div style="margin-top:0.75rem;">
                 <a href="{{ route('orders.index') }}" style="font-size:0.82rem; color:#2d7a45; font-weight:600; text-decoration:none;">
-                    ← Back to All Orders
+                    <i class="ri-arrow-left-line" aria-hidden="true"></i> Back to All Orders
                 </a>
             </div>
         </div>
     </div>
 
+</div>
+
+        </div>
+    </div>
 </div>
 
 @endsection

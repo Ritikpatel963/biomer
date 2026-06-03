@@ -12,9 +12,8 @@
     box-shadow: 0 2px 16px rgba(60,120,60,0.06);
     margin-bottom: 1.25rem;
     overflow: hidden;
-    transition: box-shadow 0.2s;
 }
-.mo__card:hover { box-shadow: 0 4px 24px rgba(60,120,60,0.12); }
+.mo__card:hover { box-shadow: 0 2px 16px rgba(60,120,60,0.06); }
 
 .mo__card-header {
     background: #f4faf0;
@@ -137,7 +136,7 @@
                     @if($item->product && $item->product->featured_image)
                         <img src="{{ Storage::url($item->product->featured_image) }}" alt="{{ $item->product_name }}">
                     @else
-                        <div class="mo__item-chip-placeholder">🌿</div>
+                        <div class="mo__item-chip-placeholder"><i class="ri-box-3-line" aria-hidden="true"></i></div>
                     @endif
                     <span>{{ Str::limit($item->product_name, 25) }} × {{ $item->quantity }}</span>
                 </div>
@@ -150,7 +149,7 @@
 
         <div class="mo__card-footer">
             <div class="mo__address">
-                📦 {{ $order->city }}, {{ $order->state }} – {{ $order->pincode }}
+                <i class="ri-map-pin-line" aria-hidden="true"></i> {{ $order->city }}, {{ $order->state }} – {{ $order->pincode }}
             </div>
             <div class="d-flex align-items-center gap-2">
                 @if($order->canRequestReturn())
@@ -183,7 +182,7 @@
 
 @else
     <div class="mo__empty">
-        <div class="mo__empty-icon">📦</div>
+        <div class="mo__empty-icon"><i class="ri-box-3-line" aria-hidden="true"></i></div>
         <h3>No orders yet</h3>
         <p>You haven't placed any orders. Start shopping!</p>
         <a href="{{ route('products.index') }}" class="mo__empty-btn">Browse Products</a>

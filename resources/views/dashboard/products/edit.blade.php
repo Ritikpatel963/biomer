@@ -9,12 +9,13 @@
 @section('content')
 
   {{-- Breadcrumb --}}
-  <div class="d-flex justify-content-between align-items-center mb-4">
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
     <div>
       
+      <h5 class="mb-1">Edit Product</h5>
       <small class="text-muted">{{ $product->name }}</small>
     </div>
-    <a href="{{ route('dashboard.products.index') }}" class="btn btn-outline-secondary btn-sm">← Back to Products</a>
+    <a href="{{ route('dashboard.products.index') }}" class="btn btn-outline-secondary btn-sm">Back to Products</a>
   </div>
 
   @if($errors->any())
@@ -68,7 +69,7 @@
               <div class="col-md-6">
                 <label class="form-label fw-semibold">Base Price <span class="text-danger">*</span></label>
                 <div class="input-group">
-                  <span class="input-group-text">₹</span>
+                  <span class="input-group-text">Rs.</span>
                   <input type="number" name="base_price" step="0.01" min="0"
                          class="form-control @error('base_price') is-invalid @enderror"
                          value="{{ old('base_price', $product->base_price) }}" required>
@@ -79,7 +80,7 @@
               <div class="col-md-6">
                 <label class="form-label fw-semibold">Shipping Charge</label>
                 <div class="input-group">
-                  <span class="input-group-text">₹</span>
+                  <span class="input-group-text">Rs.</span>
                   <input type="number" name="shipping_charge" step="0.01" min="0"
                          class="form-control @error('shipping_charge') is-invalid @enderror"
                          value="{{ old('shipping_charge', $product->shipping_charge ?? 0) }}">
@@ -142,7 +143,7 @@
         {{-- SEO --}}
         <div class="card basic-data-table mb-4">
           <div class="card-header">
-            <h5 class="card-title mb-0">🔍 SEO Settings</h5>
+            <h5 class="card-title mb-0"> SEO Settings</h5>
           </div>
           <div class="card-body">
             <div class="row g-3">
@@ -241,7 +242,7 @@
               <div class="col-12">
                 <label class="form-label fw-semibold">Brand</label>
                 <select name="brand_id" class="form-select @error('brand_id') is-invalid @enderror">
-                  <option value="">— Select Brand —</option>
+                  <option value="">Select Brand</option>
                   @foreach($brands as $brand)
                     <option value="{{ $brand->id }}"
                       {{ old('brand_id', $product->brand_id) == $brand->id ? 'selected' : '' }}>
@@ -255,7 +256,7 @@
               <div class="col-12">
                 <label class="form-label fw-semibold">Category</label>
                 <select name="category_id" class="form-select @error('category_id') is-invalid @enderror">
-                  <option value="">— Select Category —</option>
+                  <option value="">Select Category</option>
                   @foreach($categories as $cat)
                     <option value="{{ $cat->id }}"
                       {{ old('category_id', $product->category_id) == $cat->id ? 'selected' : '' }}>
@@ -311,22 +312,6 @@
                    value="{{ old('video_url', $product->video_url) }}"
                    placeholder="https://youtube.com/...">
             @error('video_url')<div class="invalid-feedback">{{ $message }}</div>@enderror
-          </div>
-        </div>
-
-        {{-- Variations Quick Link --}}
-        <div class="card basic-data-table mb-4">
-          <div class="card-header">
-            <h5 class="card-title mb-0">Variations</h5>
-          </div>
-          <div class="card-body">
-            <p class="text-muted text-sm mb-2">
-              Manage sizes, colours, or any variants for this product separately.
-            </p>
-            <a href="{{ route('dashboard.products.variations.index', $product) }}"
-               class="btn btn-outline-primary btn-sm w-100">
-              Go to Variations →
-            </a>
           </div>
         </div>
 

@@ -11,7 +11,7 @@
                 <div class="card-header">
                     <div class="d-flex flex-wrap align-items-center justify-content-end gap-2">
                         <button type="button" class="btn btn-sm btn-primary-600 radius-8 d-inline-flex align-items-center gap-1">
-                            <iconify-icon icon="simple-line-icons:check" class="text-xl"></iconify-icon>
+                            
                             Save
                         </button>
                     </div>
@@ -25,10 +25,10 @@
                                         <div class="col-sm-4">
                                             <h3 class="text-xl">Invoice #3492</h3>
                                             <p class="mb-1 text-sm">Date Issued: <span class="editable text-decoration-underline">25/08/2020</span> <span class="text-success-main">
-                                                    <iconify-icon icon="mage:edit"></iconify-icon>
+                                                    
                                                 </span></p>
                                             <p class="mb-0 text-sm">Date Due: <span class="editable text-decoration-underline">29/08/2020</span> <span class="text-success-main">
-                                                    <iconify-icon icon="mage:edit"></iconify-icon>
+                                                    
                                                 </span></p>
                                         </div>
                                         <div class="col-sm-4">
@@ -48,19 +48,19 @@
                                                     <tr>
                                                         <td>Name</td>
                                                         <td class="ps-8">: <span class="editable text-decoration-underline">Will Marthas</span> <span class="text-success-main">
-                                                                <iconify-icon icon="mage:edit"></iconify-icon>
+                                                                
                                                             </span></td>
                                                     </tr>
                                                     <tr>
                                                         <td>Address</td>
                                                         <td class="ps-8">: <span class="editable text-decoration-underline">4517 Washington Ave.USA</span> <span class="text-success-main">
-                                                                <iconify-icon icon="mage:edit"></iconify-icon>
+                                                                
                                                             </span></td>
                                                     </tr>
                                                     <tr>
                                                         <td>Phone number</td>
                                                         <td class="ps-8">: <span class="editable text-decoration-underline">+1 543 2198</span> <span class="text-success-main">
-                                                                <iconify-icon icon="mage:edit"></iconify-icon>
+                                                                
                                                             </span></td>
                                                     </tr>
                                                 </tbody>
@@ -110,7 +110,7 @@
                                                         <td>$1000.00</td>
                                                         <td class="text-center">
                                                             <button type="button" class="remove-row">
-                                                                <iconify-icon icon="ic:twotone-close" class="text-danger-main text-xl"></iconify-icon>
+                                                                
                                                             </button>
                                                         </td>
                                                     </tr>
@@ -123,7 +123,7 @@
                                                         <td>$1000.00</td>
                                                         <td class="text-center">
                                                             <button type="button" class="remove-row">
-                                                                <iconify-icon icon="ic:twotone-close" class="text-danger-main text-xl"></iconify-icon>
+                                                                
                                                             </button>
                                                         </td>
                                                     </tr>
@@ -136,7 +136,7 @@
                                                         <td>$1000.00</td>
                                                         <td class="text-center">
                                                             <button type="button" class="remove-row">
-                                                                <iconify-icon icon="ic:twotone-close" class="text-danger-main text-xl"></iconify-icon>
+                                                                
                                                             </button>
                                                         </td>
                                                     </tr>
@@ -149,7 +149,7 @@
                                                         <td>$1000.00</td>
                                                         <td class="text-center">
                                                             <button type="button" class="remove-row">
-                                                                <iconify-icon icon="ic:twotone-close" class="text-danger-main text-xl"></iconify-icon>
+                                                                
                                                             </button>
                                                         </td>
                                                     </tr>
@@ -159,7 +159,7 @@
 
                                         <div>
                                             <button type="button" id="addRow" class="btn btn-sm btn-primary-600 radius-8 d-inline-flex align-items-center gap-1">
-                                                <iconify-icon icon="simple-line-icons:plus" class="text-xl"></iconify-icon>
+                                                
                                                 Add New
                                             </button>
                                         </div>

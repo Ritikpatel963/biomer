@@ -1,0 +1,251 @@
+﻿
+  GET|HEAD        / ...................................................................... generated::ZrH12CQn4iDkiyNW
+  GET|HEAD        _debugbar/assets ........... debugbar.assets › Fruitcake\LaravelDebugbar › AssetController@getAssets
+  DELETE          _debugbar/cache/{key} ... debugbar.cache.delete › Fruitcake\LaravelDebugbar › CacheController@delete
+  GET|HEAD        _debugbar/clockwork/{id} debugbar.clockwork › Fruitcake\LaravelDebugbar › OpenHandlerController@clo…
+  GET|HEAD        _debugbar/open ..... debugbar.openhandler › Fruitcake\LaravelDebugbar › OpenHandlerController@handle
+  POST            _debugbar/queries/explain debugbar.queries.explain › Fruitcake\LaravelDebugbar › QueriesController@…
+  POST            _ignition/execute-solution ignition.executeSolution › Spatie\LaravelIgnition › ExecuteSolutionContr…
+  GET|HEAD        _ignition/health-check ....... ignition.healthCheck › Spatie\LaravelIgnition › HealthCheckController
+  POST            _ignition/update-config .... ignition.updateConfig › Spatie\LaravelIgnition › UpdateConfigController
+  GET|HEAD        about .................................................................. generated::5RxTgpH6MscrSahi
+  GET|HEAD        admin .................................................................. generated::5n0iwbttOA1lQKn2
+  GET|HEAD        aiapplication/codegenerator .................. codeGenerator › AiapplicationController@codeGenerator
+  GET|HEAD        aiapplication/codegeneratornew ......... codeGeneratorNew › AiapplicationController@codeGeneratorNew
+  GET|HEAD        aiapplication/imagegenerator ............... imageGenerator › AiapplicationController@imageGenerator
+  GET|HEAD        aiapplication/textgenerator .................. textGenerator › AiapplicationController@textGenerator
+  GET|HEAD        aiapplication/textgeneratornew ......... textGeneratorNew › AiapplicationController@textGeneratorNew
+  GET|HEAD        aiapplication/videogenerator ............... videoGenerator › AiapplicationController@videoGenerator
+  GET|HEAD        aiapplication/voicegenerator ............... voiceGenerator › AiapplicationController@voiceGenerator
+  POST            audience-preference ................. audience-preference.store › AudiencePreferenceController@store
+  POST            authentication/login-action ................... login.action › AuthenticationController@loginProcess
+  GET|HEAD        authentication/signin ..................................... signin › AuthenticationController@signIn
+  POST            authentication/signout .................................. signout › AuthenticationController@signOut
+  GET|HEAD        blankPage ..................................................... blankPage › HomeController@blankPage
+  GET|HEAD        blog .................................................................... blog › BlogController@blog
+  GET|HEAD        blog/addBlog ...................................................... addBlog › BlogController@addBlog
+  GET|HEAD        blog/blogDetails/{blog} ................................... blogDetails › BlogController@blogDetails
+  GET|HEAD        blog/categories ............................... blog-categories.index › BlogCategoryController@index
+  POST            blog/categories ............................... blog-categories.store › BlogCategoryController@store
+  POST            blog/categories/{category}/delete ......... blog-categories.destroy › BlogCategoryController@destroy
+  POST            blog/categories/{category}/update ........... blog-categories.update › BlogCategoryController@update
+  POST            blog/destroyBlog/{blog} ................................... destroyBlog › BlogController@destroyBlog
+  GET|HEAD        blog/editBlog/{blog} ............................................ editBlog › BlogController@editBlog
+  POST            blog/storeBlog ................................................ storeBlog › BlogController@storeBlog
+  POST            blog/updateBlog/{blog} ...................................... updateBlog › BlogController@updateBlog
+  GET|HEAD        blogs ........................................... frontend.blog.index › BlogController@frontendIndex
+  POST            blogs/{blog}/reviews ...................... frontend.blog.reviews.store › BlogController@storeReview
+  GET|HEAD        blogs/{slug} ................................... frontend.blog.show › BlogController@frontendDetails
+  GET|HEAD        calendar ........................................................ calendar › HomeController@calendar
+  GET|HEAD        cart ............................................................. cart.index › CartController@index
+  POST            cart/add ............................................................. cart.add › CartController@add
+  GET|HEAD        cart/clear ....................................................... cart.clear › CartController@clear
+  POST            cart/coupon/apply ................................... cart.coupon.apply › CartController@applyCoupon
+  POST            cart/coupon/remove ................................ cart.coupon.remove › CartController@removeCoupon
+  POST            cart/remove .................................................... cart.remove › CartController@remove
+  POST            cart/update .................................................... cart.update › CartController@update
+  GET|HEAD        chart/columnchart ........................................ columnChart › ChartController@columnChart
+  GET|HEAD        chart/linechart .............................................. lineChart › ChartController@lineChart
+  GET|HEAD        chart/piechart ................................................. pieChart › ChartController@pieChart
+  GET|HEAD        chatempty ..................................................... chatempty › HomeController@chatempty
+  GET|HEAD        chatmessage ............................................... chatMessage › HomeController@chatMessage
+  GET|HEAD        chatprofile ............................................... chatProfile › HomeController@chatProfile
+  GET|HEAD        checkout ....................................................... checkout › OrderController@checkout
+  GET|HEAD        collaboration .......................................................... generated::HKvsiILdZ7yRw9Hm
+  GET|HEAD        comingSoon .................................................. comingSoon › HomeController@comingSoon
+  GET|HEAD        componentspage/alert ......................................... alert › ComponentpageController@alert
+  GET|HEAD        componentspage/avatar ...................................... avatar › ComponentpageController@avatar
+  GET|HEAD        componentspage/badges ...................................... badges › ComponentpageController@badges
+  GET|HEAD        componentspage/button ...................................... button › ComponentpageController@button
+  GET|HEAD        componentspage/card ............................................ card › ComponentpageController@card
+  GET|HEAD        componentspage/carousel ................................ carousel › ComponentpageController@carousel
+  GET|HEAD        componentspage/colors ...................................... colors › ComponentpageController@colors
+  GET|HEAD        componentspage/dropdown ................................ dropdown › ComponentpageController@dropdown
+  GET|HEAD        componentspage/imageupload ....................... imageUpload › ComponentpageController@imageUpload
+  GET|HEAD        componentspage/list ............................................ list › ComponentpageController@list
+  GET|HEAD        componentspage/pagination .......................... pagination › ComponentpageController@pagination
+  GET|HEAD        componentspage/progress ................................ progress › ComponentpageController@progress
+  GET|HEAD        componentspage/radio ......................................... radio › ComponentpageController@radio
+  GET|HEAD        componentspage/starrating .......................... starRating › ComponentpageController@starRating
+  GET|HEAD        componentspage/switch ...................................... switch › ComponentpageController@switch
+  GET|HEAD        componentspage/tabs ............................................ tabs › ComponentpageController@tabs
+  GET|HEAD        componentspage/tags ............................................ tags › ComponentpageController@tags
+  GET|HEAD        componentspage/tooltip ................................... tooltip › ComponentpageController@tooltip
+  GET|HEAD        componentspage/typography .......................... typography › ComponentpageController@typography
+  GET|HEAD        componentspage/videos ...................................... videos › ComponentpageController@videos
+  GET|HEAD        contact ................................................................ generated::Xutx8iEmyBfacsPl
+  GET|HEAD        cryptocurrency/marketplace ...................... marketplace › CryptocurrencyController@marketplace
+  GET|HEAD        cryptocurrency/marketplacedetails . marketplaceDetails › CryptocurrencyController@marketplaceDetails
+  GET|HEAD        cryptocurrency/portfolio ............................ portfolio › CryptocurrencyController@portfolio
+  GET|HEAD        cryptocurrency/wallet ..................................... wallet › CryptocurrencyController@wallet
+  GET|HEAD        customer/dashboard .......................... customer.dashboard › CustomerDashboardController@index
+  GET|HEAD        customer/login .............................. customer.login › Auth\CustomerAuthController@showLogin
+  GET|HEAD        dashboard .................................................... dashboard › DashboardController@index
+  GET|HEAD        dashboard/audience-preferences dashboard.audience-preferences.index › Admin\AudiencePreferenceContr…
+  GET|HEAD        dashboard/blog-reviews ................... dashboard.blog-reviews.index › BlogReviewController@index
+  DELETE          dashboard/blog-reviews/{review} ...... dashboard.blog-reviews.destroy › BlogReviewController@destroy
+  POST            dashboard/blog-reviews/{review}/approve dashboard.blog-reviews.approve › BlogReviewController@appro…
+  POST            dashboard/blog-reviews/{review}/reject . dashboard.blog-reviews.reject › BlogReviewController@reject
+  GET|HEAD        dashboard/brands .................................... dashboard.brands.index › BrandController@index
+  POST            dashboard/brands .................................... dashboard.brands.store › BrandController@store
+  GET|HEAD        dashboard/brands/create ........................... dashboard.brands.create › BrandController@create
+  GET|HEAD        dashboard/brands/{brand} .............................. dashboard.brands.show › BrandController@show
+  PUT|PATCH       dashboard/brands/{brand} .......................... dashboard.brands.update › BrandController@update
+  DELETE          dashboard/brands/{brand} ........................ dashboard.brands.destroy › BrandController@destroy
+  GET|HEAD        dashboard/brands/{brand}/edit ......................... dashboard.brands.edit › BrandController@edit
+  GET|HEAD        dashboard/categories ......................... dashboard.categories.index › CategoryController@index
+  POST            dashboard/categories ......................... dashboard.categories.store › CategoryController@store
+  GET|HEAD        dashboard/categories/create ................ dashboard.categories.create › CategoryController@create
+  GET|HEAD        dashboard/categories/{category} ................ dashboard.categories.show › CategoryController@show
+  PUT|PATCH       dashboard/categories/{category} ............ dashboard.categories.update › CategoryController@update
+  DELETE          dashboard/categories/{category} .......... dashboard.categories.destroy › CategoryController@destroy
+  GET|HEAD        dashboard/categories/{category}/edit ........... dashboard.categories.edit › CategoryController@edit
+  GET|HEAD        dashboard/coupons ................................. dashboard.coupons.index › CouponController@index
+  POST            dashboard/coupons ................................. dashboard.coupons.store › CouponController@store
+  GET|HEAD        dashboard/coupons/create ........................ dashboard.coupons.create › CouponController@create
+  GET|HEAD        dashboard/coupons/{coupon} .......................... dashboard.coupons.show › CouponController@show
+  PUT|PATCH       dashboard/coupons/{coupon} ...................... dashboard.coupons.update › CouponController@update
+  DELETE          dashboard/coupons/{coupon} .................... dashboard.coupons.destroy › CouponController@destroy
+  GET|HEAD        dashboard/coupons/{coupon}/edit ..................... dashboard.coupons.edit › CouponController@edit
+  GET|HEAD        dashboard/customers ...................... dashboard.customers.index › AdminCustomerController@index
+  GET|HEAD        dashboard/customers/{id} ................... dashboard.customers.show › AdminCustomerController@show
+  GET|HEAD        dashboard/footer-links ............. dashboard.footer-links.index › Admin\FooterLinkController@index
+  POST            dashboard/footer-links ............. dashboard.footer-links.store › Admin\FooterLinkController@store
+  GET|HEAD        dashboard/footer-links/create .... dashboard.footer-links.create › Admin\FooterLinkController@create
+  GET|HEAD        dashboard/footer-links/{footer_link} ........... footer-links.show › Admin\FooterLinkController@show
+  PUT|PATCH       dashboard/footer-links/{footer_link} dashboard.footer-links.update › Admin\FooterLinkController@upd…
+  DELETE          dashboard/footer-links/{footer_link} dashboard.footer-links.destroy › Admin\FooterLinkController@de…
+  GET|HEAD        dashboard/footer-links/{footer_link}/edit dashboard.footer-links.edit › Admin\FooterLinkController@…
+  GET|HEAD        dashboard/header-links ............. dashboard.header-links.index › Admin\HeaderLinkController@index
+  POST            dashboard/header-links ............. dashboard.header-links.store › Admin\HeaderLinkController@store
+  GET|HEAD        dashboard/header-links/create .... dashboard.header-links.create › Admin\HeaderLinkController@create
+  GET|HEAD        dashboard/header-links/{header_link} ........... header-links.show › Admin\HeaderLinkController@show
+  PUT|PATCH       dashboard/header-links/{header_link} dashboard.header-links.update › Admin\HeaderLinkController@upd…
+  DELETE          dashboard/header-links/{header_link} dashboard.header-links.destroy › Admin\HeaderLinkController@de…
+  GET|HEAD        dashboard/header-links/{header_link}/edit dashboard.header-links.edit › Admin\HeaderLinkController@…
+  GET|HEAD        dashboard/index .................................................. index › DashboardController@index
+  GET|HEAD        dashboard/invoices .............................. dashboard.invoices.index › InvoiceController@index
+  GET|HEAD        dashboard/orders ............................... dashboard.orders.index › AdminOrderController@index
+  GET|HEAD        dashboard/orders/{orderNumber} ................... dashboard.orders.show › AdminOrderController@show
+  GET|HEAD        dashboard/orders/{orderNumber}/invoice .. dashboard.orders.invoice › InvoiceController@downloadAdmin
+  PATCH           dashboard/orders/{orderNumber}/status dashboard.orders.updateStatus › AdminOrderController@updateSt…
+  GET|HEAD        dashboard/pages ................................. dashboard.pages.index › Admin\PageController@index
+  POST            dashboard/pages ................................. dashboard.pages.store › Admin\PageController@store
+  GET|HEAD        dashboard/pages/create ........................ dashboard.pages.create › Admin\PageController@create
+  GET|HEAD        dashboard/pages/{page} ............................ dashboard.pages.show › Admin\PageController@show
+  PUT|PATCH       dashboard/pages/{page} ........................ dashboard.pages.update › Admin\PageController@update
+  DELETE          dashboard/pages/{page} ...................... dashboard.pages.destroy › Admin\PageController@destroy
+  GET|HEAD        dashboard/pages/{page}/edit ....................... dashboard.pages.edit › Admin\PageController@edit
+  DELETE          dashboard/product-images/{image} .. dashboard.products.destroyImage › ProductController@destroyImage
+  DELETE          dashboard/product-variations/{variation} dashboard.products.destroyVariation › ProductController@de…
+  POST            dashboard/product-variations/{variation}/toggle dashboard.variations.toggle › ProductVariationContr…
+  GET|HEAD        dashboard/products .............................. dashboard.products.index › ProductController@index
+  POST            dashboard/products .............................. dashboard.products.store › ProductController@store
+  GET|HEAD        dashboard/products/create ..................... dashboard.products.create › ProductController@create
+  GET|HEAD        dashboard/products/{product} ...................... dashboard.products.show › ProductController@show
+  PUT|PATCH       dashboard/products/{product} .................. dashboard.products.update › ProductController@update
+  DELETE          dashboard/products/{product} ................ dashboard.products.destroy › ProductController@destroy
+  GET|HEAD        dashboard/products/{product}/edit ................. dashboard.products.edit › ProductController@edit
+  GET|HEAD        dashboard/products/{product}/variations dashboard.products.variations.index › ProductVariationContr…
+  POST            dashboard/products/{product}/variations dashboard.products.variations.store › ProductVariationContr…
+  GET|HEAD        dashboard/products/{product}/variations/create dashboard.products.variations.create › ProductVariat…
+  PUT             dashboard/products/{product}/variations/{variation} dashboard.products.variations.update › ProductV…
+  DELETE          dashboard/products/{product}/variations/{variation} dashboard.products.variations.destroy › Product…
+  GET|HEAD        dashboard/products/{product}/variations/{variation}/edit dashboard.products.variations.edit › Produ…
+  GET|HEAD        dashboard/returns ....................... dashboard.returns.index › AdminOrderReturnController@index
+  GET|HEAD        dashboard/returns/{id} .................... dashboard.returns.show › AdminOrderReturnController@show
+  POST            dashboard/returns/{id} ................ dashboard.returns.update › AdminOrderReturnController@update
+  GET|HEAD        dashboard/reviews .......................... dashboard.reviews.index › ProductReviewController@index
+  DELETE          dashboard/reviews/{review} ............. dashboard.reviews.destroy › ProductReviewController@destroy
+  POST            dashboard/reviews/{review}/approve ..... dashboard.reviews.approve › ProductReviewController@approve
+  POST            dashboard/reviews/{review}/reject ........ dashboard.reviews.reject › ProductReviewController@reject
+  GET|HEAD        dashboard/site-settings ............ dashboard.site-settings.edit › Admin\SiteSettingController@edit
+  POST            dashboard/site-settings ........ dashboard.site-settings.update › Admin\SiteSettingController@update
+  GET|HEAD        dashboard/stock ...................................... dashboard.stock.index › StockController@index
+  GET|HEAD        dashboard/stock/edit ................................... dashboard.stock.edit › StockController@edit
+  POST            dashboard/stock/update ............................. dashboard.stock.update › StockController@update
+  GET|HEAD        dashboard/tags .......................................... dashboard.tags.index › TagController@index
+  POST            dashboard/tags .......................................... dashboard.tags.store › TagController@store
+  GET|HEAD        dashboard/tags-search ................................. dashboard.tags.search › TagController@search
+  POST            dashboard/tags/bulk-store ....................... dashboard.tags.bulkStore › TagController@bulkStore
+  GET|HEAD        dashboard/tags/create ................................. dashboard.tags.create › TagController@create
+  GET|HEAD        dashboard/tags/{tag} ...................................... dashboard.tags.show › TagController@show
+  PUT|PATCH       dashboard/tags/{tag} .................................. dashboard.tags.update › TagController@update
+  DELETE          dashboard/tags/{tag} ................................ dashboard.tags.destroy › TagController@destroy
+  GET|HEAD        dashboard/tags/{tag}/edit ................................. dashboard.tags.edit › TagController@edit
+  GET|HEAD        email ................................................................. email › HomeController@email
+  GET|HEAD        error ................................................................ error › HomeController@error1
+  GET|HEAD        faq ....................................................................... faq › HomeController@faq
+  GET|HEAD        forms/form ............................................................. form › FormsController@form
+  GET|HEAD        forms/form-layout .......................................... formLayout › FormsController@formLayout
+  GET|HEAD        forms/form-validation .............................. formValidation › FormsController@formValidation
+  GET|HEAD        forms/wizard ....................................................... wizard › FormsController@wizard
+  GET|HEAD        gallery ........................................................... gallery › HomeController@gallery
+  GET|HEAD        impact ................................................................. generated::NRz4MQ9KptMjemOc
+  GET|HEAD        invoice/invoice-add ...................................... invoiceAdd › InvoiceController@invoiceAdd
+  GET|HEAD        invoice/invoice-edit ................................... invoiceEdit › InvoiceController@invoiceEdit
+  GET|HEAD        invoice/invoice-list ................................... invoiceList › InvoiceController@invoiceList
+  GET|HEAD        invoice/invoice-preview .......................... invoicePreview › InvoiceController@invoicePreview
+  GET|HEAD        kanban .............................................................. kanban › HomeController@kanban
+  GET|HEAD        login ................................................ login › Auth\CustomerAuthController@showLogin
+  POST            login ...................................... customer.login.post › Auth\CustomerAuthController@login
+  POST            logout ........................................ customer.logout › Auth\CustomerAuthController@logout
+  GET|HEAD        maintenance ............................................... maintenance › HomeController@maintenance
+  GET|HEAD        my-account .................................. customer.account › CustomerDashboardController@account
+  GET|HEAD        my-account/edit ........................... customer.account.edit › CustomerDashboardController@edit
+  POST            my-account/update ..................... customer.account.update › CustomerDashboardController@update
+  GET|HEAD        my-orders .................................................. orders.index › OrderController@myOrders
+  GET|HEAD        my-orders/{orderNumber} ......................................... orders.show › OrderController@show
+  GET|HEAD        my-orders/{orderNumber}/invoice ................ orders.invoice › InvoiceController@downloadCustomer
+  GET|HEAD        order-returns .................................... order-returns.index › OrderReturnController@index
+  GET|HEAD        order-returns/create/{orderNumber} ............. order-returns.create › OrderReturnController@create
+  GET|HEAD        order-returns/store/{orderNumber} ...................................... generated::pSCLpa37mBTpMwNt
+  POST            order-returns/store/{orderNumber} ................ order-returns.store › OrderReturnController@store
+  GET|HEAD        order-returns/{id} ................................. order-returns.show › OrderReturnController@show
+  POST            order/cashfree ................................ order.cashfree › OrderController@createCashfreeOrder
+  GET|HEAD        order/cashfree/verify ................ order.cashfree.verify › OrderController@verifyCashfreePayment
+  POST            order/cod ............................................... order.cod › OrderController@createCodOrder
+  POST            order/payment-failed .......................... order.payment.failed › OrderController@paymentFailed
+  POST            order/payment-success ....................... order.payment.success › OrderController@paymentSuccess
+  POST            order/razorpay ................................ order.razorpay › OrderController@createRazorpayOrder
+  GET|HEAD        order/{orderNumber}/success ................................ order.success › OrderController@success
+  GET|HEAD        pricing ........................................................... pricing › HomeController@pricing
+  GET|HEAD        privacy-policy ...................................................................... policy.privacy
+  GET|HEAD        products .............................................. products.index › ProductController@shopIndex
+  GET|HEAD        products/{product} ...................................... products.show › ProductController@shopShow
+  POST            products/{product}/reviews ........................... reviews.store › ProductReviewController@store
+  GET|HEAD        register .............................. customer.register › Auth\CustomerAuthController@showRegister
+  POST            register ............................. customer.register.post › Auth\CustomerAuthController@register
+  GET|HEAD        return-policy ........................................................................ policy.return
+  GET|HEAD        roleandaccess/assignRole ........................... assignRole › RoleandaccessController@assignRole
+  GET|HEAD        roleandaccess/roleAaccess ........................ roleAaccess › RoleandaccessController@roleAaccess
+  GET|HEAD        settings/company .............................................. company › SettingsController@company
+  GET|HEAD        settings/currencies ..................................... currencies › SettingsController@currencies
+  GET|HEAD        settings/language ........................................... language › SettingsController@language
+  GET|HEAD        settings/notification ............................... notification › SettingsController@notification
+  GET|HEAD        settings/notification-alert ............... notificationAlert › SettingsController@notificationAlert
+  GET|HEAD        settings/payment-gateway ........................ paymentGateway › SettingsController@paymentGateway
+  POST            settings/payment-gateway ........... paymentGateway.update › SettingsController@updatePaymentGateway
+  GET|HEAD        settings/theme .................................................... theme › SettingsController@theme
+  GET|HEAD        shipping-policy .................................................................... policy.shipping
+  GET|HEAD        starred ........................................................... starred › HomeController@starred
+  GET|HEAD        table/tablebasic ........................................... tableBasic › TableController@tableBasic
+  GET|HEAD        table/tabledata .............................................. tableData › TableController@tableData
+  GET|HEAD        technology ............................................................. generated::4zNl8k24QluGmsGh
+  GET|HEAD        terms-and-conditions .................................................................. policy.terms
+  GET|HEAD        termscondition ...................................... termsCondition › HomeController@termsCondition
+  GET|HEAD        testimonials ............................................ testimonials › HomeController@testimonials
+  GET|HEAD        up ..................................................................... generated::MX6pypAXZUtCYAtn
+  GET|HEAD        users/add-user ................................................... addUser › UsersController@addUser
+  GET|HEAD        users/users-grid ............................................. usersGrid › UsersController@usersGrid
+  GET|HEAD        users/users-list ............................................. usersList › UsersController@usersList
+  GET|HEAD        users/view-profile ....................................... viewProfile › UsersController@viewProfile
+  GET|HEAD        veiwdetails ............................................... veiwDetails › HomeController@veiwDetails
+  GET|HEAD        widgets ........................................................... widgets › HomeController@widgets
+  GET|HEAD        wishlist ................................................. wishlist.index › WishlistController@index
+  POST            wishlist/remove ........................................ wishlist.remove › WishlistController@remove
+  POST            wishlist/toggle ........................................ wishlist.toggle › WishlistController@toggle
+  GET|HEAD        {page} ............................................................ pages.show › PageController@show
+
+                                                                                                  Showing [247] routes
+

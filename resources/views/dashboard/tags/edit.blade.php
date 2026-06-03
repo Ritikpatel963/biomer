@@ -1,107 +1,61 @@
-{{-- resources/views/dashboard/tags/edit.blade.php --}}
 @extends('layout.layout')
 
 @php
-    $title    = 'Edit Tag';
-    $subTitle = 'Edit Tag';
+    $title = 'Edit Tag';
+    $subTitle = 'Tags';
 @endphp
 
 @section('content')
-
-<div class="row justify-content-center">
-    <div class="col-lg-5 col-md-7 col-12">
-
-        {{-- Header --}}
-        <div class="d-flex align-items-center justify-content-between mb-3">
-            <h6 class="fw-bold mb-0">Edit Tag</h6>
-            <a href="{{ route('dashboard.tags.index') }}"
-               class="btn btn-outline-secondary btn-sm">
-                ← Back
-            </a>
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+            <h5 class="card-title mb-1">Edit Tag</h5>
+            <p class="text-secondary-light mb-0">Update tag details for {{ $tag->name }}.</p>
         </div>
+        <a href="{{ route('dashboard.tags.index') }}" class="btn btn-outline-secondary btn-sm">Back to Tags</a>
+    </div>
 
-        {{-- Error Alert --}}
-        @if($errors->any())
-            <div class="alert alert-danger alert-dismissible fade show mb-3">
-                <ul class="mb-0">
-                    @foreach($errors->all() as $e)
-                        <li>{{ $e }}</li>
-                    @endforeach
-                </ul>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        @endif
-
-        {{-- Card --}}
-        <div class="card basic-data-table">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    Tag Details
-                </h5>
-            </div>
-            <div class="card-body">
-                <form action="{{ route('dashboard.tags.update', $tag) }}" method="POST">
-                    @csrf
-                    @method('PUT')
-
-                    {{-- Tag Name --}}
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">
-                            Tag Name <span class="text-danger">*</span>
-                        </label>
-                        <input type="text"
-                               name="name"
-                               class="form-control @error('name') is-invalid @enderror"
-                               value="{{ old('name', $tag->name) }}"
-                               placeholder="e.g. Cotton, Summer, Sale"
-                               required>
-                        @error('name')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    {{-- Slug --}}
-                    <div class="mb-4">
-                        <label class="form-label fw-semibold">Slug</label>
-                        <input type="text"
-                               name="slug"
-                               id="slugInput"
-                               class="form-control @error('slug') is-invalid @enderror"
-                               value="{{ old('slug', $tag->slug) }}"
-                               placeholder="e.g. cotton-summer-sale">
-                        @error('slug')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                        <small class="text-muted">Auto-generated from name. Lowercase letters, numbers & hyphens only.</small>
-                    </div>
-
-                    {{-- Action Buttons --}}
-                    <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2">
-                              <iconify-icon icon="lucide:save"></iconify-icon>
-                              Update Tag
-                        </button>
-                        <a href="{{ route('dashboard.tags.index') }}"
-                           class="btn btn-outline-secondary">
-                            Cancel
-                        </a>
-                    </div>
-
-                </form>
-            </div>
-
-            {{-- Footer Info --}}
-           
-
+    @if($errors->any())
+        <div class="alert alert-danger alert-dismissible fade show mx-3 mt-3 mb-0">
+            <ul class="mb-0">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
+    @endif
 
+    <div class="card-body">
+        <form action="{{ route('dashboard.tags.update', $tag) }}" method="POST">
+            @csrf
+            @method('PUT')
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Tag Name <span class="text-danger">*</span></label>
+                    <input type="text" name="name" class="form-control @error('name') is-invalid @enderror"
+                        value="{{ old('name', $tag->name) }}" placeholder="e.g. Cotton, Summer, Sale" required>
+                    @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Slug</label>
+                    <input type="text" name="slug" id="slugInput" class="form-control @error('slug') is-invalid @enderror"
+                        value="{{ old('slug', $tag->slug) }}" placeholder="e.g. cotton-summer-sale">
+                    @error('slug')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    <small class="text-muted">Auto-generated from name. Lowercase letters, numbers and hyphens only.</small>
+                </div>
+
+                <div class="col-12 d-flex justify-content-end gap-2">
+                    <a href="{{ route('dashboard.tags.index') }}" class="btn btn-outline-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Update Tag</button>
+                </div>
+            </div>
+        </form>
     </div>
 </div>
-
 @endsection
 
 @push('scripts')
 <script>
+document.addEventListener('DOMContentLoaded', function () {
     const nameInput = document.querySelector('input[name="name"]');
     const slugInput = document.getElementById('slugInput');
 
@@ -116,5 +70,6 @@
     slugInput.addEventListener('input', function () {
         this.dataset.manual = 'true';
     });
+});
 </script>
 @endpush

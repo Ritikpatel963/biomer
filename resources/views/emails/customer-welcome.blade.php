@@ -10,7 +10,7 @@
         .header { background: #2d7a45; color: white; padding: 20px; text-align: center; }
         .content { padding: 20px; background: #f9f9f9; }
         .footer { background: #333; color: white; padding: 20px; text-align: center; font-size: 12px; }
-        .btn { display: inline-block; background: #2d7a45; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; }
+        .btn { display: inline-block; background: #2d7a45; color: white !important; padding: 10px 20px; text-decoration: none; border-radius: 5px; }
     </style>
 </head>
 <body>

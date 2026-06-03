@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\ProductVariation;
+use App\Services\CartPricingService;
 use Illuminate\Http\Request;
 
 class CartController extends Controller
@@ -182,34 +183,7 @@ class CartController extends Controller
 
     private function calculateCartTotals(array $cart, ?array $coupon = null): array
     {
-        $subtotal = collect($cart)->sum(fn($item) => $item['price'] * $item['quantity']);
-        $shippingTotal = collect($cart)->sum(fn($item) => ($item['shipping_charge'] ?? 0) * $item['quantity']);
-
-        $discount = 0;
-        if ($coupon) {
-            $discount = $coupon['type'] === 'percent'
-                ? ($subtotal * ($coupon['value'] / 100))
-                : $coupon['value'];
-        }
-
-        $taxAmount = 0;
-        foreach ($cart as $item) {
-            $product = Product::find($item['product_id']);
-            if ($product && $product->tax_rate > 0) {
-                $itemSubtotal = $item['price'] * $item['quantity'];
-                $taxAmount += $itemSubtotal * ($product->tax_rate / 100);
-            }
-        }
-
-        $total = max(0, $subtotal - $discount) + $shippingTotal + $taxAmount;
-
-        return [
-            'subtotal' => $subtotal,
-            'shippingTotal' => $shippingTotal,
-            'discount' => $discount,
-            'taxAmount' => $taxAmount,
-            'total' => $total,
-        ];
+        return app(CartPricingService::class)->calculate($cart, $coupon);
     }
 
     public function clear()

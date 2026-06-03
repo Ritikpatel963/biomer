@@ -6,10 +6,10 @@
 .wl__card {
     background: #fff; border-radius: 16px; border: 1px solid #e8f0e4;
     box-shadow: 0 2px 16px rgba(60,120,60,0.06);
-    overflow: hidden; transition: box-shadow 0.2s;
+    overflow: hidden;
     height: 100%; display: flex; flex-direction: column;
 }
-.wl__card:hover { box-shadow: 0 4px 24px rgba(60,120,60,0.12); }
+.wl__card:hover { box-shadow: 0 2px 16px rgba(60,120,60,0.06); }
 .wl__img-wrap {
     background: #f4faf0; padding: 1.5rem;
     display: flex; align-items: center; justify-content: center;
@@ -109,7 +109,7 @@
 
 @else
 <div class="wl__empty">
-    <div class="wl__empty-icon">🤍</div>
+    <div class="wl__empty-icon"><i class="ri-heart-3-line" aria-hidden="true"></i></div>
     <h3 style="font-size:1.4rem; font-weight:700; color:#1a2e1a; margin-bottom:0.5rem;">Your wishlist is empty</h3>
     <p style="color:#6b7c6b; margin-bottom:1.5rem;">Save products you love and come back to them later.</p>
     <a href="{{ route('products.index') }}" style="display:inline-block; padding:0.75rem 2rem; background:#2d7a45; color:#fff; font-weight:700; border-radius:10px; text-decoration:none;">

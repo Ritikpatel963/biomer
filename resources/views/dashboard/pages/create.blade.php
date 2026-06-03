@@ -13,14 +13,6 @@
             --radius: 10px;
         }
 
-        .page-header {
-            background: linear-gradient(135deg, #2d7a45 0%, #1a5c30 100%);
-            color: #fff;
-            padding: 1.5rem 2rem;
-            border-radius: var(--radius);
-            margin-bottom: 1.8rem;
-        }
-
         .form-card {
             background: #fff;
             border: 1px solid var(--border);
@@ -167,12 +159,6 @@
 
 @section('content')
     <div class="container-fluid py-4">
-
-        <div class="page-header mb-4">
-            <h1>Create New Page</h1>
-            <p style="margin: .25rem 0 0; opacity: .8; font-size: .9rem;">Add a new page to your website with SEO optimization</p>
-        </div>
-
         @if ($errors->any())
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                 <strong>Please fix the following errors:</strong>
@@ -232,7 +218,7 @@
 
             <!-- SEO Settings -->
             <div class="form-section">
-                <h5 class="form-section-title">🔍 SEO Settings</h5>
+                <h5 class="form-section-title"> SEO Settings</h5>
 
                 <div class="seo-note">
                     <strong>📌 SEO Tips:</strong> These fields help search engines understand your page and improve how it appears

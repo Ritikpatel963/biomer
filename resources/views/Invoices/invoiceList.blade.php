@@ -20,7 +20,7 @@
                         <div class="icon-field">
                             <input type="text" name="#0" class="form-control form-control-sm w-auto" placeholder="Search">
                             <span class="icon">
-                                <iconify-icon icon="ion:search-outline"></iconify-icon>
+                                
                             </span>
                         </div>
                     </div>
@@ -75,13 +75,13 @@
                                 <td> <span class="bg-success-focus text-success-main px-24 py-4 rounded-pill fw-medium text-sm">Paid</span> </td>
                                 <td>
                                     <a  href="javascript:void(0)" class="w-32-px h-32-px bg-primary-light text-primary-600 rounded-circle d-inline-flex align-items-center justify-content-center">
-                                        <iconify-icon icon="iconamoon:eye-light"></iconify-icon>
+                                        
                                     </a>
                                     <a  href="javascript:void(0)" class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center">
-                                        <iconify-icon icon="lucide:edit"></iconify-icon>
+                                        
                                     </a>
                                     <a  href="javascript:void(0)" class="w-32-px h-32-px bg-danger-focus text-danger-main rounded-circle d-inline-flex align-items-center justify-content-center">
-                                        <iconify-icon icon="mingcute:delete-2-line"></iconify-icon>
+                                        
                                     </a>
                                 </td>
                             </tr>
@@ -106,13 +106,13 @@
                                 <td> <span class="bg-success-focus text-success-main px-24 py-4 rounded-pill fw-medium text-sm">Paid</span> </td>
                                 <td>
                                     <a  href="javascript:void(0)" class="w-32-px h-32-px bg-primary-light text-primary-600 rounded-circle d-inline-flex align-items-center justify-content-center">
-                                        <iconify-icon icon="iconamoon:eye-light"></iconify-icon>
+                                        
                                     </a>
                                     <a  href="javascript:void(0)" class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center">
-                                        <iconify-icon icon="lucide:edit"></iconify-icon>
+                                        
                                     </a>
                                     <a  href="javascript:void(0)" class="w-32-px h-32-px bg-danger-focus text-danger-main rounded-circle d-inline-flex align-items-center justify-content-center">
-                                        <iconify-icon icon="mingcute:delete-2-line"></iconify-icon>
+                                        
                                     </a>
                                 </td>
                             </tr>
@@ -137,13 +137,13 @@
                                 <td> <span class="bg-success-focus text-success-main px-24 py-4 rounded-pill fw-medium text-sm">Paid</span> </td>
                                 <td>
                                     <a  href="javascript:void(0)" class="w-32-px h-32-px bg-primary-light text-primary-600 rounded-circle d-inline-flex align-items-center justify-content-center">
-                                        <iconify-icon icon="iconamoon:eye-light"></iconify-icon>
+                                        
                                     </a>
                                     <a  href="javascript:void(0)" class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center">
-                                        <iconify-icon icon="lucide:edit"></iconify-icon>
+                                        
                                     </a>
                                     <a  href="javascript:void(0)" class="w-32-px h-32-px bg-danger-focus text-danger-main rounded-circle d-inline-flex align-items-center justify-content-center">
-                                        <iconify-icon icon="mingcute:delete-2-line"></iconify-icon>
+                                        
                                     </a>
                                 </td>
                             </tr>
@@ -168,13 +168,13 @@
                                 <td> <span class="bg-success-focus text-success-main px-24 py-4 rounded-pill fw-medium text-sm">Paid</span> </td>
                                 <td>
                                     <a  href="javascript:void(0)" class="w-32-px h-32-px bg-primary-light text-primary-600 rounded-circle d-inline-flex align-items-center justify-content-center">
-                                        <iconify-icon icon="iconamoon:eye-light"></iconify-icon>
+                                        
                                     </a>
                                     <a  href="javascript:void(0)" class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center">
-                                        <iconify-icon icon="lucide:edit"></iconify-icon>
+                                        
                                     </a>
                                     <a  href="javascript:void(0)" class="w-32-px h-32-px bg-danger-focus text-danger-main rounded-circle d-inline-flex align-items-center justify-content-center">
-                                        <iconify-icon icon="mingcute:delete-2-line"></iconify-icon>
+                                        
                                     </a>
                                 </td>
                             </tr>
@@ -199,13 +199,13 @@
                                 <td> <span class="bg-warning-focus text-warning-main px-24 py-4 rounded-pill fw-medium text-sm">Pending</span> </td>
                                 <td>
                                     <a  href="javascript:void(0)" class="w-32-px h-32-px bg-primary-light text-primary-600 rounded-circle d-inline-flex align-items-center justify-content-center">
-                                        <iconify-icon icon="iconamoon:eye-light"></iconify-icon>
+                                        
                                     </a>
                                     <a  href="javascript:void(0)" class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center">
-                                        <iconify-icon icon="lucide:edit"></iconify-icon>
+                                        
                                     </a>
                                     <a  href="javascript:void(0)" class="w-32-px h-32-px bg-danger-focus text-danger-main rounded-circle d-inline-flex align-items-center justify-content-center">
-                                        <iconify-icon icon="mingcute:delete-2-line"></iconify-icon>
+                                        
                                     </a>
                                 </td>
                             </tr>
@@ -230,13 +230,13 @@
                                 <td> <span class="bg-success-focus text-success-main px-24 py-4 rounded-pill fw-medium text-sm">Paid</span> </td>
                                 <td>
                                     <a  href="javascript:void(0)" class="w-32-px h-32-px bg-primary-light text-primary-600 rounded-circle d-inline-flex align-items-center justify-content-center">
-                                        <iconify-icon icon="iconamoon:eye-light"></iconify-icon>
+                                        
                                     </a>
                                     <a  href="javascript:void(0)" class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center">
-                                        <iconify-icon icon="lucide:edit"></iconify-icon>
+                                        
                                     </a>
                                     <a  href="javascript:void(0)" class="w-32-px h-32-px bg-danger-focus text-danger-main rounded-circle d-inline-flex align-items-center justify-content-center">
-                                        <iconify-icon icon="mingcute:delete-2-line"></iconify-icon>
+                                        
                                     </a>
                                 </td>
                             </tr>
@@ -261,13 +261,13 @@
                                 <td> <span class="bg-success-focus text-success-main px-24 py-4 rounded-pill fw-medium text-sm">Paid</span> </td>
                                 <td>
                                     <a  href="javascript:void(0)" class="w-32-px h-32-px bg-primary-light text-primary-600 rounded-circle d-inline-flex align-items-center justify-content-center">
-                                        <iconify-icon icon="iconamoon:eye-light"></iconify-icon>
+                                        
                                     </a>
                                     <a  href="javascript:void(0)" class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center">
-                                        <iconify-icon icon="lucide:edit"></iconify-icon>
+                                        
                                     </a>
                                     <a  href="javascript:void(0)" class="w-32-px h-32-px bg-danger-focus text-danger-main rounded-circle d-inline-flex align-items-center justify-content-center">
-                                        <iconify-icon icon="mingcute:delete-2-line"></iconify-icon>
+                                        
                                     </a>
                                 </td>
                             </tr>
@@ -292,13 +292,13 @@
                                 <td> <span class="bg-warning-focus text-warning-main px-24 py-4 rounded-pill fw-medium text-sm">Pending</span> </td>
                                 <td>
                                     <a  href="javascript:void(0)" class="w-32-px h-32-px bg-primary-light text-primary-600 rounded-circle d-inline-flex align-items-center justify-content-center">
-                                        <iconify-icon icon="iconamoon:eye-light"></iconify-icon>
+                                        
                                     </a>
                                     <a  href="javascript:void(0)" class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center">
-                                        <iconify-icon icon="lucide:edit"></iconify-icon>
+                                        
                                     </a>
                                     <a  href="javascript:void(0)" class="w-32-px h-32-px bg-danger-focus text-danger-main rounded-circle d-inline-flex align-items-center justify-content-center">
-                                        <iconify-icon icon="mingcute:delete-2-line"></iconify-icon>
+                                        
                                     </a>
                                 </td>
                             </tr>
@@ -323,13 +323,13 @@
                                 <td> <span class="bg-success-focus text-success-main px-24 py-4 rounded-pill fw-medium text-sm">Paid</span> </td>
                                 <td>
                                     <a  href="javascript:void(0)" class="w-32-px h-32-px bg-primary-light text-primary-600 rounded-circle d-inline-flex align-items-center justify-content-center">
-                                        <iconify-icon icon="iconamoon:eye-light"></iconify-icon>
+                                        
                                     </a>
                                     <a  href="javascript:void(0)" class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center">
-                                        <iconify-icon icon="lucide:edit"></iconify-icon>
+                                        
                                     </a>
                                     <a  href="javascript:void(0)" class="w-32-px h-32-px bg-danger-focus text-danger-main rounded-circle d-inline-flex align-items-center justify-content-center">
-                                        <iconify-icon icon="mingcute:delete-2-line"></iconify-icon>
+                                        
                                     </a>
                                 </td>
                             </tr>
@@ -354,13 +354,13 @@
                                 <td> <span class="bg-success-focus text-success-main px-24 py-4 rounded-pill fw-medium text-sm">Paid</span> </td>
                                 <td>
                                     <a  href="javascript:void(0)" class="w-32-px h-32-px bg-primary-light text-primary-600 rounded-circle d-inline-flex align-items-center justify-content-center">
-                                        <iconify-icon icon="iconamoon:eye-light"></iconify-icon>
+                                        
                                     </a>
                                     <a  href="javascript:void(0)" class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center">
-                                        <iconify-icon icon="lucide:edit"></iconify-icon>
+                                        
                                     </a>
                                     <a  href="javascript:void(0)" class="w-32-px h-32-px bg-danger-focus text-danger-main rounded-circle d-inline-flex align-items-center justify-content-center">
-                                        <iconify-icon icon="mingcute:delete-2-line"></iconify-icon>
+                                        
                                     </a>
                                 </td>
                             </tr>
@@ -372,7 +372,7 @@
                         <ul class="pagination d-flex flex-wrap align-items-center gap-2 justify-content-center">
                             <li class="page-item">
                                 <a class="page-link text-secondary-light fw-medium radius-4 border-0 px-10 py-10 d-flex align-items-center justify-content-center h-32-px w-32-px bg-base"  href="javascript:void(0)">
-                                    <iconify-icon icon="ep:d-arrow-left" class="text-xl"></iconify-icon>
+                                    
                                 </a>
                             </li>
                             <li class="page-item">
@@ -386,7 +386,7 @@
                             </li>
                             <li class="page-item">
                                 <a class="page-link text-secondary-light fw-medium radius-4 border-0 px-10 py-10 d-flex align-items-center justify-content-center h-32-px w-32-px bg-base"  href="javascript:void(0)">
-                                    <iconify-icon icon="ep:d-arrow-right" class="text-xl"></iconify-icon>
+                                    
                                 </a>
                             </li>
                         </ul>

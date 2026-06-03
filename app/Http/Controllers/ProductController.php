@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Brand;
 use App\Models\Category;
+use App\Models\GlobalProductAttribute;
 use App\Models\Product;
+use App\Models\ProductAttribute;
 use App\Models\ProductImage;
 use App\Models\ProductVariation;
 use App\Models\Tag;
@@ -13,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
 
 class ProductController extends Controller
@@ -21,6 +24,8 @@ class ProductController extends Controller
     public function index()
     {
         $products = Product::with(['brand', 'category', 'variations'])
+            ->withAvg('approvedReviews', 'rating')
+            ->withCount('approvedReviews')
             ->latest()
             ->paginate(15);
 
@@ -33,8 +38,9 @@ class ProductController extends Controller
         $brands     = Brand::orderBy('name')->get();
         $categories = Category::orderBy('name')->get();
         $tags       = Tag::orderBy('name')->get();
+        $globalAttributes = GlobalProductAttribute::active()->orderBy('sort_order')->orderBy('name')->get();
 
-        return view('dashboard.products.create', compact('brands', 'categories', 'tags'));
+        return view('dashboard.products.create', compact('brands', 'categories', 'tags', 'globalAttributes'));
     }
 
     // ── Store ──────────────────────────────────────────────────────────────
@@ -42,7 +48,7 @@ class ProductController extends Controller
     {
         $request->validate([
             'name'              => 'required|string|max:255',
-            'sku'               => 'required|string|max:100|unique:products,sku',
+            'sku'               => 'nullable|string|max:100|unique:products,sku',
             'brand_id'          => 'nullable|exists:brands,id',
             'category_id'       => 'nullable|exists:categories,id',
             'technical_content' => 'nullable|string|max:255',
@@ -50,6 +56,8 @@ class ProductController extends Controller
             'short_description' => 'nullable|string',
             'base_price'        => 'required|numeric|min:0',
             'unit'              => 'required|string|max:50',
+            'manage_stock'      => 'nullable|boolean',
+            'stock_quantity'    => 'nullable|integer|min:0',
             'shipping_charge'   => 'nullable|numeric|min:0',
             'tax_rate'          => 'nullable|numeric|min:0|max:100',
             'status'            => 'required|in:active,inactive,draft',
@@ -63,20 +71,20 @@ class ProductController extends Controller
             'tags.*'            => 'string',
         ]);
 
-        $variations = $request->input('variations', []);
+        $variations = $this->normalizedVariationPayloads($request);
 
-        if (!empty($variations)) {
+        if ($variations->isNotEmpty()) {
             $varRules = [];
             foreach ($variations as $i => $v) {
-                $varRules["variations.{$i}.attribute_name"]  = 'required|string|max:100';
-                $varRules["variations.{$i}.attribute_value"] = 'required|string|max:100';
-                $varRules["variations.{$i}.sku"]             = 'required|string|max:100|distinct|unique:product_variations,sku';
-                $varRules["variations.{$i}.price"]           = 'required|numeric|min:0';
-                $varRules["variations.{$i}.weight"]          = 'nullable|numeric|min:0';
-                $varRules["variations.{$i}.unit"]            = 'nullable|string|max:50';
-                $varRules["variations.{$i}.stock_quantity"]  = 'required|integer|min:0';
+                $varRules["normalized_variations.{$i}.attribute_name"]  = 'required|string|max:100';
+                $varRules["normalized_variations.{$i}.attribute_value"] = 'required|string|max:255';
+                $varRules["normalized_variations.{$i}.sku"]             = 'required|string|max:100|distinct|unique:product_variations,sku';
+                $varRules["normalized_variations.{$i}.price"]           = 'required|numeric|min:0';
+                $varRules["normalized_variations.{$i}.weight"]          = 'nullable|numeric|min:0';
+                $varRules["normalized_variations.{$i}.unit"]            = 'nullable|string|max:50';
+                $varRules["normalized_variations.{$i}.stock_quantity"]  = 'required|integer|min:0';
             }
-            $request->validate($varRules);
+            validator(['normalized_variations' => $variations->toArray()], $varRules)->validate();
         }
 
         // ── try/catch exposes any silent error ─────────────────────────────
@@ -94,7 +102,7 @@ class ProductController extends Controller
                 $product = Product::create([
                     'name'              => $request->name,
                     'slug'              => Str::slug($request->name),
-                    'sku'               => $request->sku,
+                    'sku'               => $request->filled('sku') ? $request->sku : null,
                     'brand_id'          => $request->brand_id,
                     'category_id'       => $request->category_id,
                     'technical_content' => $request->technical_content,
@@ -102,6 +110,8 @@ class ProductController extends Controller
                     'short_description' => $request->short_description,
                     'base_price'        => $request->base_price,
                     'unit'              => $request->unit ?? 'kg',
+                    'manage_stock'      => $request->boolean('manage_stock'),
+                    'stock_quantity'    => (int) $request->input('stock_quantity', 0),
                     'shipping_charge'   => $request->shipping_charge ?? 0,
                     'tax_rate'          => $request->tax_rate ?? 0,
                     'status'            => $request->status,
@@ -128,7 +138,7 @@ class ProductController extends Controller
                 }
 
                 // 4. Variations
-                if (!empty($variations)) {
+                if ($variations->isNotEmpty()) {
                     $varFiles = $request->file('variations', []);
 
                     foreach ($variations as $index => $varData) {
@@ -146,14 +156,22 @@ class ProductController extends Controller
                             'sku'             => $varData['sku'],
                             'attribute_name'  => $varData['attribute_name'],
                             'attribute_value' => $varData['attribute_value'],
+                            'attributes'      => $varData['attributes'],
                             'price'           => $varData['price'],
+                            'compare_at_price'=> $varData['compare_at_price'],
+                            'cost_price'      => $varData['cost_price'],
                             'weight'          => $varData['weight'] ?? null,
                             'unit'            => $varData['unit'] ?? null,
                             'stock_quantity'  => (int) $varData['stock_quantity'],
-                            'is_active'       => true,
+                            'track_stock'     => $varData['track_stock'],
+                            'is_in_stock'     => $varData['is_in_stock'],
+                            'is_active'       => $varData['is_active'],
+                            'is_default'      => $varData['is_default'],
                             'image_path'      => $varImagePath,
                         ]);
                     }
+
+                    $this->syncProductAttributesFromVariations($product);
                 }
 
                 // 5. Tags
@@ -195,19 +213,20 @@ class ProductController extends Controller
     // ── Show ───────────────────────────────────────────────────────────────
     public function show(Product $product)
     {
-        $product->load(['brand', 'category', 'tags', 'images', 'variations']);
+        $product->load(['brand', 'category', 'tags', 'images', 'variations', 'attributes']);
         return view('dashboard.products.show', compact('product'));
     }
 
     // ── Edit form ──────────────────────────────────────────────────────────
     public function edit(Product $product)
     {
-        $product->load(['brand', 'category', 'tags', 'images', 'variations']);
+        $product->load(['brand', 'category', 'tags', 'images', 'variations', 'attributes']);
         $brands     = Brand::orderBy('name')->get();
         $categories = Category::orderBy('name')->get();
         $tags       = Tag::orderBy('name')->get();
+        $globalAttributes = GlobalProductAttribute::active()->orderBy('sort_order')->orderBy('name')->get();
 
-        return view('dashboard.products.edit', compact('product', 'brands', 'categories', 'tags'));
+        return view('dashboard.products.create', compact('product', 'brands', 'categories', 'tags', 'globalAttributes'));
     }
 
     // ── Update ─────────────────────────────────────────────────────────────
@@ -215,7 +234,7 @@ class ProductController extends Controller
     {
         $request->validate([
             'name'              => 'required|string|max:255',
-            'sku'               => 'required|string|max:100|unique:products,sku,' . $product->id,
+            'sku'               => 'nullable|string|max:100|unique:products,sku,' . $product->id,
             'brand_id'          => 'nullable|exists:brands,id',
             'category_id'       => 'nullable|exists:categories,id',
             'technical_content' => 'nullable|string|max:255',
@@ -223,6 +242,8 @@ class ProductController extends Controller
             'short_description' => 'nullable|string',
             'base_price'        => 'required|numeric|min:0',
             'unit'              => 'required|string|max:50',
+            'manage_stock'      => 'nullable|boolean',
+            'stock_quantity'    => 'nullable|integer|min:0',
             'shipping_charge'   => 'nullable|numeric|min:0',
             'tax_rate'          => 'nullable|numeric|min:0|max:100',
             'status'            => 'required|in:active,inactive,draft',
@@ -236,7 +257,33 @@ class ProductController extends Controller
             'tags.*'            => 'string',
         ]);
 
-        $variations = $request->input('variations', []);
+        $variations = $this->normalizedVariationPayloads($request, $product);
+
+        if ($variations->isNotEmpty()) {
+            $varRules = [];
+            foreach ($variations as $i => $v) {
+                $variationId = $v['id'] ?? null;
+
+                $varRules["normalized_variations.{$i}.id"] = [
+                    'nullable',
+                    Rule::exists('product_variations', 'id')->where('product_id', $product->id),
+                ];
+                $varRules["normalized_variations.{$i}.attribute_name"] = 'required|string|max:100';
+                $varRules["normalized_variations.{$i}.attribute_value"] = 'required|string|max:255';
+                $varRules["normalized_variations.{$i}.sku"] = [
+                    'required',
+                    'string',
+                    'max:100',
+                    'distinct',
+                    Rule::unique('product_variations', 'sku')->ignore($variationId),
+                ];
+                $varRules["normalized_variations.{$i}.price"] = 'required|numeric|min:0';
+                $varRules["normalized_variations.{$i}.weight"] = 'nullable|numeric|min:0';
+                $varRules["normalized_variations.{$i}.unit"] = 'nullable|string|max:50';
+                $varRules["normalized_variations.{$i}.stock_quantity"] = 'required|integer|min:0';
+            }
+            validator(['normalized_variations' => $variations->toArray()], $varRules)->validate();
+        }
 
         try {
             DB::transaction(function () use ($request, $product, $variations) {
@@ -255,7 +302,7 @@ class ProductController extends Controller
                 $product->update([
                     'name'              => $request->name,
                     'slug'              => Str::slug($request->name),
-                    'sku'               => $request->sku,
+                    'sku'               => $request->filled('sku') ? $request->sku : null,
                     'brand_id'          => $request->brand_id,
                     'category_id'       => $request->category_id,
                     'technical_content' => $request->technical_content,
@@ -263,6 +310,8 @@ class ProductController extends Controller
                     'short_description' => $request->short_description,
                     'base_price'        => $request->base_price,
                     'unit'              => $request->unit ?? 'kg',
+                    'manage_stock'      => $request->boolean('manage_stock'),
+                    'stock_quantity'    => (int) $request->input('stock_quantity', 0),
                     'shipping_charge'   => $request->shipping_charge ?? 0,
                     'tax_rate'          => $request->tax_rate ?? 0,
                     'status'            => $request->status,
@@ -288,7 +337,7 @@ class ProductController extends Controller
                 }
 
                 // 4. Variations — UPDATE existing, CREATE new
-                if (!empty($variations)) {
+                if ($variations->isNotEmpty()) {
                     $varFiles = $request->file('variations', []);
 
                     foreach ($variations as $index => $varData) {
@@ -312,10 +361,17 @@ class ProductController extends Controller
                                     'sku'             => $varData['sku'],
                                     'attribute_name'  => $varData['attribute_name'],
                                     'attribute_value' => $varData['attribute_value'],
+                                    'attributes'      => $varData['attributes'],
                                     'price'           => $varData['price'],
+                                    'compare_at_price'=> $varData['compare_at_price'],
+                                    'cost_price'      => $varData['cost_price'],
                                     'weight'          => $varData['weight'] ?? null,
                                     'unit'            => $varData['unit'] ?? null,
                                     'stock_quantity'  => (int) $varData['stock_quantity'],
+                                    'track_stock'     => $varData['track_stock'],
+                                    'is_in_stock'     => $varData['is_in_stock'],
+                                    'is_active'       => $varData['is_active'],
+                                    'is_default'      => $varData['is_default'],
                                     'image_path'      => $varImagePath ?: $existing->image_path,
                                 ]);
                             }
@@ -326,15 +382,23 @@ class ProductController extends Controller
                                 'sku'             => $varData['sku'],
                                 'attribute_name'  => $varData['attribute_name'],
                                 'attribute_value' => $varData['attribute_value'],
+                                'attributes'      => $varData['attributes'],
                                 'price'           => $varData['price'],
+                                'compare_at_price'=> $varData['compare_at_price'],
+                                'cost_price'      => $varData['cost_price'],
                                 'weight'          => $varData['weight'] ?? null,
                                 'unit'            => $varData['unit'] ?? null,
                                 'stock_quantity'  => (int) $varData['stock_quantity'],
-                                'is_active'       => true,
+                                'track_stock'     => $varData['track_stock'],
+                                'is_in_stock'     => $varData['is_in_stock'],
+                                'is_active'       => $varData['is_active'],
+                                'is_default'      => $varData['is_default'],
                                 'image_path'      => $varImagePath,
                             ]);
                         }
                     }
+
+                    $this->syncProductAttributesFromVariations($product);
                 }
 
                 // 5. Tags sync
@@ -399,6 +463,16 @@ class ProductController extends Controller
         return response()->json(['success' => true]);
     }
 
+    public function destroyFeaturedImage(Product $product)
+    {
+        if ($product->featured_image) {
+            Storage::disk('public')->delete($product->featured_image);
+            $product->forceFill(['featured_image' => null])->save();
+        }
+
+        return response()->json(['success' => true]);
+    }
+
     // ── Delete single variation (AJAX) ────────────────────────────────────
     public function destroyVariation(ProductVariation $variation)
     {
@@ -413,6 +487,8 @@ class ProductController extends Controller
 public function shopIndex(Request $request)
 {
     $query = Product::with(['brand', 'category', 'variations'])
+        ->withAvg('approvedReviews', 'rating')
+        ->withCount('approvedReviews')
         ->where('status', 'active');
 
     // Search functionality
@@ -502,7 +578,7 @@ public function shopShow(Product $product)
         'tags',
         'images',
         'variations' => function ($q) {
-            $q->where('is_active', true)->orderBy('price');
+            $q->where('is_active', true)->orderByDesc('is_default')->orderBy('price');
         },
         'reviews' => function ($q) {
             $q->with('customer')->where('status', 'approved')->latest();
@@ -511,4 +587,105 @@ public function shopShow(Product $product)
 
     return view('productdetails', compact('product'));
 }
+
+    private function syncProductAttributesFromVariations(Product $product): void
+    {
+        $product->load('variations');
+
+        $grouped = collect();
+
+        foreach ($product->variations as $variation) {
+            $attributes = $variation->attributes ?: [$variation->attribute_name => $variation->attribute_value];
+
+            foreach ($attributes as $name => $value) {
+                if (!filled($name) || !filled($value)) {
+                    continue;
+                }
+
+                $grouped->push([
+                    'name' => $name,
+                    'value' => $value,
+                ]);
+            }
+        }
+
+        foreach ($grouped->groupBy('name') as $name => $items) {
+            ProductAttribute::updateOrCreate(
+                ['product_id' => $product->id, 'name' => $name],
+                [
+                    'values' => $items
+                        ->pluck('value')
+                        ->filter()
+                        ->unique(fn ($value) => Str::lower($value))
+                        ->values()
+                        ->all(),
+                ]
+            );
+        }
+    }
+
+    private function normalizedVariationPayloads(Request $request, ?Product $product = null)
+    {
+        $defaultRow = $request->input('default_variation_row');
+
+        return collect($request->input('variations', []))
+            ->map(function (array $variation, int $index) use ($defaultRow, $product, $request) {
+                $attributes = collect($variation['attributes'] ?? [])
+                    ->mapWithKeys(fn ($value, $name) => [trim((string) $name) => trim((string) $value)])
+                    ->filter(fn ($value, $name) => filled($name) && filled($value))
+                    ->all();
+
+                if (empty($attributes)) {
+                    $attributeName = trim((string) ($variation['attribute_name'] ?? 'Pack'));
+                    $attributeValue = trim((string) ($variation['attribute_value'] ?? $variation['name'] ?? ''));
+                    $attributes = filled($attributeName) && filled($attributeValue)
+                        ? [$attributeName => $attributeValue]
+                        : [];
+                }
+
+                $attributeName = array_key_first($attributes) ?: trim((string) ($variation['attribute_name'] ?? 'Variation'));
+                $attributeValue = filled($variation['attribute_value'] ?? null)
+                    ? trim((string) $variation['attribute_value'])
+                    : $this->variationDisplayName($attributes, $variation['name'] ?? '');
+
+                return [
+                    'id' => $variation['id'] ?? null,
+                    'name' => $this->variationDisplayName($attributes, $variation['name'] ?? ''),
+                    'attribute_name' => $attributeName ?: 'Variation',
+                    'attribute_value' => $attributeValue ?: 'Default',
+                    'attributes' => $attributes,
+                    'sku' => trim((string) ($variation['sku'] ?? $this->generatedVariationSku($product?->sku ?? $request->input('sku'), $attributes, $index))),
+                    'price' => $variation['price'] ?? $request->input('base_price', 0),
+                    'compare_at_price' => $variation['compare_at_price'] ?? null,
+                    'cost_price' => $variation['cost_price'] ?? null,
+                    'weight' => $variation['weight'] ?? null,
+                    'unit' => $variation['unit'] ?? $request->input('unit'),
+                    'stock_quantity' => $variation['stock_quantity'] ?? $variation['stock_qty'] ?? 0,
+                    'track_stock' => (bool) ($variation['track_stock'] ?? true),
+                    'is_in_stock' => (bool) ($variation['is_in_stock'] ?? true),
+                    'is_active' => (bool) ($variation['is_active'] ?? false),
+                    'is_default' => (string) $defaultRow === (string) $index || (bool) ($variation['is_default'] ?? false),
+                ];
+            })
+            ->filter(fn ($variation) => filled($variation['sku']) && filled($variation['price']))
+            ->values();
+    }
+
+    private function variationDisplayName(array $attributes, string $fallback = ''): string
+    {
+        if (!empty($attributes)) {
+            return collect($attributes)
+                ->map(fn ($value, $name) => "{$name}: {$value}")
+                ->implode(' / ');
+        }
+
+        return trim($fallback);
+    }
+
+    private function generatedVariationSku(?string $baseSku, array $attributes, int $index): string
+    {
+        $parts = collect($attributes)->values()->push($index + 1)->implode('-');
+
+        return Str::upper(Str::slug(($baseSku ?: 'PRODUCT') . '-' . $parts));
+    }
 }

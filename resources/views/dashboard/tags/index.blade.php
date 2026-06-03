@@ -92,9 +92,9 @@
                         <td>
                             {{-- Edit --}}
                             <a href="{{ route('dashboard.tags.edit', $tag) }}"
-                               class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center"
+                               class="btn btn-sm btn-outline-primary"
                                title="Edit Tag">
-                                <iconify-icon icon="lucide:edit"></iconify-icon>
+                                Edit
                             </a>
 
                             {{-- Delete --}}
@@ -103,10 +103,9 @@
                                   onsubmit="return confirm('Delete tag \'{{ addslashes($tag->name) }}\'?')">
                                 @csrf @method('DELETE')
                                 <button type="submit"
-                                        class="w-32-px h-32-px bg-danger-focus text-danger-main rounded-circle d-inline-flex align-items-center justify-content-center border-0"
-                                        style="background:transparent"
+                                        class="btn btn-sm btn-outline-danger"
                                         title="Delete Tag">
-                                    <iconify-icon icon="mingcute:delete-2-line"></iconify-icon>
+                                    Delete
                                 </button>
                             </form>
                         </td>

@@ -12,7 +12,7 @@
         @if(session('success'))
             <div class="alert alert-success alert-dismissible fade show mb-24" role="alert">
                 <div class="d-flex align-items-center">
-                    <iconify-icon icon="lucide:check-circle" class="fs-6 me-2"></iconify-icon>
+                    
                     <span>{{ session('success') }}</span>
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -22,7 +22,7 @@
         @if($errors->any())
             <div class="alert alert-danger alert-dismissible fade show mb-24" role="alert">
                 <div class="d-flex align-items-center">
-                    <iconify-icon icon="lucide:alert-circle" class="fs-6 me-2"></iconify-icon>
+                    
                     <span>{{ $errors->first() }}</span>
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -42,7 +42,7 @@
                         <div class="card-header bg-neutral-100 border-bottom py-16 px-24 d-flex align-items-center flex-wrap gap-3 justify-content-between">
                             <div class="d-flex align-items-center gap-10">
                                 <span class="w-36-px h-36-px bg-base rounded-circle d-flex justify-content-center align-items-center">
-                                    <iconify-icon icon="mdi:razorpay" class="fs-4 text-primary"></iconify-icon>
+                                    
                                 </span>
                                 <span class="text-lg fw-semibold text-primary-light">Razorpay</span>
                             </div>
@@ -105,7 +105,7 @@
                         <div class="card-header bg-neutral-100 border-bottom py-16 px-24 d-flex align-items-center flex-wrap gap-3 justify-content-between">
                             <div class="d-flex align-items-center gap-10">
                                 <span class="w-36-px h-36-px bg-base rounded-circle d-flex justify-content-center align-items-center">
-                                    <iconify-icon icon="mdi:cashfree" class="fs-4 text-success"></iconify-icon>
+                                    
                                 </span>
                                 <span class="text-lg fw-semibold text-primary-light">Cashfree</span>
                             </div>
@@ -171,7 +171,7 @@
                         <div class="card-header bg-neutral-100 border-bottom py-16 px-24 d-flex align-items-center flex-wrap gap-3 justify-content-between">
                             <div class="d-flex align-items-center gap-10">
                                 <span class="w-36-px h-36-px bg-base rounded-circle d-flex justify-content-center align-items-center">
-                                    <iconify-icon icon="mdi:cash-multiple" class="fs-4 text-warning"></iconify-icon>
+                                    
                                 </span>
                                 <span class="text-lg fw-semibold text-primary-light">Cash on Delivery (COD)</span>
                             </div>

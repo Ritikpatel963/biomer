@@ -3,45 +3,46 @@
 @php
     $title    = isset($blog) ? 'Edit Blog' : 'Add Blog';
     $subTitle = isset($blog) ? 'Edit Blog' : 'Add Blog';
-    $script = '
-        <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-bs5.min.css" rel="stylesheet">
-        <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-bs5.min.js"><\/script>
-        <script>
-            $(document).ready(function () {
+    $script = <<<'SCRIPT'
+<link href="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-bs5.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-bs5.min.js"></script>
+<script>
+    $(document).ready(function () {
 
-                $("#description").summernote({
-                    height: 300,
-                    placeholder: "Write your post content here...",
-                    toolbar: [
-                        ["style",  ["style"]],
-                        ["font",   ["bold", "italic", "underline", "strikethrough", "clear"]],
-                        ["color",  ["color"]],
-                        ["para",   ["ul", "ol", "paragraph"]],
-                        ["table",  ["table"]],
-                        ["insert", ["link", "picture", "video"]],
-                        ["view",   ["fullscreen", "codeview"]],
-                    ],
-                });
+        $("#description").summernote({
+            height: 300,
+            placeholder: "Write your post content here...",
+            toolbar: [
+                ["style",  ["style"]],
+                ["font",   ["bold", "italic", "underline", "strikethrough", "clear"]],
+                ["color",  ["color"]],
+                ["para",   ["ul", "ol", "paragraph"]],
+                ["table",  ["table"]],
+                ["insert", ["link", "picture", "video"]],
+                ["view",   ["fullscreen", "codeview"]],
+            ],
+        });
 
-                const fileInput            = document.getElementById("upload-file");
-                const imagePreview         = document.getElementById("uploaded-img__preview");
-                const uploadedImgContainer = document.querySelector(".uploaded-img");
-                const removeButton         = document.querySelector(".uploaded-img__remove");
+        const fileInput            = document.getElementById("upload-file");
+        const imagePreview         = document.getElementById("uploaded-img__preview");
+        const uploadedImgContainer = document.querySelector(".uploaded-img");
+        const removeButton         = document.querySelector(".uploaded-img__remove");
 
-                fileInput.addEventListener("change", (e) => {
-                    if (e.target.files.length) {
-                        imagePreview.src = URL.createObjectURL(e.target.files[0]);
-                        uploadedImgContainer.classList.remove("d-none");
-                    }
-                });
+        fileInput.addEventListener("change", (e) => {
+            if (e.target.files.length) {
+                imagePreview.src = URL.createObjectURL(e.target.files[0]);
+                uploadedImgContainer.classList.remove("d-none");
+            }
+        });
 
-                removeButton.addEventListener("click", () => {
-                    imagePreview.src = "";
-                    uploadedImgContainer.classList.add("d-none");
-                    fileInput.value  = "";
-                });
-            });
-        <\/script>';
+        removeButton.addEventListener("click", () => {
+            imagePreview.src = "";
+            uploadedImgContainer.classList.add("d-none");
+            fileInput.value  = "";
+        });
+    });
+</script>
+SCRIPT;
 @endphp
 
 @section('content')
@@ -49,11 +50,23 @@
 <div class="row gy-4">
 
     <div class="col-lg-8">
-        <div class="card mt-24">
-            <div class="card-header border-bottom">
-                <h6 class="text-xl mb-0">{{ isset($blog) ? 'Edit Post' : 'Add New Post' }}</h6>
+        <div class="admin-page-card">
+            <div class="admin-page-card__header">
+                <div>
+                    <span class="admin-page-card__eyebrow">Content Editor</span>
+                    <h2 class="admin-page-card__title">{{ isset($blog) ? 'Edit Blog Post' : 'Add Blog Post' }}</h2>
+                    <p class="admin-page-card__desc">Use the same admin card layout while editing content, SEO fields, status, and thumbnail assets.</p>
+                </div>
+                <div class="admin-page-card__actions">
+                    <a href="{{ route('blog') }}" class="btn btn-outline-secondary">Back To Posts</a>
+                </div>
             </div>
-            <div class="card-body p-24">
+
+            <div class="admin-section-card mt-4">
+                <div class="admin-section-card__header">
+                    <h6 class="text-xl mb-0">{{ isset($blog) ? 'Edit Post' : 'Add New Post' }}</h6>
+                </div>
+                <div class="admin-section-card__body">
 
                 @if ($errors->any())
                     <div class="alert alert-danger alert-dismissible fade show mb-20" role="alert">
@@ -128,6 +141,62 @@
                                placeholder="e.g. technology, business, design">
                     </div>
 
+                    {{-- Author --}}
+                    <div>
+                        <label class="form-label fw-bold text-neutral-900" for="author">
+                            Author
+                        </label>
+                        <input type="text"
+                               class="form-control border border-neutral-200 radius-8"
+                               id="author" name="author"
+                               value="{{ old('author', $blog->author ?? '') }}"
+                               placeholder="Enter author name">
+                    </div>
+
+                    {{-- Reading Time --}}
+                    <div>
+                        <label class="form-label fw-bold text-neutral-900" for="reading_time">
+                            Reading Time (minutes)
+                        </label>
+                        <input type="number"
+                               class="form-control border border-neutral-200 radius-8"
+                               id="reading_time" name="reading_time"
+                               value="{{ old('reading_time', $blog->reading_time ?? 5) }}"
+                               min="1" max="120">
+                    </div>
+
+                    {{-- SEO Meta Title --}}
+                    <div>
+                        <label class="form-label fw-bold text-neutral-900" for="meta_title">
+                            Meta Title
+                        </label>
+                        <input type="text"
+                               class="form-control border border-neutral-200 radius-8"
+                               id="meta_title" name="meta_title"
+                               value="{{ old('meta_title', $blog->meta_title ?? '') }}"
+                               placeholder="SEO meta title for this blog post">
+                    </div>
+
+                    {{-- SEO Meta Tags --}}
+                    <div>
+                        <label class="form-label fw-bold text-neutral-900" for="meta_tags">
+                            Meta Tags <span class="text-neutral-400 fw-normal text-sm">(comma separated)</span>
+                        </label>
+                        <input type="text"
+                               class="form-control border border-neutral-200 radius-8"
+                               id="meta_tags" name="meta_tags"
+                               value="{{ old('meta_tags', $blog->meta_tags ?? '') }}"
+                               placeholder="keyword1, keyword2, keyword3">
+                    </div>
+
+                    {{-- SEO Meta Description --}}
+                    <div>
+                        <label class="form-label fw-bold text-neutral-900" for="meta_description">
+                            Meta Description
+                        </label>
+                        <textarea class="form-control border border-neutral-200 radius-8" id="meta_description" name="meta_description" rows="3" placeholder="SEO meta description for search engines">{{ old('meta_description', $blog->meta_description ?? '') }}</textarea>
+                    </div>
+
                     {{-- Description - Summernote --}}
                     <div>
                         <label class="form-label fw-bold text-neutral-900">
@@ -173,6 +242,7 @@
                     </div>
 
                 </form>
+                </div>
             </div>
         </div>
     </div>
@@ -180,11 +250,11 @@
     {{-- Sidebar --}}
     <div class="col-lg-4">
         <div class="d-flex flex-column gap-24">
-            <div class="card">
-                <div class="card-header border-bottom">
+            <div class="admin-section-card">
+                <div class="admin-section-card__header">
                     <h6 class="text-xl mb-0">Latest Posts</h6>
                 </div>
-                <div class="card-body d-flex flex-column gap-24 p-24">
+                <div class="admin-section-card__body d-flex flex-column gap-24">
                     @forelse ($blogs as $post)
                         <div class="d-flex flex-wrap">
                             <a href="{{ route('blogDetails', $post->id) }}" class="blog__thumb w-100 radius-12 overflow-hidden">

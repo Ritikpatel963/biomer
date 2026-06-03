@@ -9,14 +9,12 @@
   border-radius: 16px;
   overflow: hidden;
   border: 1px solid #e8f0e4;
-  transition: box-shadow 0.25s ease, transform 0.25s ease;
   height: 100%;
   display: flex;
   flex-direction: column;
 }
 .shop__card:hover {
-  box-shadow: 0 8px 32px rgba(60, 120, 60, 0.12);
-  transform: translateY(-4px);
+  box-shadow: none;
 }
 .shop__img-wrap {
   position: relative;
@@ -74,7 +72,7 @@
 .shop__wishlist-btn:hover {
   background: #fdecea;
   border-color: #f5a9a4;
-  transform: scale(1.1);
+  transform: none;
 }
 .shop__wishlist-btn.wishlisted {
   background: #fdecea;

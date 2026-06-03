@@ -10,7 +10,7 @@
         .header { background: #2d7a45; color: white; padding: 20px; text-align: center; }
         .content { padding: 20px; background: #f9f9f9; }
         .footer { background: #333; color: white; padding: 20px; text-align: center; font-size: 12px; }
-        .btn { display: inline-block; background: #2d7a45; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; }
+        .btn { display: inline-block; background: #2d7a45; color: white !important; padding: 10px 20px; text-decoration: none; border-radius: 5px; }
         .status-update { background: white; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #2d7a45; }
         .status-badge {
             display: inline-block;
@@ -30,7 +30,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>📦 Order Status Update</h1>
+            <h1>Order Status Update</h1>
             <p>Order #{{ $order->order_number }}</p>
         </div>
 
@@ -56,23 +56,23 @@
 
             @if($newStatus === 'processing')
                 <div style="background: #e8f5ed; padding: 15px; border-radius: 5px; margin: 20px 0;">
-                    <h4>🔄 Order Processing Started</h4>
+                    <h4>Order Processing Started</h4>
                     <p>Your order is now being processed. Our team will prepare your items for shipping.</p>
                 </div>
             @elseif($newStatus === 'shipped')
                 <div style="background: #cce5ff; padding: 15px; border-radius: 5px; margin: 20px 0;">
-                    <h4>🚚 Order Shipped</h4>
+                    <h4>Order Shipped</h4>
                     <p>Your order has been shipped and is on its way to you. You will receive tracking information soon.</p>
                 </div>
             @elseif($newStatus === 'delivered')
                 <div style="background: #d4edda; padding: 15px; border-radius: 5px; margin: 20px 0;">
-                    <h4>✅ Order Delivered</h4>
+                    <h4>Order Delivered</h4>
                     <p>Your order has been successfully delivered. Thank you for shopping with us!</p>
                     <p>We hope you love your products. Please consider leaving a review.</p>
                 </div>
             @elseif($newStatus === 'cancelled')
                 <div style="background: #f8d7da; padding: 15px; border-radius: 5px; margin: 20px 0;">
-                    <h4>❌ Order Cancelled</h4>
+                    <h4>Order Cancelled</h4>
                     <p>Your order has been cancelled. If you have any questions, please contact our support team.</p>
                 </div>
             @endif

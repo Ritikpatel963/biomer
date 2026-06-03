@@ -55,7 +55,7 @@
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-hover mb-0">
+                    <table class="table table-hover mb-0 admin-data-table" data-page-length="10" data-no-sort-targets="2">
                         <thead class="table-light">
                             <tr>
                                 <th class="ps-24" style="width:60px;">#</th>

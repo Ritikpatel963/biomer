@@ -9,7 +9,10 @@ class SiteSetting extends Model
     protected $fillable = [
         'site_name', 'tagline', 'email', 'phone', 'address', 'about',
         'facebook_url', 'twitter_url', 'instagram_url', 'linkedin_url',
-        'logo_path', 'footer_logo_path', 'footer_text'
+        'google_analytics_id', 'homepage_video_url', 'homepage_video_title',
+        'homepage_video_caption', 'instagram_embed_code',
+        'logo_path', 'footer_logo_path', 'footer_text',
+        'home_banner_image_1', 'home_banner_image_2', 'home_banner_image_3', 'home_banner_image_4'
     ];
 
     /**

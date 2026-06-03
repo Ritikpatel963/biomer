@@ -70,7 +70,20 @@
 
                     {{-- Description --}}
                     <div class="text-neutral-500 blog-content">
-                        {!! $blog->description !!}
+                        {!! \App\Services\HtmlSanitizer::clean($blog->description) !!}
+                    </div>
+
+                    <div class="d-flex align-items-center gap-12 flex-wrap mt-24 pt-24 border-top border-dashed">
+                        <span class="text-neutral-500 fw-medium">Share</span>
+                        <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode(route('frontend.blog.show', $blog->slug)) }}" target="_blank" class="btn btn-sm bg-primary-50 text-primary-600 border-0 px-16 py-6 radius-8">
+                            <i class="ri-facebook-fill"></i> Facebook
+                        </a>
+                        <a href="https://twitter.com/intent/tweet?url={{ urlencode(route('frontend.blog.show', $blog->slug)) }}&text={{ urlencode($blog->title) }}" target="_blank" class="btn btn-sm bg-primary-50 text-primary-600 border-0 px-16 py-6 radius-8">
+                            <i class="ri-twitter-x-line"></i> X
+                        </a>
+                        <a href="https://wa.me/?text={{ urlencode($blog->title . ' ' . route('frontend.blog.show', $blog->slug)) }}" target="_blank" class="btn btn-sm bg-primary-50 text-primary-600 border-0 px-16 py-6 radius-8">
+                            <i class="ri-whatsapp-line"></i> WhatsApp
+                        </a>
                     </div>
 
                     {{-- Edit/Delete actions --}}

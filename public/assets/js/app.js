@@ -37,11 +37,15 @@
 
   //to keep the current page active
   $(function () {
+    function normalizeUrl(url) {
+      return url.split(/[?#]/)[0].replace(/\/$/, '');
+    }
+
+    var currentUrl = normalizeUrl(window.location.href);
     for (
-      var nk = window.location,
-        o = $("ul#sidebar-menu a")
+      var o = $("ul#sidebar-menu a")
           .filter(function () {
-            return this.href == nk;
+            return normalizeUrl(this.href) === currentUrl;
           })
           .addClass("active-page") // anchor
           .parent()
@@ -54,68 +58,6 @@
       o = o.parent().addClass("show").parent().addClass("open");
     }
   });
-
-/**
-* Utility function to calculate the current theme setting based on localStorage.
-*/
-function calculateSettingAsThemeString({ localStorageTheme }) {
-  if (localStorageTheme !== null) {
-    return localStorageTheme;
-  }
-  return "light"; // default to light theme if nothing is stored
-}
-
-/**
-* Utility function to update the button text and aria-label.
-*/
-function updateButton({ buttonEl, isDark }) {
-  const newCta = isDark ? "dark" : "light";
-  buttonEl.setAttribute("aria-label", newCta);
-  buttonEl.innerText = newCta;
-}
-
-/**
-* Utility function to update the theme setting on the html tag.
-*/
-function updateThemeOnHtmlEl({ theme }) {
-  document.querySelector("html").setAttribute("data-theme", theme);
-}
-
-/**
-* 1. Grab what we need from the DOM and system settings on page load.
-*/
-const button = document.querySelector("[data-theme-toggle]");
-const localStorageTheme = localStorage.getItem("theme");
-
-/**
-* 2. Work out the current site settings.
-*/
-let currentThemeSetting = calculateSettingAsThemeString({ localStorageTheme });
-
-/**
-* 3. If the button exists, update the theme setting and button text according to current settings.
-*/
-if (button) {
-  updateButton({ buttonEl: button, isDark: currentThemeSetting === "dark" });
-  updateThemeOnHtmlEl({ theme: currentThemeSetting });
-
-  /**
-  * 4. Add an event listener to toggle the theme.
-  */
-  button.addEventListener("click", (event) => {
-    const newTheme = currentThemeSetting === "dark" ? "light" : "dark";
-
-    localStorage.setItem("theme", newTheme);
-    updateButton({ buttonEl: button, isDark: newTheme === "dark" });
-    updateThemeOnHtmlEl({ theme: newTheme });
-
-    currentThemeSetting = newTheme;
-  });
-} else {
-  // If no button is found, just apply the current theme to the page
-  updateThemeOnHtmlEl({ theme: currentThemeSetting });
-}
-
 
 // =========================== Table Header Checkbox checked all js Start ================================
 $('#selectAll').on('change', function () {
@@ -137,15 +79,28 @@ $('#selectAll').on('change', function () {
   // Remove Table Tr when click on remove btn end
 })(window.jQuery);
 
-document.addEventListener("DOMContentLoaded", () => {
-  if (
-    typeof window.gsap === "undefined" ||
-    typeof window.ScrollTrigger === "undefined"
-  ) {
+function initGsapAnimations() {
+  const hasGsap = typeof window.gsap !== "undefined";
+  const hasScrollTrigger = typeof window.ScrollTrigger !== "undefined";
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  console.info("[GSAP] initGsapAnimations", {
+    hasGsap,
+    hasScrollTrigger,
+    prefersReducedMotion,
+    readyState: document.readyState,
+    heroHeadline: !!document.querySelector(".bb-hero-headline"),
+    homepageSection: !!document.querySelector(".bb-hero-section"),
+  });
+
+  if (!hasGsap || !hasScrollTrigger) {
+    console.warn("[GSAP] animation initialization skipped because GSAP or ScrollTrigger is missing", {
+      hasGsap,
+      hasScrollTrigger,
+    });
     return;
   }
 
-  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (prefersReducedMotion) {
     return;
   }
@@ -263,7 +218,6 @@ document.addEventListener("DOMContentLoaded", () => {
     gsap.set(elements, {
       autoAlpha: 0,
       y: options.y ?? 32,
-      scale: options.scale ?? 1,
       transformOrigin: "50% 50%",
       willChange: "transform, opacity",
     });
@@ -271,7 +225,6 @@ document.addEventListener("DOMContentLoaded", () => {
     gsap.to(elements, {
       autoAlpha: 1,
       y: 0,
-      scale: 1,
       duration: options.duration ?? 0.9,
       ease: options.ease ?? "power3.out",
       stagger: options.stagger ?? 0.12,
@@ -375,17 +328,18 @@ document.addEventListener("DOMContentLoaded", () => {
       );
     }
 
-    if (heroButtons.length) {
-      heroTimeline.from(
-        heroButtons,
-        {
-          autoAlpha: 0,
-          y: 18,
-          stagger: 0.1,
-        },
-        "-=0.45"
-      );
-    }
+    // Disable hero CTA button entrance animation to keep the button static.
+    // if (heroButtons.length) {
+    //   heroTimeline.from(
+    //     heroButtons,
+    //     {
+    //       autoAlpha: 0,
+    //       y: 18,
+    //       stagger: 0.1,
+    //     },
+    //     "-=0.45"
+    //   );
+    // }
 
     if (heroImage) {
       heroTimeline.from(
@@ -393,7 +347,6 @@ document.addEventListener("DOMContentLoaded", () => {
         {
           autoAlpha: 0,
           x: 42,
-          scale: 0.96,
         },
         "-=0.85"
       );
@@ -404,12 +357,10 @@ document.addEventListener("DOMContentLoaded", () => {
         heroDots,
         {
           autoAlpha: 0,
-          scale: 0.75,
           rotate: -8,
         },
         {
           autoAlpha: 1,
-          scale: 1,
           rotate: 0,
           duration: 1.1,
           ease: "power2.out",
@@ -466,12 +417,6 @@ document.addEventListener("DOMContentLoaded", () => {
     duration: 0.7,
   });
 
-  fadeInOnScroll(".bb-feature-card", {
-    trigger: ".bb-section-wrapper .row",
-    y: 42,
-    stagger: 0.15,
-  });
-
   fadeInOnScroll(".wwd-desc, .wwd-solutions-label", {
     trigger: ".section-what-we-do",
     y: 30,
@@ -491,79 +436,36 @@ document.addEventListener("DOMContentLoaded", () => {
     stagger: 0.1,
   });
 
-  fadeInOnScroll(".wws-card", {
-    trigger: ".wws-cards-row",
-    y: 38,
-    stagger: 0.12,
-  });
-
   fadeInOnScroll(".kh-subtitle", {
     trigger: ".section-key-highlights",
     y: 26,
     stagger: 0.1,
   });
 
-  fadeInOnScroll(".kh-card", {
-    trigger: ".kh-cards-row",
-    y: 36,
-    stagger: 0.14,
-  });
-
-  gsap.utils.toArray(".bb-icon-badge, .wws-icon-circle, .kh-icon-circle").forEach((element, index) => {
-    gsap.to(element, {
-      y: index % 2 === 0 ? -7 : -4,
-      duration: 2.1 + (index % 3) * 0.25,
-      ease: "sine.inOut",
-      repeat: -1,
-      yoyo: true,
-    });
-  });
-
   if (isDesktopPointer) {
-    gsap
-      .utils
-      .toArray("main a[class*='btn'], main a[class*='cta'], main button[class*='btn'], main button[class*='cta'], main button[class*='submit']")
-      .forEach((button) => {
-      const moveX = gsap.quickTo(button, "x", { duration: 0.35, ease: "power3.out" });
-      const moveY = gsap.quickTo(button, "y", { duration: 0.35, ease: "power3.out" });
+    // Button hover motion animations are disabled for a static UI experience.
+    // gsap
+    //   .utils
+    //   .toArray("main a[class*='btn'], main a[class*='cta'], main button[class*='btn'], main button[class*='cta'], main button[class*='submit']")
+    //   .forEach((button) => {
+    //   const moveX = gsap.quickTo(button, "x", { duration: 0.35, ease: "power3.out" });
+    //   const moveY = gsap.quickTo(button, "y", { duration: 0.35, ease: "power3.out" });
 
-      button.addEventListener("pointermove", (event) => {
-        const rect = button.getBoundingClientRect();
-        const x = event.clientX - rect.left - rect.width / 2;
-        const y = event.clientY - rect.top - rect.height / 2;
+    //   button.addEventListener("pointermove", (event) => {
+    //     const rect = button.getBoundingClientRect();
+    //     const x = event.clientX - rect.left - rect.width / 2;
+    //     const y = event.clientY - rect.top - rect.height / 2;
 
-        moveX(x * 0.12);
-        moveY(y * 0.18);
-      });
+    //     moveX(x * 0.12);
+    //     moveY(y * 0.18);
+    //   });
 
-      button.addEventListener("pointerleave", () => {
-        moveX(0);
-        moveY(0);
-      });
-    });
+    //   button.addEventListener("pointerleave", () => {
+    //     moveX(0);
+    //     moveY(0);
+    //   });
+    // });
 
-    gsap
-      .utils
-      .toArray("main [class*='card'], main [class*='__card'], main [class*='feature-item'], main [class*='__box']")
-      .filter((card) => !card.closest(".pd-page"))
-      .forEach((card) => {
-      const cardX = gsap.quickTo(card, "x", { duration: 0.4, ease: "power3.out" });
-      const cardY = gsap.quickTo(card, "y", { duration: 0.4, ease: "power3.out" });
-
-      card.addEventListener("pointermove", (event) => {
-        const rect = card.getBoundingClientRect();
-        const pointerX = (event.clientX - rect.left) / rect.width;
-        const pointerY = (event.clientY - rect.top) / rect.height;
-
-        cardX((pointerX - 0.5) * 8);
-        cardY((pointerY - 0.5) * -8);
-      });
-
-      card.addEventListener("pointerleave", () => {
-        cardX(0);
-        cardY(0);
-      });
-    });
   }
 
   const genericHeadings = uniqueElements(
@@ -596,22 +498,6 @@ document.addEventListener("DOMContentLoaded", () => {
     y: 22,
     duration: 0.72,
     stagger: 0.03,
-  });
-
-  const genericCards = uniqueElements(
-    gsap
-      .utils
-      .toArray(
-        "main section [class*='__card'], main section [class*='__item'], main section [class*='__box'], main section [class*='__feature'], main section [class*='__info-card'], main section [class*='__flow-box'], main section [class*='__stat-card']"
-      )
-      .filter((element) => !isHomepageElement(element) && !element.closest(".pd-page"))
-  );
-
-  fadeInOnScroll(genericCards, {
-    y: 42,
-    scale: 0.98,
-    duration: 0.82,
-    stagger: 0.08,
   });
 
   const genericButtons = uniqueElements(
@@ -653,7 +539,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   fadeInOnScroll(genericImages, {
     y: 30,
-    scale: 0.97,
     duration: 0.9,
     stagger: 0.06,
   });
@@ -684,14 +569,6 @@ document.addEventListener("DOMContentLoaded", () => {
             "h1, h2, p, [class*='__heading'], [class*='__desc'], [class*='__subtext'], [class*='__title']"
           )
         )
-    );
-    const cinematicCards = uniqueElements(
-      gsap
-        .utils
-        .toArray(
-          section.querySelectorAll("[class*='card'], [class*='__card'], [class*='__item'], [class*='__box']")
-        )
-        .filter((element) => !element.closest(".pd-page"))
     );
     const cinematicMedia = uniqueElements(
       gsap
@@ -755,41 +632,15 @@ document.addEventListener("DOMContentLoaded", () => {
       );
     }
 
-    if (cinematicCards.length) {
-      gsap.fromTo(
-        cinematicCards,
-        {
-          y: 48,
-          autoAlpha: 0.3,
-          scale: 0.965,
-        },
-        {
-          y: 0,
-          autoAlpha: 1,
-          scale: 1,
-          stagger: 0.08,
-          ease: "none",
-          scrollTrigger: {
-            trigger: section,
-            start: "top 88%",
-            end: "top 34%",
-            scrub: 1.1,
-          },
-        }
-      );
-    }
-
     cinematicMedia.forEach((element) => {
       gsap.fromTo(
         element,
         {
           yPercent: 10,
-          scale: 1.08,
           autoAlpha: 0.45,
         },
         {
           yPercent: -6,
-          scale: 1,
           autoAlpha: 1,
           ease: "none",
           scrollTrigger: {
@@ -818,4 +669,10 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
   });
-});
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initGsapAnimations);
+} else {
+  initGsapAnimations();
+}

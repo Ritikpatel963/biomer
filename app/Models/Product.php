@@ -35,6 +35,7 @@ class Product extends Model
     public function tags()       { return $this->belongsToMany(Tag::class, 'product_tag'); }
     public function images()     { return $this->hasMany(ProductImage::class)->orderBy('sort_order'); }
     public function variations()      { return $this->hasMany(ProductVariation::class); }
+    public function attributes()      { return $this->hasMany(ProductAttribute::class); }
     public function reviews()           { return $this->hasMany(ProductReview::class); }
     public function approvedReviews()   { return $this->hasMany(ProductReview::class)->where('status', 'approved'); }
 
@@ -84,11 +85,19 @@ class Product extends Model
 
     public function getAvgRatingAttribute(): float
     {
+        if (array_key_exists('approved_reviews_avg_rating', $this->attributes)) {
+            return round((float) $this->attributes['approved_reviews_avg_rating'], 1);
+        }
+
         return round($this->approvedReviews()->avg('rating') ?? 0, 1);
     }
 
     public function getReviewCountAttribute(): int
     {
+        if (array_key_exists('approved_reviews_count', $this->attributes)) {
+            return (int) $this->attributes['approved_reviews_count'];
+        }
+
         return $this->approvedReviews()->count();
     }
 }

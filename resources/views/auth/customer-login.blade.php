@@ -24,7 +24,7 @@
       <div class="col-12 col-sm-10 col-md-7 col-lg-5">
 
         @if(session('success'))
-          <div class="auth__alert auth__alert--success mb-3">✅ {{ session('success') }}</div>
+          <div class="auth__alert auth__alert--success mb-3"><iconify-icon icon="mdi:check-circle-outline" class="icon"></iconify-icon> {{ session('success') }}</div>
         @endif
         @if(session('error'))
           <div class="auth__alert auth__alert--danger mb-3">⚠ {{ session('error') }}</div>

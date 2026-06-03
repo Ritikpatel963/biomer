@@ -28,14 +28,10 @@
                     <option>9</option>
                     <option>10</option>
                 </select>
-                <form class="navbar-search">
-                    <input type="text" class="bg-base h-40-px w-auto" name="search" placeholder="Search">
-                    <iconify-icon icon="ion:search-outline" class="icon"></iconify-icon>
-                </form>
             </div>
 
             <button type="button" class="btn btn-primary text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                <iconify-icon icon="ic:baseline-plus" class="icon text-xl line-height-1"></iconify-icon>
+                
                 Add Currency
             </button>
         </div>
@@ -68,10 +64,10 @@
                             <td class="text-center">
                                 <div class="d-flex align-items-center gap-10 justify-content-center">
                                     <button type="button" class="bg-success-100 text-success-600 bg-hover-success-200 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle" data-bs-toggle="modal" data-bs-target="#exampleModalEdit">
-                                        <iconify-icon icon="lucide:edit" class="menu-icon"></iconify-icon>
+                                        
                                     </button>
                                     <button type="button" class="remove-item-button bg-danger-focus bg-hover-danger-200 text-danger-600 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle">
-                                        <iconify-icon icon="fluent:delete-24-regular" class="menu-icon"></iconify-icon>
+                                        
                                     </button>
                                 </div>
                             </td>
@@ -90,10 +86,10 @@
                             <td class="text-center">
                                 <div class="d-flex align-items-center gap-10 justify-content-center">
                                     <button type="button" class="bg-success-100 text-success-600 bg-hover-success-200 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle" data-bs-toggle="modal" data-bs-target="#exampleModalEdit">
-                                        <iconify-icon icon="lucide:edit" class="menu-icon"></iconify-icon>
+                                        
                                     </button>
                                     <button type="button" class="remove-item-button bg-danger-focus bg-hover-danger-200 text-danger-600 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle">
-                                        <iconify-icon icon="fluent:delete-24-regular" class="menu-icon"></iconify-icon>
+                                        
                                     </button>
                                 </div>
                             </td>
@@ -112,10 +108,10 @@
                             <td class="text-center">
                                 <div class="d-flex align-items-center gap-10 justify-content-center">
                                     <button type="button" class="bg-success-100 text-success-600 bg-hover-success-200 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle" data-bs-toggle="modal" data-bs-target="#exampleModalEdit">
-                                        <iconify-icon icon="lucide:edit" class="menu-icon"></iconify-icon>
+                                        
                                     </button>
                                     <button type="button" class="remove-item-button bg-danger-focus bg-hover-danger-200 text-danger-600 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle">
-                                        <iconify-icon icon="fluent:delete-24-regular" class="menu-icon"></iconify-icon>
+                                        
                                     </button>
                                 </div>
                             </td>
@@ -134,10 +130,10 @@
                             <td class="text-center">
                                 <div class="d-flex align-items-center gap-10 justify-content-center">
                                     <button type="button" class="bg-success-100 text-success-600 bg-hover-success-200 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle" data-bs-toggle="modal" data-bs-target="#exampleModalEdit">
-                                        <iconify-icon icon="lucide:edit" class="menu-icon"></iconify-icon>
+                                        
                                     </button>
                                     <button type="button" class="remove-item-button bg-danger-focus bg-hover-danger-200 text-danger-600 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle">
-                                        <iconify-icon icon="fluent:delete-24-regular" class="menu-icon"></iconify-icon>
+                                        
                                     </button>
                                 </div>
                             </td>
@@ -156,10 +152,10 @@
                             <td class="text-center">
                                 <div class="d-flex align-items-center gap-10 justify-content-center">
                                     <button type="button" class="bg-success-100 text-success-600 bg-hover-success-200 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle" data-bs-toggle="modal" data-bs-target="#exampleModalEdit">
-                                        <iconify-icon icon="lucide:edit" class="menu-icon"></iconify-icon>
+                                        
                                     </button>
                                     <button type="button" class="remove-item-button bg-danger-focus bg-hover-danger-200 text-danger-600 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle">
-                                        <iconify-icon icon="fluent:delete-24-regular" class="menu-icon"></iconify-icon>
+                                        
                                     </button>
                                 </div>
                             </td>
@@ -178,10 +174,10 @@
                             <td class="text-center">
                                 <div class="d-flex align-items-center gap-10 justify-content-center">
                                     <button type="button" class="bg-success-100 text-success-600 bg-hover-success-200 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle" data-bs-toggle="modal" data-bs-target="#exampleModalEdit">
-                                        <iconify-icon icon="lucide:edit" class="menu-icon"></iconify-icon>
+                                        
                                     </button>
                                     <button type="button" class="remove-item-button bg-danger-focus bg-hover-danger-200 text-danger-600 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle">
-                                        <iconify-icon icon="fluent:delete-24-regular" class="menu-icon"></iconify-icon>
+                                        
                                     </button>
                                 </div>
                             </td>
@@ -200,10 +196,10 @@
                             <td class="text-center">
                                 <div class="d-flex align-items-center gap-10 justify-content-center">
                                     <button type="button" class="bg-success-100 text-success-600 bg-hover-success-200 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle" data-bs-toggle="modal" data-bs-target="#exampleModalEdit">
-                                        <iconify-icon icon="lucide:edit" class="menu-icon"></iconify-icon>
+                                        
                                     </button>
                                     <button type="button" class="remove-item-button bg-danger-focus bg-hover-danger-200 text-danger-600 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle">
-                                        <iconify-icon icon="fluent:delete-24-regular" class="menu-icon"></iconify-icon>
+                                        
                                     </button>
                                 </div>
                             </td>
@@ -222,10 +218,10 @@
                             <td class="text-center">
                                 <div class="d-flex align-items-center gap-10 justify-content-center">
                                     <button type="button" class="bg-success-100 text-success-600 bg-hover-success-200 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle" data-bs-toggle="modal" data-bs-target="#exampleModalEdit">
-                                        <iconify-icon icon="lucide:edit" class="menu-icon"></iconify-icon>
+                                        
                                     </button>
                                     <button type="button" class="remove-item-button bg-danger-focus bg-hover-danger-200 text-danger-600 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle">
-                                        <iconify-icon icon="fluent:delete-24-regular" class="menu-icon"></iconify-icon>
+                                        
                                     </button>
                                 </div>
                             </td>
@@ -244,10 +240,10 @@
                             <td class="text-center">
                                 <div class="d-flex align-items-center gap-10 justify-content-center">
                                     <button type="button" class="bg-success-100 text-success-600 bg-hover-success-200 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle" data-bs-toggle="modal" data-bs-target="#exampleModalEdit">
-                                        <iconify-icon icon="lucide:edit" class="menu-icon"></iconify-icon>
+                                        
                                     </button>
                                     <button type="button" class="remove-item-button bg-danger-focus bg-hover-danger-200 text-danger-600 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle">
-                                        <iconify-icon icon="fluent:delete-24-regular" class="menu-icon"></iconify-icon>
+                                        
                                     </button>
                                 </div>
                             </td>
@@ -261,7 +257,7 @@
                 <ul class="pagination d-flex flex-wrap align-items-center gap-2 justify-content-center">
                     <li class="page-item">
                         <a class="page-link bg-neutral-200 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md"  href="javascript:void(0)">
-                            <iconify-icon icon="ep:d-arrow-left" class=""></iconify-icon>
+                            
                         </a>
                     </li>
                     <li class="page-item">
@@ -281,7 +277,7 @@
                     </li>
                     <li class="page-item">
                         <a class="page-link bg-neutral-200 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md"  href="javascript:void(0)">
-                            <iconify-icon icon="ep:d-arrow-right" class=""></iconify-icon>
+                            
                         </a>
                     </li>
                 </ul>

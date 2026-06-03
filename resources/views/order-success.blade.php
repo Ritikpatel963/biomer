@@ -28,12 +28,6 @@
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
     margin: 0 auto 1.5rem;
-    animation: popIn 0.5s cubic-bezier(.175,.885,.32,1.275);
-}
-@keyframes popIn {
-    0%   { transform: scale(0); opacity: 0; }
-    80%  { transform: scale(1.08); }
-    100% { transform: scale(1); opacity: 1; }
 }
 .suc__title {
     font-size: 2rem;
@@ -264,7 +258,7 @@
 
                         {{-- Items Ordered --}}
                         <div class="suc__card">
-                            <div class="suc__card-title">🛒 Items Ordered</div>
+                            <div class="suc__card-title"><iconify-icon icon="fa6-solid:cart-shopping" class="icon"></iconify-icon> Items Ordered</div>
 
                             @foreach($order->items as $item)
                             <div class="suc__item">
@@ -273,7 +267,7 @@
                                          alt="{{ $item->product_name }}"
                                          class="suc__item-img">
                                 @else
-                                    <div class="suc__item-img-placeholder">🌿</div>
+                                    <div class="suc__item-img-placeholder"><iconify-icon icon="mdi:leaf" class="icon"></iconify-icon></div>
                                 @endif
                                 <div style="flex:1; min-width:0;">
                                     <div class="suc__item-name">{{ $item->product_name }}</div>
@@ -319,7 +313,7 @@
 
                         {{-- Shipping Address --}}
                         <div class="suc__card">
-                            <div class="suc__card-title">📦 Shipping Address</div>
+                            <div class="suc__card-title"><iconify-icon icon="mdi:package-variant" class="icon"></iconify-icon> Shipping Address</div>
                             <div class="suc__address-grid">
                                 <div>
                                     <div class="suc__detail-label">Name</div>
@@ -365,7 +359,7 @@
                             <div class="suc__card-title">📋 What Happens Next?</div>
                             <ul class="suc__timeline">
                                 <li class="suc__tl-item">
-                                    <div class="suc__tl-icon">✅</div>
+                                    <div class="suc__tl-icon"><iconify-icon icon="mdi:check-circle-outline" class="icon"></iconify-icon></div>
                                     <div>
                                         <div class="suc__tl-title">Order Received</div>
                                         <div class="suc__tl-desc">Your order is confirmed and in our system.</div>
@@ -379,7 +373,7 @@
                                     </div>
                                 </li>
                                 <li class="suc__tl-item">
-                                    <div class="suc__tl-icon">🚚</div>
+                                    <div class="suc__tl-icon"><iconify-icon icon="mdi:truck-delivery-outline" class="icon"></iconify-icon></div>
                                     <div>
                                         <div class="suc__tl-title">Dispatched</div>
                                         <div class="suc__tl-desc">Shipped within 1–2 business days with tracking.</div>

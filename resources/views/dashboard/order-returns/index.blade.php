@@ -58,7 +58,7 @@
 
     <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table bordered-table mb-0">
+            <table class="table bordered-table mb-0 admin-data-table" data-page-length="10" data-no-sort-targets="8">
                 <thead>
                     <tr>
                         <th>S.L</th>
@@ -112,9 +112,9 @@
                             <td>{{ optional($return->requested_at ?? $return->created_at)->format('d M Y') }}</td>
                             <td>
                                 <a href="{{ route('dashboard.returns.show', $return->id) }}"
-                                   class="w-32-px h-32-px bg-info-focus text-info-main rounded-circle d-inline-flex align-items-center justify-content-center"
+                                   class="btn btn-sm btn-outline-primary"
                                    title="View Return">
-                                    <iconify-icon icon="lucide:eye"></iconify-icon>
+                                    View
                                 </a>
                             </td>
                         </tr>

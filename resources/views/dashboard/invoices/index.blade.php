@@ -4,17 +4,13 @@
 @php
     $title    = 'Invoices';
     $subTitle = 'Invoices';
-    $script   = '<script>
-                    let table = new DataTable("#invoiceTable", {
-                        responsive: true,
-                        scrollX: false,
-                        autoWidth: false,
-                        columnDefs: [{ orderable: false, targets: [0, 7] }]
-                    });
-                 </script>';
 @endphp
 
 @section('content')
+
+@if(session('info'))
+    <div class="alert alert-info">{{ session('info') }}</div>
+@endif
 
 <div class="card basic-data-table">
     <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
@@ -26,7 +22,7 @@
 
     <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table bordered-table mb-0" id="invoiceTable" style="width:100%">
+            <table class="table bordered-table admin-data-table mb-0" id="invoiceTable" data-no-sort-targets="0,7" style="width:100%">
                 <thead>
                     <tr>
                         <th>S.L</th>
@@ -80,7 +76,7 @@
                         {{-- Amount --}}
                         <td>
                             <span class="fw-semibold text-success-main">
-                                ₹{{ number_format($order->total_amount, 2) }}
+                                Rs. {{ number_format($order->total_amount, 2) }}
                             </span>
                         </td>
 
@@ -109,17 +105,17 @@
                         <td>
                             <div class="d-flex align-items-center gap-2">
                                 {{-- View Order --}}
-                                <a href="{{ route('dashboard.orders.show', $order->order_number) }}"
-                                   class="w-32-px h-32-px bg-info-focus text-info-main rounded-circle d-inline-flex align-items-center justify-content-center"
-                                   title="View Order">
-                                    <iconify-icon icon="lucide:eye"></iconify-icon>
+                                <a href="{{ route('invoicePreview', $order->order_number) }}"
+                                   class="btn btn-sm btn-outline-primary"
+                                   title="Preview Invoice">
+                                    Preview
                                 </a>
 
                                 {{-- Download Invoice --}}
                                 <a href="{{ route('dashboard.orders.invoice', $order->order_number) }}"
-                                   class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center"
+                                   class="btn btn-sm btn-outline-success"
                                    title="Download Invoice" target="_blank">
-                                    <iconify-icon icon="lucide:download"></iconify-icon>
+                                    Download
                                 </a>
                             </div>
                         </td>

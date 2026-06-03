@@ -9,6 +9,7 @@ use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\ProductVariation;
 use App\Models\PaymentGateway;
+use App\Models\Coupon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -17,11 +18,18 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Razorpay\Api\Api;
 use Razorpay\Api\Errors\SignatureVerificationError;
+use App\Services\CartPricingService;
 use App\Services\ShiprocketService;
 
 
 class OrderController extends Controller
 {
+    public function __construct(
+        private CartPricingService $pricing,
+        private ShiprocketService $shiprocket,
+    ) {
+    }
+
     private function customer()
     {
         return Auth::guard('customer')->user();
@@ -83,36 +91,7 @@ class OrderController extends Controller
 
     private function calculateCartTotals(array $cart, ?array $coupon = null): array
     {
-        $subtotal = collect($cart)->sum(fn($item) => $item['price'] * $item['quantity']);
-        $shippingTotal = collect($cart)->sum(fn($item) => ($item['shipping_charge'] ?? 0) * $item['quantity']);
-
-        $discount = 0;
-        if ($coupon) {
-            $discount = $coupon['type'] === 'percent'
-                ? ($subtotal * ($coupon['value'] / 100))
-                : $coupon['value'];
-        }
-
-        // Calculate tax on subtotal (after discount)
-        $taxableAmount = max(0, $subtotal - $discount);
-        $taxAmount = 0;
-        foreach ($cart as $item) {
-            $product = Product::find($item['product_id']);
-            if ($product && $product->tax_rate > 0) {
-                $itemSubtotal = $item['price'] * $item['quantity'];
-                $taxAmount += $itemSubtotal * ($product->tax_rate / 100);
-            }
-        }
-
-        $total = max(0, $subtotal - $discount) + $shippingTotal + $taxAmount;
-
-        return [
-            'subtotal' => $subtotal,
-            'shippingTotal' => $shippingTotal,
-            'taxAmount' => $taxAmount,
-            'discount' => $discount,
-            'total' => $total,
-        ];
+        return $this->pricing->calculate($cart, $coupon);
     }
 
     private function storeCheckoutSession(Request $request)
@@ -129,24 +108,32 @@ class OrderController extends Controller
         ]);
     }
 
-    private function createOrderInDB(array $checkoutData, array $cart, float $total, string $gateway, array $paymentIds): string
+    private function syncCustomerAddress(array $checkoutData): void
+    {
+        $customer = $this->customer();
+
+        $customer->update([
+            'phone' => $checkoutData['phone'],
+            'address' => $checkoutData['address'],
+            'city' => $checkoutData['city'],
+            'state' => $checkoutData['state'],
+            'pincode' => $checkoutData['pincode'],
+            'country' => $checkoutData['country'] ?? 'India',
+        ]);
+    }
+
+    private function createOrderInDB(array $checkoutData, array $cart, string $gateway, array $paymentIds): string
     {
         $orderNumber = null;
 
-        DB::transaction(function () use ($checkoutData, $cart, $total, $gateway, $paymentIds, &$orderNumber) {
-            $customer = $this->customer();
+        $this->syncCustomerAddress($checkoutData);
 
-            // Calculate shipping and tax
-            $shippingAmount = collect($cart)->sum(fn($item) => ($item['shipping_charge'] ?? 0) * $item['quantity']);
-            $subtotal = collect($cart)->sum(fn($item) => $item['price'] * $item['quantity']);
-            $taxAmount = 0;
-            foreach ($cart as $item) {
-                $product = Product::find($item['product_id']);
-                if ($product && $product->tax_rate > 0) {
-                    $itemSubtotal = $item['price'] * $item['quantity'];
-                    $taxAmount += $itemSubtotal * ($product->tax_rate / 100);
-                }
-            }
+        DB::transaction(function () use ($checkoutData, $cart, $gateway, $paymentIds, &$orderNumber) {
+            $customer = $this->customer();
+            $coupon = $this->validatedCouponForOrder($cart);
+            $totals = $this->calculateCartTotals($cart, $coupon);
+
+            $this->reserveStock($cart);
 
             $orderData = [
                 'customer_id' => $customer->id,
@@ -159,9 +146,12 @@ class OrderController extends Controller
                 'state' => $checkoutData['state'],
                 'pincode' => $checkoutData['pincode'],
                 'notes' => $checkoutData['notes'],
-                'total_amount' => $total,
-                'shipping_amount' => $shippingAmount,
-                'tax_amount' => $taxAmount,
+                'total_amount' => $totals['total'],
+                'shipping_amount' => $totals['shippingTotal'],
+                'tax_amount' => $totals['taxAmount'],
+                'coupon_id' => $coupon['id'] ?? null,
+                'discount_amount' => $totals['discount'],
+                'net_amount' => $totals['total'],
                 'status' => 'confirmed',
                 'payment_status' => 'paid',
                 'payment_gateway' => $gateway,
@@ -173,6 +163,11 @@ class OrderController extends Controller
             $order = Order::create($orderData);
 
             foreach ($cart as $item) {
+                $product = Product::find($item['product_id']);
+                $gstRate = (float) ($product?->tax_rate ?? $product?->gst_rate ?? 0);
+                $lineSubtotal = (float) $item['price'] * (int) $item['quantity'];
+                $lineTax = $gstRate > 0 ? ($lineSubtotal * $gstRate / 100) : 0;
+
                 OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $item['product_id'],
@@ -182,26 +177,25 @@ class OrderController extends Controller
                     'sku' => $item['sku'] ?? null,
                     'unit_price' => $item['price'],
                     'quantity' => $item['quantity'],
-                    'subtotal' => $item['price'] * $item['quantity'],
+                    'subtotal' => $lineSubtotal,
                     'shipping_charge' => $item['shipping_charge'] ?? 0,
+                    'gst_rate' => $gstRate,
+                    'tax_amount' => $lineTax,
+                    'net_price' => $lineSubtotal,
                 ]);
+            }
 
-                if (!empty($item['variation_id'])) {
-                    ProductVariation::where('id', $item['variation_id'])->decrement('stock_quantity', $item['quantity']);
-                }
-                else {
-                    Product::where('id', $item['product_id'])->decrement('stock_quantity', $item['quantity']);
-                }
+            if ($coupon) {
+                Coupon::where('id', $coupon['id'])->increment('used_count');
             }
 
             $orderNumber = $order->order_number;
-            session()->forget(['cart', 'checkout_data']);
+            session()->forget(['cart', 'checkout_data', 'coupon']);
         });
 
         // Push to Shiprocket
         try {
-            $shiprocket = new ShiprocketService();
-            $result = $shiprocket->createOrder(
+            $result = $this->shiprocket->createOrder(
                 Order::where('order_number', $orderNumber)->with('items')->first()
             );
             if (!empty($result['order_id'])) {
@@ -214,6 +208,81 @@ class OrderController extends Controller
 
         return $orderNumber ?? '';
 
+    }
+
+    private function validatedCouponForOrder(array $cart): ?array
+    {
+        $sessionCoupon = session()->get('coupon');
+
+        if (!$sessionCoupon || empty($sessionCoupon['code'])) {
+            return null;
+        }
+
+        $coupon = Coupon::where('code', $sessionCoupon['code'])
+            ->where('is_active', true)
+            ->lockForUpdate()
+            ->first();
+
+        if (!$coupon) {
+            throw new \RuntimeException('The selected coupon is no longer available.');
+        }
+
+        if ($coupon->expires_at && \Carbon\Carbon::parse($coupon->expires_at)->isPast()) {
+            throw new \RuntimeException('The selected coupon has expired.');
+        }
+
+        if ($coupon->usage_limit && $coupon->used_count >= $coupon->usage_limit) {
+            throw new \RuntimeException('The selected coupon usage limit has been reached.');
+        }
+
+        $subtotal = collect($cart)->sum(fn ($item) => $item['price'] * $item['quantity']);
+        if ($subtotal < $coupon->min_order_amount) {
+            throw new \RuntimeException('The selected coupon is no longer valid for this cart.');
+        }
+
+        return [
+            'id' => $coupon->id,
+            'code' => $coupon->code,
+            'type' => $coupon->type,
+            'value' => $coupon->value,
+        ];
+    }
+
+    private function reserveStock(array $cart): void
+    {
+        foreach ($cart as $item) {
+            $quantity = (int) $item['quantity'];
+
+            if (!empty($item['variation_id'])) {
+                $variation = ProductVariation::with('product')
+                    ->where('id', $item['variation_id'])
+                    ->lockForUpdate()
+                    ->first();
+
+                if (!$variation || ($variation->product->manage_stock && $variation->stock_quantity < $quantity)) {
+                    throw new \RuntimeException("Sorry! '{$item['name']}' does not have enough stock.");
+                }
+
+                if ($variation->product->manage_stock) {
+                    $variation->decrement('stock_quantity', $quantity);
+                }
+
+                continue;
+            }
+
+            $product = Product::withCount('variations')
+                ->where('id', $item['product_id'])
+                ->lockForUpdate()
+                ->first();
+
+            if (!$product || ($product->manage_stock && $product->variations_count === 0 && $product->stock_quantity < $quantity)) {
+                throw new \RuntimeException("Sorry! '{$item['name']}' does not have enough stock.");
+            }
+
+            if ($product->manage_stock && $product->variations_count === 0) {
+                $product->decrement('stock_quantity', $quantity);
+            }
+        }
     }
 
     // ── RAZORPAY: Step 1 — Create Order ───────────────────────────────
@@ -288,10 +357,14 @@ class OrderController extends Controller
         $totals = $this->calculateCartTotals($cart, $coupon);
         $total = $totals['total'];
 
-        $orderNumber = $this->createOrderInDB($checkoutData, $cart, $total, 'razorpay', [
-            'razorpay_order_id' => $request->razorpay_order_id,
-            'razorpay_payment_id' => $request->razorpay_payment_id,
-        ]);
+        try {
+            $orderNumber = $this->createOrderInDB($checkoutData, $cart, 'razorpay', [
+                'razorpay_order_id' => $request->razorpay_order_id,
+                'razorpay_payment_id' => $request->razorpay_payment_id,
+            ]);
+        } catch (\RuntimeException $e) {
+            return response()->json(['error' => $e->getMessage()], 422);
+        }
 
         // Send order success email
         $order = Order::where('order_number', $orderNumber)->first();
@@ -323,6 +396,12 @@ class OrderController extends Controller
         $customer = $this->customer();
         $orderId = 'BB-' . strtoupper(uniqid());
 
+        if (empty(config('cashfree.app_id')) || empty(config('cashfree.secret_key'))) {
+            return response()->json(['error' => 'Cashfree credentials are not configured. Please set CASHFREE_APP_ID and CASHFREE_SECRET_KEY.'], 500);
+        }
+
+        $returnUrl = $request->getSchemeAndHttpHost() . route('order.cashfree.verify', [], false) . '?order_id={order_id}';
+
         $response = Http::withHeaders([
             'x-client-id' => config('cashfree.app_id'),
             'x-client-secret' => config('cashfree.secret_key'),
@@ -339,17 +418,27 @@ class OrderController extends Controller
                 'customer_phone' => $request->phone,
             ],
             'order_meta' => [
-                'return_url' => route('order.cashfree.verify') . '?order_id={order_id}',
+                'return_url' => $returnUrl,
             ],
         ]);
 
         if (!$response->successful()) {
-            return response()->json(['error' => 'Failed to create Cashfree order. Please try again.'], 500);
+            Log::error('Cashfree create order failed: ' . $response->body());
+            $message = 'Failed to create Cashfree order. Please check Cashfree credentials and environment.';
+            if ($response->json('message')) {
+                $message = $response->json('message');
+            }
+            return response()->json(['error' => $message], 500);
         }
 
         $this->storeCheckoutSession($request);
 
         $data = $response->json();
+
+        if (empty($data['payment_session_id']) || !is_string($data['payment_session_id'])) {
+            Log::error('Cashfree create order missing payment_session_id: ' . json_encode($data));
+            return response()->json(['error' => 'Cashfree did not return a valid payment_session_id. Please check Cashfree configuration and logs.'], 500);
+        }
 
         return response()->json([
             'success' => true,
@@ -373,7 +462,8 @@ class OrderController extends Controller
         ])->get(config('cashfree.base_url') . '/orders/' . $orderId);
 
         if (!$response->successful()) {
-            return response()->json(['error' => 'Could not verify payment with Cashfree.'], 500);
+            Log::error('Cashfree verify order failed: ' . $response->body());
+            return response()->json(['error' => 'Could not verify payment with Cashfree. Please check the Cashfree response logs.'], 500);
         }
 
         $orderData = $response->json();
@@ -405,10 +495,14 @@ class OrderController extends Controller
             ? ($paymentsRes->json()[0]['cf_payment_id'] ?? null)
             : null;
 
-        $orderNumber = $this->createOrderInDB($checkoutData, $cart, $total, 'cashfree', [
-            'cashfree_order_id' => $orderId,
-            'cashfree_payment_id' => (string)$cfPaymentId,
-        ]);
+        try {
+            $orderNumber = $this->createOrderInDB($checkoutData, $cart, 'cashfree', [
+                'cashfree_order_id' => $orderId,
+                'cashfree_payment_id' => (string)$cfPaymentId,
+            ]);
+        } catch (\RuntimeException $e) {
+            return response()->json(['error' => $e->getMessage()], 422);
+        }
 
         // Send order success email
         $order = Order::where('order_number', $orderNumber)->first();
@@ -418,7 +512,11 @@ class OrderController extends Controller
             Log::error('Failed to send order success email: ' . $e->getMessage());
         }
 
-        return response()->json(['success' => true, 'redirect_url' => route('order.success', $orderNumber)]);
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'redirect_url' => route('order.success', $orderNumber)]);
+        }
+
+        return redirect()->route('order.success', $orderNumber);
     }
 
     // ── COD: Place Order Directly ──────────────────────────────────────
@@ -436,17 +534,16 @@ class OrderController extends Controller
 
         $this->storeCheckoutSession($request);
 
-        $coupon = session()->get('coupon');
-        $totals = $this->calculateCartTotals($cart, $coupon);
-        $total = $totals['total'];
-
-        $orderNumber = $this->createOrderInDB(
-            session()->get('checkout_data'),
-            $cart,
-            $total,
-            'cod',
-            ['payment_status' => 'pending'] // override: COD not paid yet
-        );
+        try {
+            $orderNumber = $this->createOrderInDB(
+                session()->get('checkout_data'),
+                $cart,
+                'cod',
+                ['payment_status' => 'pending'] // override: COD not paid yet
+            );
+        } catch (\RuntimeException $e) {
+            return response()->json(['error' => $e->getMessage()], 422);
+        }
 
         // Send order success email
         $order = Order::where('order_number', $orderNumber)->first();
@@ -495,6 +592,11 @@ class OrderController extends Controller
 
             // Add order items
             foreach ($cart as $item) {
+                $product = Product::find($item['product_id']);
+                $gstRate = (float) ($product?->tax_rate ?? $product?->gst_rate ?? 0);
+                $lineSubtotal = (float) $item['price'] * (int) $item['quantity'];
+                $lineTax = $gstRate > 0 ? ($lineSubtotal * $gstRate / 100) : 0;
+
                 OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $item['product_id'],
@@ -504,8 +606,11 @@ class OrderController extends Controller
                     'sku' => $item['sku'] ?? null,
                     'unit_price' => $item['price'],
                     'quantity' => $item['quantity'],
-                    'subtotal' => $item['price'] * $item['quantity'],
+                    'subtotal' => $lineSubtotal,
                     'shipping_charge' => $item['shipping_charge'] ?? 0,
+                    'gst_rate' => $gstRate,
+                    'tax_amount' => $lineTax,
+                    'net_price' => $lineSubtotal,
                 ]);
             }
 

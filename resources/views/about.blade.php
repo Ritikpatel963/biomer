@@ -1,5 +1,7 @@
 @extends('layout.frontlayout')
-@section('title', 'Bharat Biomer – Nature-Powered Biology')
+@section('title', 'About Bharat Biomer – Bharat Biomer')
+@section('seo_description', 'Learn about Bharat Biomer, our mission to develop sustainable biological solutions for agriculture, and our commitment to soil health and crop productivity.')
+@section('seo_keywords', 'Bharat Biomer, about us, agri-biotechnology, sustainable agriculture, soil health')
 
 @section('content')
   <!-- ========================

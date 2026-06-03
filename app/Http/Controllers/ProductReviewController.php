@@ -12,21 +12,31 @@ class ProductReviewController extends Controller
     // ── ADMIN: list all reviews ─────────────────────────────────────────
     public function index(Request $request)
     {
-        $status   = $request->get('status', 'all');
-        $reviews  = ProductReview::with(['product', 'customer'])
+        $status = $request->get('status', 'all');
+        $search = trim($request->get('q', ''));
+
+        $reviews = ProductReview::with(['product', 'customer'])
             ->when($status !== 'all', fn($q) => $q->where('status', $status))
+            ->when($search, function ($q) use ($search) {
+                $q->where(function ($query) use ($search) {
+                    $query->whereHas('customer', fn($sub) => $sub->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%"))
+                        ->orWhereHas('product', fn($sub) => $sub->where('name', 'like', "%{$search}%"))
+                        ->orWhere('review_text', 'like', "%{$search}%");
+                });
+            })
             ->latest()
             ->paginate(15)
             ->withQueryString();
 
         $counts = [
-            'all'      => ProductReview::count(),
-            'pending'  => ProductReview::where('status', 'pending')->count(),
+            'all' => ProductReview::count(),
+            'pending' => ProductReview::where('status', 'pending')->count(),
             'approved' => ProductReview::where('status', 'approved')->count(),
             'rejected' => ProductReview::where('status', 'rejected')->count(),
         ];
 
-        return view('dashboard.reviews.index', compact('reviews', 'status', 'counts'));
+        return view('dashboard.reviews.index', compact('reviews', 'status', 'counts', 'search'));
     }
 
     // ── ADMIN: approve a review ─────────────────────────────────────────
@@ -82,6 +92,14 @@ class ProductReviewController extends Controller
             'status'      => 'pending',
         ]);
 
-        return response()->json(['success' => true, 'message' => 'Thank you! Your review is awaiting approval.']);
+        return response()->json([
+            'success' => true,
+            'message' => 'Thank you! Your review has been submitted and is awaiting approval.',
+            'modal' => [
+                'title' => 'Review Submitted',
+                'message' => 'Thank you! Your review has been submitted and is awaiting approval.',
+                'button' => 'Continue Shopping',
+            ],
+        ]);
     }
 }

@@ -8217,7 +8217,7 @@ h6, .h6 {
 }
 
 .hover-scale-img:hover .hover-scale-img__img {
-  transform: scale(1.1);
+  transform: none;
 }
 
 .visibility-hidden {
@@ -12363,17 +12363,33 @@ div.dt-container .dt-paging .dt-paging-button:hover:hover, div.dt-container .dt-
 /* Switch Css Start */
 .form-switch {
   padding-inline-start: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .form-switch .form-check-input {
   box-shadow: none !important;
   margin: 0;
   position: relative;
-  background-color: var(--neutral-400);
+  width: 46px;
+  height: 24px;
+  background-color: var(--neutral-300);
   border: 0;
-  background-image: none !important;
-  width: 36px;
+  border-radius: 999px;
+  transition: background-color 0.2s ease;
+}
+
+.form-switch .form-check-input::before {
+  position: absolute;
+  content: "";
+  width: 20px;
   height: 20px;
+  background: #fff;
+  border-radius: 50%;
+  top: 2px;
+  left: 2px;
+  transition: left 0.2s ease;
 }
 
 .form-switch .form-check-input:checked {
@@ -12381,25 +12397,35 @@ div.dt-container .dt-paging .dt-paging-button:hover:hover, div.dt-container .dt-
 }
 
 .form-switch .form-check-input:checked::before {
-  left: calc(100% - 18px);
-  transition: 0.2s linear;
+  left: calc(100% - 22px);
 }
 
-.form-switch .form-check-input:checked ~ .form-check-label {
-  color: var(--text-primary-light) !important;
+.form-switch .form-check-input + .form-check-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0;
 }
 
-.form-switch .form-check-input::before {
-  position: absolute;
-  content: "";
-  width: 16px;
-  height: 16px;
-  background: #fff;
-  border-radius: 50%;
-  top: 50%;
-  transform: translateY(-50%);
-  left: 2px;
-  transition: 0.2s linear;
+.form-switch .form-check-input + .form-check-label::before {
+  content: "Off";
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 18px;
+  border-radius: 999px;
+  background: var(--neutral-200);
+  color: var(--neutral-700);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.form-switch .form-check-input:checked + .form-check-label::before {
+  content: "On";
+  background: var(--primary-600);
+  color: #fff;
 }
 
 /* Switch Css End */
@@ -14411,7 +14437,7 @@ td.fc-header-center {
 
 .image-upload__deleteBtn:hover {
   background: var(--danger-600);
-  transform: scale(1.1);
+  transform: none;
   color: #fff;
 }
 
@@ -14654,64 +14680,6 @@ td.fc-header-center {
     display: none;
   }
 }
-.navbar-search {
-  position: relative;
-  display: none;
-}
-
-@media (min-width: 992px) {
-  .navbar-search {
-    display: inline-block;
-  }
-}
-.navbar-search input {
-  width: 24.25rem;
-  height: 2.5rem;
-  background-color: var(--neutral-50);
-  border: 1px solid var(--input-form-light);
-  border-radius: 0.5rem;
-  -webkit-border-radius: 0.5rem;
-  -moz-border-radius: 0.5rem;
-  -ms-border-radius: 0.5rem;
-  -o-border-radius: 0.5rem;
-  padding-block: 0.3125rem;
-  padding-inline-start: 2.625rem;
-  padding-inline-end: 1.25rem;
-  color: var(--text-primary-light);
-}
-
-.navbar-search input:focus {
-  border-color: var(--brand);
-}
-
-.navbar-search .icon {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  inset-inline-start: 0.9375rem;
-  font-size: 1.125rem;
-  color: var(--black);
-}
-
-[data-theme-toggle] {
-  font-size: 0;
-  position: relative;
-}
-
-[data-theme-toggle]::after {
-  position: absolute;
-  content: "\f1bf";
-  font-family: remixicon;
-  font-style: normal;
-  font-size: 1.25rem;
-  color: var(--text-primary-light);
-}
-
-[data-theme-toggle][aria-label=dark]::after {
-  content: "\ef6f";
-  color: #fff;
-}
-
 .positioned-icon {
   inset-inline-start: 16px;
 }
@@ -14970,7 +14938,7 @@ td.fc-header-center {
   font-weight: 500;
   display: flex;
   align-items: center;
-  color: var(--text-secondary-light);
+  color: white;
   border-radius: 8px;
   -webkit-border-radius: 8px;
   -moz-border-radius: 8px;

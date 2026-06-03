@@ -233,7 +233,8 @@
                   <div class="pd__cta-wrap">
                     <button class="pd__cta-btn pd__cta-btn--primary" id="addToCartBtn"
                             data-product-id="{{ $product->id }}">
-                      🛒 Add to Cart
+                      <iconify-icon icon="fa6-solid:cart-shopping" class="btn-icon"></iconify-icon>
+                      <span>Add to Cart</span>
                     </button>
                     <a href="{{ route('products.index') }}" class="pd__cta-btn pd__cta-btn--outline">
                       ← Back to Products
@@ -655,13 +656,11 @@
     border-radius: 12px;
     padding: 12px;
     cursor: pointer;
-    transition: all 0.2s ease;
     text-align: center;
   }
   .pd__variant-card:hover {
     border-color: #2d7a45;
-    box-shadow: 0 4px 12px rgba(45, 122, 69, 0.15);
-    transform: translateY(-2px);
+    box-shadow: none;
   }
   .pd__variant-card-img {
     width: 100%;
@@ -799,7 +798,7 @@
   }
   .rv__pick-star:hover { 
     color: #fbbf24;
-    transform: scale(1.2);
+    transform: none;
   }
   .rv__pick-star.active { 
     color: #f59e0b;
@@ -951,7 +950,10 @@
           updateGlobalCartBadge(d.cart_count);
         }
         setTimeout(() => {
-          btn.textContent = '🛒 Add to Cart';
+          const label = btn.querySelector('span');
+          if (label) {
+            label.textContent = 'Add to Cart';
+          }
           btn.style.background = '';
         }, 2500);
       }
@@ -1082,6 +1084,9 @@
           msgEl.textContent = d.message;
           document.getElementById('reviewFormWrap').style.opacity = '0.6';
           submitBtn.textContent = '✓ Submitted';
+          if (window.BharatBiomerModal && d.modal) {
+            window.BharatBiomerModal.show(d.modal);
+          }
         } else {
           msgEl.style.color = '#dc3545';
           msgEl.textContent = d.message;

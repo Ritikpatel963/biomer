@@ -23,6 +23,11 @@ class HomeController extends Controller
     
     public function veiwDetails()
     {
+        return $this->viewDetails();
+    }
+
+    public function viewDetails()
+    {
         return view('veiwDetails');
     }
 

@@ -13,7 +13,18 @@ class Customer extends Authenticatable
 
     protected $guard = 'customer';
 
-    protected $fillable = ['name', 'email', 'phone', 'password'];
+    protected $fillable = [
+        'name',
+        'email',
+        'phone',
+        'audience_type',
+        'address',
+        'city',
+        'state',
+        'pincode',
+        'country',
+        'password',
+    ];
     protected $hidden   = ['password', 'remember_token'];
 
     public function orders()
@@ -24,6 +35,16 @@ class Customer extends Authenticatable
     public function wishlists()
     {
         return $this->hasMany(Wishlist::class, 'customer_id');
+    }
+
+    public function blogReviews()
+    {
+        return $this->hasMany(BlogReview::class, 'customer_id');
+    }
+
+    public function audiencePreferences()
+    {
+        return $this->hasMany(AudiencePreference::class, 'customer_id');
     }
 
     public function hasInWishlist(int $productId): bool

@@ -1,9 +1,12 @@
 
   // =========================== Sales Statistic Line Chart Start ===============================
+  var salesLabels = window.dashboardSalesLabels || ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  var salesData = window.dashboardSalesData || [10, 20, 12, 30, 14, 35, 16, 32, 14, 25, 13, 28];
+
   var options = {
     series: [{
       name: "This month",
-      data: [10, 20, 12, 30, 14, 35, 16, 32, 14, 25, 13, 28]
+      data: salesData
     }],
     chart: {
       height: 264,
@@ -44,7 +47,9 @@
         show: true,
       },
       y: {
-        show: false,
+        formatter: function(value) {
+          return '₹' + value.toLocaleString();
+        }
       },
       z: {
         show: false,
@@ -61,7 +66,7 @@
     yaxis: {
       labels: {
         formatter: function (value) {
-          return "$" + value + "k";
+          return "₹" + value.toLocaleString();
         },
         style: {
           fontSize: "14px"
@@ -69,7 +74,7 @@
       },
     },
     xaxis: {
-      categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+      categories: salesLabels,
       tooltip: {
         enabled: false
       },
@@ -93,13 +98,6 @@
         fill: {
           type: 'solid',
           color: '#487FFF40',
-          // gradient: {
-          //   colorFrom: '#D8E3F0',
-          //   // colorTo: '#BED1E6',
-          //   stops: [0, 100],
-          //   opacityFrom: 0.4,
-          //   opacityTo: 0.5,
-          // },
         }
       }
     }

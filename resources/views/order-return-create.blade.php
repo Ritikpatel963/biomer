@@ -104,7 +104,7 @@
             @endif
 
             <div class="orc__alert">
-                <span class="orc__alert-icon">⚠️</span>
+                <span class="orc__alert-icon"><iconify-icon icon="mdi:alert-circle-outline" class="icon"></iconify-icon></span>
                 <span class="orc__alert-text">Returns are only accepted for delivered orders within 30 days of delivery. Refund amount cannot exceed the order total.</span>
             </div>
 
@@ -128,7 +128,7 @@
                                 @if($item->product->featured_image)
                                     <img src="{{ Storage::url($item->product->featured_image) }}" alt="{{ $item->product->name }}" class="orc__item-img">
                                 @else
-                                    <div class="orc__item-img" style="display:flex; align-items:center; justify-content:center; background:#f0f5ee;">📦</div>
+                                    <div class="orc__item-img" style="display:flex; align-items:center; justify-content:center; background:#f0f5ee;"><iconify-icon icon="mdi:package-variant" class="icon"></iconify-icon></div>
                                 @endif
                                 <div class="orc__item-details">
                                     <div class="orc__item-name">{{ $item->product->name }}</div>

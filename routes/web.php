@@ -11,12 +11,12 @@ use App\Http\Controllers\FormsController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\TableController;
-use App\Http\Controllers\UsersController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\RoleandaccessController;
 use App\Http\Controllers\CryptocurrencyController;
 use App\Http\Controllers\BlogCategoryController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductAttributeController;
 use App\Http\Controllers\ProductVariationController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CategoryController;
@@ -28,11 +28,14 @@ use App\Http\Controllers\OrderReturnController;
 use App\Http\Controllers\AdminCustomerController;
 use App\Http\Controllers\AdminOrderController;
 use App\Http\Controllers\AdminOrderReturnController;
-use App\Http\Controllers\StockController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\CustomerDashboardController;
 use App\Http\Controllers\ProductReviewController;
+use App\Http\Controllers\BlogReviewController;
+use App\Http\Controllers\AudiencePreferenceController;
+use App\Http\Controllers\Admin\AudiencePreferenceController as AdminAudiencePreferenceController;
 use App\Http\Controllers\Admin\PageController as AdminPageController;
+use App\Http\Controllers\Admin\TaxController;
 use App\Http\Controllers\PageController;
 
 // ══════════════════════════════════════════════════════════════════════
@@ -44,11 +47,16 @@ Route::view('/about', 'about');
 Route::view('/collaboration', 'ourcollaboration');
 Route::view('/impact', 'fieldresult');
 Route::view('/contact', 'contact');
+Route::view('/bharat-biomer', 'bharat-biomer')->name('bharat-biomer');
 
 Route::get('/', fn() => view('index'));
 Route::get('/products', [ProductController::class , 'shopIndex'])->name('products.index');
 Route::get('/products/{product:slug}', [ProductController::class , 'shopShow'])->name('products.show');
 
+
+Route::get('/blogs', [BlogController::class, 'frontendIndex'])->name('frontend.blog.index');
+Route::get('/blogs/{slug}', [BlogController::class, 'frontendDetails'])->name('frontend.blog.show');
+Route::post('/audience-preference', [AudiencePreferenceController::class, 'store'])->name('audience-preference.store');
 // ── Dynamic Pages with SEO ────────────────────────────────────
 
 // ══════════════════════════════════════════════════════════════════════
@@ -59,7 +67,7 @@ Route::get('/admin', fn() => redirect()->route('signin'));
 
 Route::prefix('authentication')->controller(AuthenticationController::class)->group(function () {
     Route::get('/signin', 'signIn')->name('signin');
-    Route::post('/login-action', 'loginProcess')->name('login.action');
+    Route::post('/login-action', 'loginProcess')->middleware('throttle:6,1')->name('login.action');
     Route::post('/signout', 'signOut')->name('signout');
 });
 
@@ -71,9 +79,9 @@ Route::prefix('authentication')->controller(AuthenticationController::class)->gr
 Route::get('/login', [CustomerAuthController::class , 'showLogin'])->name('login')->middleware('guest:customer');
 
 Route::middleware('guest:customer')->group(function () {
-    Route::post('/login', [CustomerAuthController::class , 'login'])->name('customer.login.post');
+    Route::post('/login', [CustomerAuthController::class , 'login'])->middleware('throttle:6,1')->name('customer.login.post');
     Route::get('/register', [CustomerAuthController::class , 'showRegister'])->name('customer.register');
-    Route::post('/register', [CustomerAuthController::class , 'register'])->name('customer.register.post');
+    Route::post('/register', [CustomerAuthController::class , 'register'])->middleware('throttle:6,1')->name('customer.register.post');
 });
 
 // Alias for customer.login
@@ -86,7 +94,7 @@ Route::get('/cart', [CartController::class , 'index'])->name('cart.index');
 Route::post('/cart/add', [CartController::class , 'add'])->name('cart.add');
 Route::post('/cart/update', [CartController::class , 'update'])->name('cart.update');
 Route::post('/cart/remove', [CartController::class , 'remove'])->name('cart.remove');
-Route::get('/cart/clear', [CartController::class , 'clear'])->name('cart.clear');
+Route::post('/cart/clear', [CartController::class , 'clear'])->name('cart.clear');
 Route::post('/cart/coupon/apply', [CartController::class, 'applyCoupon'])->name('cart.coupon.apply');
 Route::post('/cart/coupon/remove', [CartController::class, 'removeCoupon'])->name('cart.coupon.remove');
 
@@ -119,6 +127,7 @@ Route::middleware('customer.auth')->group(function () {
 
     Route::get('/wishlist', [WishlistController::class , 'index'])->name('wishlist.index');
     Route::post('/wishlist/toggle', [WishlistController::class , 'toggle'])->name('wishlist.toggle');
+    Route::get('/my-orders/{orderNumber}/invoice', [InvoiceController::class , 'downloadCustomer'])->name('orders.invoice');
     Route::post('/wishlist/remove', [WishlistController::class , 'remove'])->name('wishlist.remove');
     Route::get('/customer/dashboard', [CustomerDashboardController::class , 'index'])->name('customer.dashboard');
 
@@ -127,14 +136,18 @@ Route::middleware('customer.auth')->group(function () {
 
 });
 
+Route::middleware('customer.auth')->group(function () {
+    Route::post('/blogs/{blog}/reviews', [BlogController::class, 'storeReview'])->name('frontend.blog.reviews.store');
+});
+
 // ══════════════════════════════════════════════════════════════════════
 //  ADMIN PROTECTED ROUTES — all require admin login
 // ══════════════════════════════════════════════════════════════════════
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['admin.auth'])->group(function () {
 
     // ── Dashboard Home ────────────────────────────────────────────────
-    Route::get('/dashboard', fn() => view('dashboard'))->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // ── Misc Pages ────────────────────────────────────────────────────
     Route::controller(HomeController::class)->group(function () {
@@ -150,6 +163,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('termscondition', 'termsCondition')->name('termsCondition');
             Route::get('widgets', 'widgets')->name('widgets');
             Route::get('chatprofile', 'chatProfile')->name('chatProfile');
+            Route::get('viewdetails', 'viewDetails')->name('viewDetails');
             Route::get('veiwdetails', 'veiwDetails')->name('veiwDetails');
             Route::get('blankPage', 'blankPage')->name('blankPage');
             Route::get('comingSoon', 'comingSoon')->name('comingSoon');
@@ -216,9 +230,9 @@ Route::middleware(['auth'])->group(function () {
         // ── Invoice ───────────────────────────────────────────────────────
         Route::prefix('invoice')->controller(InvoiceController::class)->group(function () {
             Route::get('/invoice-add', 'invoiceAdd')->name('invoiceAdd');
-            Route::get('/invoice-edit', 'invoiceEdit')->name('invoiceEdit');
+            Route::get('/invoice-edit/{orderNumber?}', 'invoiceEdit')->name('invoiceEdit');
             Route::get('/invoice-list', 'invoiceList')->name('invoiceList');
-            Route::get('/invoice-preview', 'invoicePreview')->name('invoicePreview');
+            Route::get('/invoice-preview/{orderNumber?}', 'invoicePreview')->name('invoicePreview');
         }
         );
 
@@ -226,7 +240,6 @@ Route::middleware(['auth'])->group(function () {
         Route::prefix('settings')->controller(SettingsController::class)->group(function () {
             Route::get('/company', 'company')->name('company');
             Route::get('/currencies', 'currencies')->name('currencies');
-            Route::get('/language', 'language')->name('language');
             Route::get('/notification', 'notification')->name('notification');
             Route::get('/notification-alert', 'notificationAlert')->name('notificationAlert');
             Route::get('/payment-gateway', 'paymentGateway')->name('paymentGateway');
@@ -243,14 +256,6 @@ Route::middleware(['auth'])->group(function () {
         );
 
         // ── Users ─────────────────────────────────────────────────────────
-        Route::prefix('users')->controller(UsersController::class)->group(function () {
-            Route::get('/add-user', 'addUser')->name('addUser');
-            Route::get('/users-grid', 'usersGrid')->name('usersGrid');
-            Route::get('/users-list', 'usersList')->name('usersList');
-            Route::get('/view-profile', 'viewProfile')->name('viewProfile');
-        }
-        );
-
         // ── Blog ──────────────────────────────────────────────────────────
         Route::prefix('blog')->controller(BlogController::class)->group(function () {
             Route::get('/', 'blog')->name('blog');
@@ -288,25 +293,19 @@ Route::middleware(['auth'])->group(function () {
         }
         );
         Route::get('/dashboard/invoices', [InvoiceController::class , 'index'])->name('dashboard.invoices.index');
-        // Admin invoice — inside middleware(['admin.auth']) group
+        // Admin invoice � inside middleware(['admin.auth']) group
         Route::get(
             '/dashboard/orders/{orderNumber}/invoice',
-        [InvoiceController::class , 'downloadAdmin']
-        )
-            ->name('dashboard.orders.invoice');
-
-        // Customer invoice — inside middleware(['customer.auth']) group
-        Route::get(
-            '/my-orders/{orderNumber}/invoice',
-        [InvoiceController::class , 'downloadCustomer']
-        )
-            ->name('orders.invoice'); // ← end auth middleware
+            [InvoiceController::class , 'downloadAdmin']
+        )->name('dashboard.orders.invoice');
     
         // ── Dashboard ─────────────────────────────────────────────────────
         Route::prefix('dashboard')->group(function () {
 
             // Main
             Route::get('/index', [DashboardController::class , 'index'])->name('index');
+            Route::get('/analytics', [DashboardController::class , 'analytics'])->name('dashboard.analytics');
+            Route::get('/analytics/export', [DashboardController::class , 'exportAnalytics'])->name('dashboard.analytics.export');
 
             // Customers
             Route::get('/customers', [AdminCustomerController::class , 'index'])->name('dashboard.customers.index');
@@ -319,13 +318,6 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/returns', [AdminOrderReturnController::class, 'index'])->name('dashboard.returns.index');
             Route::get('/returns/{id}', [AdminOrderReturnController::class, 'show'])->name('dashboard.returns.show');
             Route::post('/returns/{id}', [AdminOrderReturnController::class, 'update'])->name('dashboard.returns.update');
-            //stock
-    
-
-            // Stock Management
-            Route::get('/stock', [StockController::class , 'index'])->name('dashboard.stock.index');
-            Route::get('/stock/edit', [StockController::class , 'edit'])->name('dashboard.stock.edit');
-            Route::post('/stock/update', [StockController::class , 'update'])->name('dashboard.stock.update');
             // Products
             Route::resource('products', ProductController::class)->names([
                 'index' => 'dashboard.products.index',
@@ -337,11 +329,22 @@ Route::middleware(['auth'])->group(function () {
                 'destroy' => 'dashboard.products.destroy',
             ]);
             Route::delete('product-images/{image}', [ProductController::class , 'destroyImage'])->name('dashboard.products.destroyImage');
+            Route::delete('products/{product}/featured-image', [ProductController::class , 'destroyFeaturedImage'])->name('dashboard.products.destroyFeaturedImage');
             Route::delete('product-variations/{variation}', [ProductController::class , 'destroyVariation'])->name('dashboard.products.destroyVariation');
+            Route::resource('attributes', ProductAttributeController::class)
+                ->only(['index', 'store', 'update', 'destroy'])
+                ->parameters(['attributes' => 'attribute'])
+                ->names([
+                    'index' => 'dashboard.attributes.index',
+                    'store' => 'dashboard.attributes.store',
+                    'update' => 'dashboard.attributes.update',
+                    'destroy' => 'dashboard.attributes.destroy',
+                ]);
 
             // Product Variations
-            Route::prefix('products/{product}/variations')->name('dashboard.products.variations.')->group(function () {
+                Route::prefix('products/{product}/variations')->name('dashboard.products.variations.')->group(function () {
                     Route::get('/', [ProductVariationController::class , 'index'])->name('index');
+                    Route::post('/attributes', [ProductVariationController::class , 'storeAttribute'])->name('attributes.store');
                     Route::get('/create', [ProductVariationController::class , 'create'])->name('create');
                     Route::post('/', [ProductVariationController::class , 'store'])->name('store');
                     Route::get('/{variation}/edit', [ProductVariationController::class , 'edit'])->name('edit');
@@ -403,7 +406,16 @@ Route::middleware(['auth'])->group(function () {
                 Route::post('reviews/{review}/reject', [ProductReviewController::class, 'reject'])->name('dashboard.reviews.reject');
                 Route::delete('reviews/{review}', [ProductReviewController::class, 'destroy'])->name('dashboard.reviews.destroy');
 
+                // Taxes (GST)
+                Route::get('taxes', [TaxController::class, 'index'])->name('dashboard.taxes.index');
+
                 // Pages (Settings → Pages)
+                Route::get('blog-reviews', [BlogReviewController::class, 'index'])->name('dashboard.blog-reviews.index');
+                Route::post('blog-reviews/{review}/approve', [BlogReviewController::class, 'approve'])->name('dashboard.blog-reviews.approve');
+                Route::post('blog-reviews/{review}/reject', [BlogReviewController::class, 'reject'])->name('dashboard.blog-reviews.reject');
+                Route::delete('blog-reviews/{review}', [BlogReviewController::class, 'destroy'])->name('dashboard.blog-reviews.destroy');
+                Route::get('audience-preferences', [AdminAudiencePreferenceController::class, 'index'])->name('dashboard.audience-preferences.index');
+
                 Route::resource('pages', \App\Http\Controllers\Admin\PageController::class)->names([
                     'index' => 'dashboard.pages.index',
                     'create' => 'dashboard.pages.create',
@@ -417,6 +429,10 @@ Route::middleware(['auth'])->group(function () {
                 // Site Settings (Settings → Site Settings)
                 Route::get('site-settings', [\App\Http\Controllers\Admin\SiteSettingController::class, 'edit'])->name('dashboard.site-settings.edit');
                 Route::post('site-settings', [\App\Http\Controllers\Admin\SiteSettingController::class, 'update'])->name('dashboard.site-settings.update');
+                Route::get('homepage-editor', [\App\Http\Controllers\Admin\SiteSettingController::class, 'editHomepage'])->name('dashboard.homepage-editor.edit');
+                Route::post('homepage-editor', [\App\Http\Controllers\Admin\SiteSettingController::class, 'updateHomepage'])->name('dashboard.homepage-editor.update');
+                Route::get('google-analytics', [\App\Http\Controllers\Admin\SiteSettingController::class, 'editAnalytics'])->name('dashboard.google-analytics.edit');
+                Route::post('google-analytics', [\App\Http\Controllers\Admin\SiteSettingController::class, 'updateAnalytics'])->name('dashboard.google-analytics.update');
 
                 // Header Links (Settings → Header Links)
                 Route::resource('header-links', \App\Http\Controllers\Admin\HeaderLinkController::class)->names([
@@ -441,8 +457,12 @@ Route::middleware(['auth'])->group(function () {
             );
         });
 
+// Static policy pages
+Route::view('/terms-and-conditions', 'policies.terms')->name('policy.terms');
+Route::view('/privacy-policy', 'policies.privacy')->name('policy.privacy');
+Route::view('/shipping-policy', 'policies.shipping')->name('policy.shipping');
+Route::view('/return-policy', 'policies.return')->name('policy.return');
+
 // Dynamic pages catch-all
 // Keep this route last so it doesn't override explicit routes above.
 Route::get('/{page:slug}', [PageController::class, 'show'])->name('pages.show');
-
-

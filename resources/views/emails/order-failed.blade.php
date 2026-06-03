@@ -10,14 +10,14 @@
         .header { background: #dc3545; color: white; padding: 20px; text-align: center; }
         .content { padding: 20px; background: #f9f9f9; }
         .footer { background: #333; color: white; padding: 20px; text-align: center; font-size: 12px; }
-        .btn { display: inline-block; background: #2d7a45; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; }
+        .btn { display: inline-block; background: #2d7a45; color: white !important; padding: 10px 20px; text-decoration: none; border-radius: 5px; }
         .warning { background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 20px 0; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>❌ Payment Failed</h1>
+            <h1>Payment Failed</h1>
             <p>Order #{{ $order->order_number }}</p>
         </div>
 

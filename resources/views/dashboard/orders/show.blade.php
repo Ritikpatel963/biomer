@@ -33,7 +33,7 @@
                 {{-- ── Download Invoice Button ── --}}
                 <a href="{{ route('dashboard.orders.invoice', $order->order_number) }}"
                    class="btn btn-success btn-sm px-16" target="_blank">
-                    <iconify-icon icon="lucide:download" class="me-1"></iconify-icon>
+                    
                     Download Invoice
                 </a>
 
@@ -63,7 +63,7 @@
 
         <div class="card mb-4">
             <div class="card-header">
-                <h6 class="card-title mb-0">🛒 Items Ordered ({{ $order->items->count() }})</h6>
+                <h6 class="card-title mb-0"> Items Ordered ({{ $order->items->count() }})</h6>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
@@ -87,7 +87,7 @@
                                                  style="width:36px;height:36px;object-fit:contain;border-radius:6px;background:#f5f5f5;padding:3px;">
                                         @else
                                             <div class="d-flex align-items-center justify-content-center bg-neutral-200 rounded"
-                                                 style="width:36px;height:36px;font-size:1rem;">🌿</div>
+                                                 style="width:36px;height:36px;font-size:1rem;"></div>
                                         @endif
                                         <div>
                                             <div class="fw-medium text-sm">{{ $item->product_name }}</div>
@@ -133,7 +133,7 @@
         {{-- Customer Info --}}
         <div class="card mb-4">
             <div class="card-header">
-                <h6 class="card-title mb-0">👤 Customer</h6>
+                <h6 class="card-title mb-0"> Customer</h6>
             </div>
             <div class="card-body">
                 @if($order->customer)
@@ -159,7 +159,7 @@
         {{-- Shipping Address --}}
         <div class="card mb-4">
             <div class="card-header">
-                <h6 class="card-title mb-0">📦 Shipping Address</h6>
+                <h6 class="card-title mb-0"> Shipping Address</h6>
             </div>
             <div class="card-body">
                 <table class="table table-sm table-borderless mb-0">

@@ -9,7 +9,7 @@
                         responsive: true,
                         scrollX: false,
                         autoWidth: false,
-                        columnDefs: [{ orderable: false, targets: [0, 1, 7] }]
+                        columnDefs: [{ orderable: false, targets: [0, 1, 8] }]
                     });
                     document.getElementById("checkAll").addEventListener("change", function () {
                         document.querySelectorAll(".row-check").forEach(cb => cb.checked = this.checked);
@@ -29,7 +29,7 @@
 
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show mx-3 mt-3 mb-0">
-            ✅ {{ session('success') }}
+             {{ session('success') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     @endif
@@ -48,6 +48,7 @@
                         <th>Customer</th>
                         <th>Email</th>
                         <th>Phone</th>
+                        <th>Audience</th>
                         <th>Total Orders</th>
                         <th>Total Spent</th>
                         <th>Joined</th>
@@ -80,6 +81,7 @@
 
                         <td>{{ $customer->email }}</td>
                         <td>{{ $customer->phone ?? '—' }}</td>
+                        <td>{{ $customer->audience_type ? ucfirst($customer->audience_type) : '—' }}</td>
 
                         <td>
                             <span class="bg-primary-focus text-primary-600 px-12 py-4 rounded-pill fw-medium text-sm">
@@ -97,15 +99,15 @@
 
                         <td>
                             <a href="{{ route('dashboard.customers.show', $customer->id) }}"
-                               class="w-32-px h-32-px bg-info-focus text-info-main rounded-circle d-inline-flex align-items-center justify-content-center"
+                               class="btn btn-sm btn-outline-primary"
                                title="View Customer">
-                                <iconify-icon icon="lucide:eye"></iconify-icon>
+                                View
                             </a>
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="8" class="text-center py-5 text-muted">No customers found.</td>
+                        <td colspan="9" class="text-center py-5 text-muted">No customers found.</td>
                     </tr>
                     @endforelse
                 </tbody>

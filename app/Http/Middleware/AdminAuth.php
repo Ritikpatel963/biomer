@@ -14,6 +14,18 @@ class AdminAuth
             return redirect()->route('signin');
         }
 
+        $user = Auth::guard('web')->user();
+        $adminEmails = array_map('strtolower', config('admin.emails', []));
+
+        $isAdmin = (bool) ($user->is_admin ?? false)
+            || in_array(($user->role ?? null), ['admin', 'super-admin'], true)
+            || in_array(($user->type ?? null), ['admin', 'super-admin'], true)
+            || in_array(strtolower((string) $user->email), $adminEmails, true);
+
+        if (!$isAdmin) {
+            abort(403);
+        }
+
         return $next($request);
     }
 }

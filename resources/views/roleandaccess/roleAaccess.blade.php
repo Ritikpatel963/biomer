@@ -27,10 +27,6 @@
                 <option>9</option>
                 <option>10</option>
             </select>
-            <form class="navbar-search">
-                <input type="text" class="bg-base h-40-px w-auto" name="search" placeholder="Search">
-                <iconify-icon icon="ion:search-outline" class="icon"></iconify-icon>
-            </form>
             <select class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px">
                 <option>Status</option>
                 <option>Active</option>

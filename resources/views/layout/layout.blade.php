@@ -21,7 +21,11 @@
             <x-breadcrumb title='{{ isset($title) ? $title : "" }}' subTitle='{{ isset($subTitle) ? $subTitle : "" }}' />
             <!-- ..::  header area end ::.. -->
 
-            @yield('content')
+            <div class="admin-layout-card">
+                <div class="admin-layout-card__body">
+                    @yield('content')
+                </div>
+            </div>
         
         </div>
         <!-- ..::  footer  start ::.. -->

@@ -1,70 +1,78 @@
-
 @extends('layout.layout')
 
-@section('title', 'Brands')
+@php
+    $title = 'Brands';
+    $subTitle = 'Brands';
+@endphp
 
 @section('content')
-<div class="container-fluid py-4">
-
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-      <h2 class="mb-0 fw-bold">🏷️ Brands</h2>
-      <small class="text-muted">Manage all product brands</small>
+<div class="card basic-data-table">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+            <h5 class="card-title mb-1">Brands</h5>
+            <p class="text-secondary-light mb-0">Manage product brand names and logos.</p>
+        </div>
+        <a href="{{ route('dashboard.brands.create') }}" class="btn btn-primary btn-sm">Add Brand</a>
     </div>
-    <a href="{{ route('dashboard.brands.create') }}" class="btn btn-success px-4">+ Add Brand</a>
-  </div>
 
-  @if(session('success'))
-    <div class="alert alert-success alert-dismissible fade show">✅ {{ session('success') }}
-      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-  @endif
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show mx-3 mt-3 mb-0">
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
 
-  <div class="card border-0 shadow-sm">
     <div class="card-body p-0">
-      <table class="table table-hover align-middle mb-0">
-        <thead class="table-light">
-          <tr>
-            <th style="width:60px">#</th>
-            <th style="width:80px">Logo</th>
-            <th>Name</th>
-            <th>Slug</th>
-            <th class="text-center">Products</th>
-            <th>Created</th>
-            <th style="width:150px">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          @forelse($brands as $brand)
-          <tr>
-            <td class="text-muted small">{{ $brand->id }}</td>
-            <td>
-              @if($brand->logo)
-                <img src="{{ Storage::url($brand->logo) }}" style="width:48px;height:48px;object-fit:cover;border-radius:6px;border:1px solid #dee2e6;">
-              @else
-                <div style="width:48px;height:48px;border-radius:6px;background:#e8f5ed;display:flex;align-items:center;justify-content:center;font-size:1.4rem;">🏷️</div>
-              @endif
-            </td>
-            <td><strong>{{ $brand->name }}</strong></td>
-            <td><code class="text-muted small">{{ $brand->slug }}</code></td>
-            <td class="text-center"><span class="badge bg-primary rounded-pill">{{ $brand->products_count }}</span></td>
-            <td class="text-muted small">{{ $brand->created_at->format('d M Y') }}</td>
-            <td>
-              <a href="{{ route('dashboard.brands.edit', $brand) }}" class="btn btn-sm btn-outline-primary me-1">Edit</a>
-              <form action="{{ route('dashboard.brands.destroy', $brand) }}" method="POST" class="d-inline"
-                onsubmit="return confirm('Delete brand \'{{ addslashes($brand->name) }}\'?')">
-                @csrf @method('DELETE')
-                <button class="btn btn-sm btn-outline-danger">Delete</button>
-              </form>
-            </td>
-          </tr>
-          @empty
-          <tr><td colspan="7" class="text-center py-5 text-muted">No brands yet. <a href="{{ route('dashboard.brands.create') }}">Add the first one!</a></td></tr>
-          @endforelse
-        </tbody>
-      </table>
+        <div class="table-responsive">
+            <table class="table bordered-table admin-data-table mb-0" data-page-length="10" data-no-sort-targets="0,1,6">
+                <thead>
+                    <tr>
+                        <th>S.L</th>
+                        <th>Logo</th>
+                        <th>Brand Name</th>
+                        <th>Slug</th>
+                        <th>Products</th>
+                        <th>Created</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($brands as $i => $brand)
+                        <tr>
+                            <td>{{ str_pad($brands->firstItem() + $i, 2, '0', STR_PAD_LEFT) }}</td>
+                            <td>
+                                @if($brand->logo)
+                                    <img src="{{ Storage::url($brand->logo) }}" alt="{{ $brand->name }}" class="radius-8 border" style="width:48px;height:48px;object-fit:contain;">
+                                @else
+                                    <div class="radius-8 bg-neutral-200 border" style="width:48px;height:48px;"></div>
+                                @endif
+                            </td>
+                            <td><span class="bg-success-focus text-success-main px-12 py-4 rounded-pill fw-medium text-sm">{{ $brand->name }}</span></td>
+                            <td><code>{{ $brand->slug }}</code></td>
+                            <td><span class="bg-primary-light text-primary-600 px-12 py-4 rounded-pill fw-medium text-sm">{{ $brand->products_count }} Products</span></td>
+                            <td>{{ $brand->created_at->format('d M Y') }}</td>
+                            <td>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <a href="{{ route('dashboard.brands.edit', $brand) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+                                    <form action="{{ route('dashboard.brands.destroy', $brand) }}" method="POST" onsubmit="return confirm('Delete brand \'{{ addslashes($brand->name) }}\'?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="btn btn-sm btn-outline-danger">Delete</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="7" class="text-center py-5 text-muted">No brands yet. <a href="{{ route('dashboard.brands.create') }}">Add the first one.</a></td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+        @if($brands->hasPages())
+            <div class="px-3 py-3">{{ $brands->links() }}</div>
+        @endif
     </div>
-  </div>
-  <div class="mt-3">{{ $brands->links() }}</div>
 </div>
 @endsection

@@ -52,8 +52,8 @@
                                 <input class="form-check-input border border-neutral-300 mt-4" type="checkbox" value="" id="condition">
                                 <label class="form-check-label text-sm" for="condition">
                                     By creating an account means you agree to the
-                                    <a  href="javascript:void(0)" class="text-primary-600 fw-semibold">Terms & Conditions</a> and our
-                                    <a  href="javascript:void(0)" class="text-primary-600 fw-semibold">Privacy Policy</a>
+                                    <a href="{{ route('policy.terms') }}" class="text-primary-600 fw-semibold">Terms & Conditions</a> and our
+                                    <a href="{{ route('policy.privacy') }}" class="text-primary-600 fw-semibold">Privacy Policy</a>
                                 </label>
                             </div>
 

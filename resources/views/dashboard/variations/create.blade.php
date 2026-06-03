@@ -19,7 +19,7 @@
             </div>
             <a href="{{ route('dashboard.products.variations.index', $product) }}"
                class="btn btn-outline-secondary btn-sm">
-                ← Back
+                Back
             </a>
         </div>
 
@@ -46,13 +46,35 @@
                     @csrf
 
                     <div class="row g-3">
+                        @if($globalAttributes->count())
+                            <div class="col-12">
+                                <div class="border radius-8 p-3">
+                                    <label class="form-label fw-semibold">Use Global Attribute</label>
+                                    <div class="row g-2">
+                                        <div class="col-md-6">
+                                            <select id="globalAttributeSelect" class="form-select">
+                                                <option value="">Choose attribute</option>
+                                                @foreach($globalAttributes as $attribute)
+                                                    <option value="{{ $attribute->name }}" data-values="{{ e(json_encode($attribute->values ?? [])) }}">{{ $attribute->name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <select id="globalAttributeValueSelect" class="form-select">
+                                                <option value="">Choose value</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
 
                         {{-- Attribute Name --}}
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">
                                 Attribute Name <span class="text-danger">*</span>
                             </label>
-                            <input type="text" name="attribute_name"
+                            <input type="text" name="attribute_name" id="attributeNameInput"
                                    class="form-control @error('attribute_name') is-invalid @enderror"
                                    value="{{ old('attribute_name', 'Pack') }}"
                                    placeholder="e.g. Pack, Size, Weight" required>
@@ -66,7 +88,7 @@
                             <label class="form-label fw-semibold">
                                 Attribute Value <span class="text-danger">*</span>
                             </label>
-                            <input type="text" name="attribute_value"
+                            <input type="text" name="attribute_value" id="attributeValueInput"
                                    class="form-control @error('attribute_value') is-invalid @enderror"
                                    value="{{ old('attribute_value') }}"
                                    placeholder="e.g. 5 KG, 10 KG, 20 KG" required>
@@ -95,7 +117,7 @@
                                 Price <span class="text-danger">*</span>
                             </label>
                             <div class="input-group">
-                                <span class="input-group-text">₹</span>
+                                <span class="input-group-text">Rs.</span>
                                 <input type="number" name="price"
                                        class="form-control @error('price') is-invalid @enderror"
                                        value="{{ old('price') }}"
@@ -152,15 +174,15 @@
 
                         {{-- Active Toggle --}}
                         <div class="col-12">
-                            <div class="form-check form-switch d-flex align-items-center gap-2">
-                                <input class="form-check-input" type="checkbox"
-                                       name="is_active" id="isActive"
-                                       {{ old('is_active', true) ? 'checked' : '' }}
-                                       style="width:2.5em;height:1.3em;cursor:pointer;">
-                                <label class="form-check-label fw-semibold" for="isActive">
-                                    Active (visible to customers)
-                                </label>
+                            <x-toggle-switch name="is_active" id="isActive" :checked="old('is_active', true)" label="Active (visible to customers)" />
+                        </div>
+
+                        <div class="col-12">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="is_default" value="1" id="isDefault" {{ old('is_default') ? 'checked' : '' }}>
+                                <label class="form-check-label fw-semibold" for="isDefault">Set as default variation</label>
                             </div>
+                            <small class="text-secondary-light">Only one variation can be default for this product.</small>
                         </div>
 
                     </div>
@@ -169,7 +191,7 @@
                     <div class="d-flex gap-2 mt-4">
                         <button type="submit"
                                 class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2">
-                            <iconify-icon icon="lucide:save"></iconify-icon>
+                            
                             Save Variation
                         </button>
                         <a href="{{ route('dashboard.products.variations.index', $product) }}"
@@ -189,6 +211,28 @@
 
 @push('scripts')
 <script>
+    const globalAttributeSelect = document.getElementById('globalAttributeSelect');
+    const globalAttributeValueSelect = document.getElementById('globalAttributeValueSelect');
+    const attributeNameInput = document.getElementById('attributeNameInput');
+    const attributeValueInput = document.getElementById('attributeValueInput');
+
+    globalAttributeSelect?.addEventListener('change', function () {
+        const selected = this.options[this.selectedIndex];
+        const values = JSON.parse(selected.dataset.values || '[]');
+        attributeNameInput.value = this.value || attributeNameInput.value;
+        globalAttributeValueSelect.innerHTML = '<option value="">Choose value</option>';
+        values.forEach(value => {
+            const option = document.createElement('option');
+            option.value = value;
+            option.textContent = value;
+            globalAttributeValueSelect.appendChild(option);
+        });
+    });
+
+    globalAttributeValueSelect?.addEventListener('change', function () {
+        attributeValueInput.value = this.value || attributeValueInput.value;
+    });
+
     function previewImg(input) {
         const prev = document.getElementById('imgPreview');
         if (input.files && input.files[0]) {

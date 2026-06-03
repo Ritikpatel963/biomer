@@ -162,7 +162,7 @@
                                 @if($item->product->featured_image)
                                     <img src="{{ Storage::url($item->product->featured_image) }}" alt="{{ $item->product->name }}" class="ors__item-img">
                                 @else
-                                    <div class="ors__item-img" style="display:flex; align-items:center; justify-content:center; background:#f0f5ee;">📦</div>
+                                    <div class="ors__item-img" style="display:flex; align-items:center; justify-content:center; background:#f0f5ee;"><iconify-icon icon="mdi:package-variant" class="icon"></iconify-icon></div>
                                 @endif
                                 <div class="ors__item-details">
                                     <div class="ors__item-name">{{ $item->product->name }}</div>

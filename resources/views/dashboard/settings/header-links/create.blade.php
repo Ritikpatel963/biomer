@@ -83,7 +83,7 @@
         <div class="d-flex gap-2 justify-content-between">
           <a href="{{ route('dashboard.header-links.index') }}" class="btn btn-outline-secondary">Cancel</a>
           <button type="submit" class="btn btn-primary">
-            <iconify-icon icon="lucide:plus"></iconify-icon> Create Link
+             Create Link
           </button>
         </div>
 
@@ -92,3 +92,4 @@
   </div>
 
 @endsection
+

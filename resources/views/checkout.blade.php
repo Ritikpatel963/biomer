@@ -342,14 +342,14 @@
                             <textarea name="address"
                                       class="chk__textarea @error('address') is-invalid @enderror"
                                       placeholder="House / Flat no., Street, Village, Landmark, Area..."
-                                      required>{{ old('address') }}</textarea>
+                                      required>{{ old('address', $customer->address) }}</textarea>
                             @error('address')<span class="chk__error">{{ $message }}</span>@enderror
                         </div>
                         <div class="col-12 col-sm-6">
                             <label class="chk__label">City *</label>
                             <input type="text" name="city"
                                    class="chk__input @error('city') is-invalid @enderror"
-                                   value="{{ old('city') }}" placeholder="City / Town" required>
+                                   value="{{ old('city', $customer->city) }}" placeholder="City / Town" required>
                             @error('city')<span class="chk__error">{{ $message }}</span>@enderror
                         </div>
                         <div class="col-12 col-sm-6">
@@ -368,7 +368,7 @@
                                     'Delhi','Jammu & Kashmir','Ladakh'
                                 ] as $state)
                                     <option value="{{ $state }}"
-                                        {{ old('state') == $state ? 'selected' : '' }}>
+                                        {{ old('state', $customer->state) == $state ? 'selected' : '' }}>
                                         {{ $state }}
                                     </option>
                                 @endforeach
@@ -379,14 +379,14 @@
                             <label class="chk__label">PIN Code *</label>
                             <input type="text" name="pincode"
                                    class="chk__input @error('pincode') is-invalid @enderror"
-                                   value="{{ old('pincode') }}"
+                                   value="{{ old('pincode', $customer->pincode) }}"
                                    placeholder="6-digit PIN" maxlength="6" required>
                             @error('pincode')<span class="chk__error">{{ $message }}</span>@enderror
                         </div>
                         <div class="col-12 col-sm-6">
                             <label class="chk__label">Country</label>
                             <input type="text" name="country"
-                                   class="chk__input" value="India" readonly>
+                                   class="chk__input" value="{{ old('country', $customer->country ?: 'India') }}" readonly>
                         </div>
                     </div>
                 </div>
@@ -426,7 +426,7 @@
                             <img src="{{ Storage::url($item['image']) }}"
                                  alt="{{ $item['name'] }}" class="chk__item-img">
                         @else
-                            <div class="chk__item-img-placeholder">🌿</div>
+                            <div class="chk__item-img-placeholder"><iconify-icon icon="mdi:leaf" class="icon"></iconify-icon></div>
                         @endif
                         <div style="flex:1; min-width:0;">
                             <div class="chk__item-name">{{ $item['name'] }}</div>
@@ -469,7 +469,7 @@
 
                    {{-- Payment Method Selector --}}
 <div class="chk__form-card-title" style="margin-top:1.25rem;">
-    <span class="chk__form-card-num">💳</span> Choose Payment Method
+    <span class="chk__form-card-num"><iconify-icon icon="fa6-solid:credit-card" class="icon"></iconify-icon></span> Choose Payment Method
 </div>
 <div class="pay-methods">
     @foreach($paymentGateways as $index => $gateway)
@@ -480,7 +480,7 @@
                      onerror="this.style.display='none'"
                      style="filter:invert(1) sepia(1) saturate(5) hue-rotate(100deg)">
             @elseif($gateway->gateway_name == 'cod')
-                💵
+                <iconify-icon icon="mdi:cash" class="pay-method-icon"></iconify-icon>
             @endif
             {{ $gateway->display_name }}
         </label>
@@ -488,11 +488,12 @@
 </div>
 
 <p style="text-align:center; font-size:0.72rem; color:#9aab9a; margin-top:0.75rem; margin-bottom:0;">
-    🔒 Your information is secure and encrypted
+    <iconify-icon icon="ic:outline-lock" class="icon"></iconify-icon> Your information is secure and encrypted
 </p>
 
 <button type="button" id="placeOrderBtn" class="chk__place-btn" onclick="startPayment()">
-    Complete Purchase
+    <iconify-icon icon="fa6-solid:credit-card" class="btn-icon"></iconify-icon>
+    <span>Pay Now</span>
 </button>
 
                 </div>
@@ -509,7 +510,7 @@
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
 <script>
-const cashfree = Cashfree({ mode: "sandbox" }); // 🔁 change to "production" for live
+const cashfree = Cashfree({ mode: "{{ config('cashfree.environment', 'sandbox') }}" });
 
 function getSelectedGateway() {
     return document.querySelector('input[name="payment_method"]:checked')?.value || 'razorpay';
@@ -522,8 +523,7 @@ function startPayment() {
     if (!form.checkValidity()) { form.reportValidity(); return; }
 
     btn.disabled    = true;
-    btn.textContent = 'Processing...';
-
+        btn.querySelector('span').textContent = 'Processing...';
     const gateway = getSelectedGateway();
 
     if (gateway === 'cod') {
@@ -561,7 +561,7 @@ function startRazorpayPayment(btn, form) {
             prefill:     { name: data.name, email: data.email, contact: data.phone },
             theme:       { color: '#2d7a45' },
             handler: function (response) {
-                btn.textContent = 'Verifying Payment...';
+                btn.querySelector('span').textContent = 'Verifying Payment...';
                 fetch('{{ route("order.payment.success") }}', {
                     method: 'POST',
                     headers: {
@@ -580,16 +580,16 @@ function startRazorpayPayment(btn, form) {
                     if (ok && data.redirect_url) window.location.href = data.redirect_url;
                     else throw new Error(data.error || 'Payment verification failed.');
                 })
-                .catch(err => { alert('❌ ' + err.message); resetBtn(btn); });
+                .catch(err => { alert(err.message); resetBtn(btn); });
             },
             modal: { ondismiss: () => resetBtn(btn) }
         };
 
         const rzp = new Razorpay(options);
-        rzp.on('payment.failed', r => { alert('❌ Payment failed: ' + r.error.description); resetBtn(btn); });
+        rzp.on('payment.failed', r => { alert('Payment failed: ' + r.error.description); resetBtn(btn); });
         rzp.open();
     })
-    .catch(err => { alert('❌ ' + err.message); resetBtn(btn); });
+    .catch(err => { alert(err.message); resetBtn(btn); });
 }
 
 // ── CASHFREE ──────────────────────────────────────────────────────────
@@ -608,14 +608,18 @@ function startCashfreePayment(btn, form) {
     .then(({ ok, data }) => {
         if (!ok) throw new Error(data.error || 'Something went wrong.');
 
-        btn.textContent = 'Opening Payment...';
+        if (!data.payment_session_id) {
+            throw new Error('Cashfree session was not created. Please check the server logs.');
+        }
+
+        btn.querySelector('span').textContent = 'Opening Payment...';
 
         cashfree.checkout({
             paymentSessionId: data.payment_session_id,
             redirectTarget:   "_self",   // opens in same tab; Cashfree redirects back to return_url
         });
     })
-    .catch(err => { alert('❌ ' + err.message); resetBtn(btn); });
+    .catch(err => { alert(err.message); resetBtn(btn); });
 }
 
 // ── COD ───────────────────────────────────────────────────────────────
@@ -648,12 +652,15 @@ function startCodPayment(btn, form) {
             throw new Error(msg);
         }
     })
-    .catch(err => { alert('❌ ' + err.message); resetBtn(btn); });
+    .catch(err => { alert(err.message); resetBtn(btn); });
 }
 
 function resetBtn(btn) {
-    btn.disabled    = false;
-    btn.textContent = '💳 Pay Now →';
+    btn.disabled = false;
+    const label = btn.querySelector('span');
+    if (label) {
+        label.textContent = 'Pay Now';
+    }
 }
 </script>
 @endpush

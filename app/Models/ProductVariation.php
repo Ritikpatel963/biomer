@@ -8,14 +8,21 @@ class ProductVariation extends Model
 {
     protected $fillable = [
         'product_id', 'sku', 'attribute_name', 'attribute_value',
-        'price', 'weight', 'unit', 'stock_quantity', 'is_active', 'image_path',
+        'attributes', 'price', 'compare_at_price', 'cost_price', 'weight', 'unit',
+        'stock_quantity', 'track_stock', 'is_in_stock', 'is_active', 'is_default', 'image_path',
     ];
 
     protected $casts = [
-        'price'          => 'decimal:2',
-        'weight'         => 'decimal:2',
-        'is_active'      => 'boolean',
-        'stock_quantity' => 'integer',
+        'attributes'       => 'array',
+        'price'            => 'decimal:2',
+        'compare_at_price' => 'decimal:2',
+        'cost_price'       => 'decimal:2',
+        'weight'           => 'decimal:2',
+        'track_stock'      => 'boolean',
+        'is_in_stock'      => 'boolean',
+        'is_active'        => 'boolean',
+        'is_default'       => 'boolean',
+        'stock_quantity'   => 'integer',
     ];
 
     public function product() { return $this->belongsTo(Product::class); }

@@ -18,6 +18,12 @@ class CustomerAuthController extends Controller
         if (Auth::guard('customer')->check()) {
             return redirect()->route('products.index');
         }
+
+        $redirect = request('redirect');
+        if (is_string($redirect) && str_starts_with($redirect, url('/'))) {
+            session()->put('url.intended', $redirect);
+        }
+
         return view('auth.customer-login');
     }
 
