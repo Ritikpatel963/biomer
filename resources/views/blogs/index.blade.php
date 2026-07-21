@@ -1,44 +1,51 @@
 @extends('layout.frontlayout')
 
-@section('title', 'Blog Insights - Bharat Biomer')
-@section('seo_description', 'Explore the latest blog posts from Bharat Biomer on sustainable agriculture, biotech solutions, and farm innovation.')
-@section('seo_keywords', 'Bharat Biomer blog, agriculture blog, biotech news, farming tips, sustainable agriculture')
+@section('body_class', 'no-product-motion')
+
+@section('title', $pageSeo?->meta_title ?: 'Blog Insights - Bharat Biomer')
+@section('seo_description', $pageSeo?->meta_description ?: 'Explore the latest blog posts from Bharat Biomer on sustainable agriculture, biotech solutions, and farm innovation.')
+@section('seo_keywords', $pageSeo?->meta_keyword ?: 'Bharat Biomer blog, agriculture blog, biotech news, farming tips, sustainable agriculture')
 
 @section('content')
  <!-- ========================
        SECTION 1: About Hero
   ======================== -->
-  <section class="abth__section">
-    <div class="container">
-      <div class="row justify-content-center">
-        <div class="col-12 col-lg-9 text-center">
-          <h1 class="abth__heading">Blog</h1>
-          <p class="abth__desc">Read the latest insights on sustainable agriculture, soil health, and biological farming innovations.</p>
-        </div>
-      </div>
-    </div>
-  </section>
+  <x-front-breadcrumb
+    badge="Blog"
+    title="Blog"
+    description="Read the latest insights on sustainable agriculture, soil health, and biological farming innovations."
+    align="center"
+  />
   {{-- End Section --}}
-<section class="py-5">
+<section class="py-5 blog-index-page">
     <div class="container">
         <div class="row gx-4 gy-4">
 
             <div class="col-lg-8">
-                <div class="row g-4">
+                <div class="row g-3">
                     @forelse ($blogs as $blog)
                         <div class="col-12">
-                            <article class="card border-0 shadow-sm overflow-hidden">
-                                <div class="row g-0 align-items-center">
-                                    <div class="col-md-5">
-                                        <a href="{{ route('frontend.blog.show', $blog->slug) }}">
-                                            <img src="{{ $blog->thumbnail_url }}" alt="{{ $blog->title }}" class="img-fluid w-100 h-100 object-fit-cover">
+                            <article class="card overflow-hidden blog-list-card">
+                                <div class="row g-0 align-items-stretch blog-list-card__row">
+                                    <div class="col-md-5 blog-list-card__media">
+                                        <a href="{{ route('frontend.blog.show', $blog->slug) }}" class="blog-list-card__media-link">
+                                            <img
+                                                src="{{ $blog->thumbnail_url }}"
+                                                alt="{{ $blog->thumbnail_alt_text }}"
+                                                class="blog-list-card__image"
+                                                width="640"
+                                                height="420"
+                                                decoding="async"
+                                                loading="{{ $loop->first ? 'eager' : 'lazy' }}"
+                                                @if($loop->first) fetchpriority="high" @endif
+                                            >
                                         </a>
                                     </div>
-                                    <div class="col-md-7 p-4">
+                                    <div class="col-md-7 p-4 d-flex flex-column justify-content-center">
                                         <div class="d-flex flex-wrap align-items-center gap-2 mb-2 text-muted small">
                                             <span>{{ $blog->category->name ?? 'General' }}</span>
                                             <span>&bull;</span>
-                                            <span>{{ $blog->created_at->format('M d, Y') }}</span>
+                                            <span>{{ ($blog->published_at ?: $blog->created_at)->format('M d, Y') }}</span>
                                             <span>&bull;</span>
                                             <span>{{ $blog->reading_time ?? 5 }} min read</span>
                                         </div>
@@ -47,12 +54,12 @@
                                                 {{ $blog->title }}
                                             </a>
                                         </h2>
-                                        <p class="text-secondary mb-3">{{ Str::limit(strip_tags($blog->description), 140) }}</p>
+                                        <p class="text-secondary mb-3 blog-list-card__excerpt">{!! \App\Services\BlogExcerpt::render($blog->description, 140) !!}</p>
                                         <div class="d-flex flex-wrap gap-2 align-items-center">
-                                            <span class="badge rounded-pill bg-success-light text-success">{{ $blog->author ?? 'Bharat Biomer' }}</span>
+                                            <span class="blog-meta-pill blog-meta-pill--author">{{ $blog->author ?? 'Bharat Biomer' }}</span>
                                             @if($blog->tags)
                                                 @foreach(explode(',', $blog->tags) as $tag)
-                                                    <span class="badge rounded-pill bg-secondary-light text-secondary">{{ trim($tag) }}</span>
+                                                    <span class="blog-meta-pill blog-meta-pill--tag">{{ trim($tag) }}</span>
                                                 @endforeach
                                             @endif
                                         </div>
@@ -91,6 +98,26 @@
                             <span class="badge rounded-pill bg-primary-light text-primary">{{ $tag }}</span>
                         @empty
                             <span class="text-muted">No tags available.</span>
+                        @endforelse
+                    </div>
+                </div>
+
+                <div class="border rounded-4 p-4 bg-white shadow-sm mt-4">
+                    <h4 class="h5 mb-3">Recent Posts</h4>
+                    <div class="recent-posts-list">
+                        @forelse($recentBlogs as $recentBlog)
+                            <a href="{{ route('frontend.blog.show', $recentBlog->slug) }}" class="recent-post-item">
+                                <img src="{{ $recentBlog->thumbnail_url }}"
+                                     alt="{{ $recentBlog->thumbnail_alt_text }}"
+                                     class="recent-post-item__image"
+                                     width="72" height="72" loading="lazy" decoding="async">
+                                <span class="recent-post-item__content">
+                                    <span class="recent-post-item__title">{{ $recentBlog->title }}</span>
+                                    <span class="recent-post-item__date">{{ ($recentBlog->published_at ?: $recentBlog->created_at)->format('M d, Y') }}</span>
+                                </span>
+                            </a>
+                        @empty
+                            <span class="text-muted">No recent posts available.</span>
                         @endforelse
                     </div>
                 </div>

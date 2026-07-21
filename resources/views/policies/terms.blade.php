@@ -1,6 +1,8 @@
 @extends('layout.frontlayout')
 
-@section('title', 'Terms & Conditions – Bharat Biomer')
+@section('title', $pageSeo?->meta_title ?: 'Terms & Conditions - Bharat Biomer')
+@section('seo_description', $pageSeo?->meta_description ?: 'Review Bharat Biomer terms and conditions for website use, products, orders, payments, intellectual property, and liability.')
+@section('seo_keywords', $pageSeo?->meta_keyword ?: 'Bharat Biomer terms and conditions, website terms, product terms, order policy')
 
 @section('content')
     <section class="container py-5">

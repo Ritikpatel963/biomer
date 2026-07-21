@@ -135,6 +135,7 @@
                                 <td class="text-secondary-light">{{ $review->created_at->format('d M Y') }}</td>
                                 <td class="pe-3">
                                     <div class="d-flex justify-content-center gap-2">
+                                        @can('edit blogs')
                                         @if($review->status !== 'approved')
                                             <form action="{{ route('dashboard.blog-reviews.approve', $review) }}" method="POST">
                                                 @csrf
@@ -152,7 +153,9 @@
                                                 </button>
                                             </form>
                                         @endif
+                                        @endcan
 
+                                        @can('delete blogs')
                                         <form action="{{ route('dashboard.blog-reviews.destroy', $review) }}" method="POST" onsubmit="return confirm('Delete this review?')">
                                             @csrf
                                             @method('DELETE')
@@ -160,6 +163,7 @@
                                                 <i class="ri-delete-bin-line"></i>
                                             </button>
                                         </form>
+                                        @endcan
                                     </div>
                                 </td>
                             </tr>

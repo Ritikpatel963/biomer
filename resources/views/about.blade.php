@@ -1,22 +1,18 @@
 @extends('layout.frontlayout')
-@section('title', 'About Bharat Biomer – Bharat Biomer')
-@section('seo_description', 'Learn about Bharat Biomer, our mission to develop sustainable biological solutions for agriculture, and our commitment to soil health and crop productivity.')
-@section('seo_keywords', 'Bharat Biomer, about us, agri-biotechnology, sustainable agriculture, soil health')
+@section('title', $pageSeo?->meta_title ?: 'About Bharat Biomer – Bharat Biomer')
+@section('seo_description', $pageSeo?->meta_description ?: 'Learn about Bharat Biomer, our mission to develop sustainable biological solutions for agriculture, and our commitment to soil health and crop productivity.')
+@section('seo_keywords', $pageSeo?->meta_keyword ?: 'Bharat Biomer, about us, agri-biotechnology, sustainable agriculture, soil health')
 
 @section('content')
   <!-- ========================
        SECTION 1: About Hero
   ======================== -->
-  <section class="abth__section">
-    <div class="container">
-      <div class="row justify-content-center">
-        <div class="col-12 col-lg-9 text-center">
-          <h1 class="abth__heading">About Bharat Biomer</h1>
-          <p class="abth__desc">We are an agri-biotechnology company focused on developing sustainable biological inputs that enhance crop performance while protecting soil and the environment.</p>
-        </div>
-      </div>
-    </div>
-  </section>
+  <x-front-breadcrumb
+    badge="About Us"
+    title="About Bharat Biomer"
+    description="We are an agri-biotechnology company focused on developing sustainable biological inputs that enhance crop performance while protecting soil and the environment."
+    align="center"
+  />
 
   <!-- ========================
        SECTION 2: Who We Are

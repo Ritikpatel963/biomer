@@ -16,36 +16,64 @@ class Blog extends Model
         'title',
         'slug',
         'thumbnail',
+        'thumbnail_alt',
         'author',
+        'author_bio',
         'reading_time',
+        'published_at',
         'description',
         'tags',
         'status',
         'meta_title',
         'meta_tags',
         'meta_description',
+        'canonical_url',
+        'faq_items',
+    ];
+
+    protected $casts = [
+        'faq_items' => 'array',
+        'published_at' => 'datetime',
     ];
 
     protected static function booted(): void
     {
         static::creating(function (self $blog) {
-            $blog->slug = self::uniqueSlug($blog->title);
+            $blog->slug = self::uniqueSlug($blog->slug ?: $blog->title);
+
+            if ($blog->status === 'published' && blank($blog->published_at)) {
+                $blog->published_at = now();
+            }
         });
 
         static::updating(function (self $blog) {
-            if ($blog->isDirty('title')) {
+            if ($blog->isDirty('slug')) {
+                $blog->slug = self::uniqueSlug($blog->slug, $blog->id);
+            } elseif (blank($blog->slug)) {
                 $blog->slug = self::uniqueSlug($blog->title, $blog->id);
+            }
+
+            if ($blog->status === 'published' && blank($blog->published_at)) {
+                $blog->published_at = now();
             }
         });
     }
 
-    public static function uniqueSlug(string $title, ?int $ignoreId = null): string
+    public static function uniqueSlug(string $value, ?int $ignoreId = null): string
     {
-        $slug  = Str::slug($title);
-        $query = self::where('slug', $slug);
-        if ($ignoreId) $query->where('id', '!=', $ignoreId);
-        $count = $query->count();
-        return $count ? "{$slug}-{$count}" : $slug;
+        $base = substr(Str::slug($value) ?: 'blog-post', 0, 255);
+        $slug = $base;
+        $suffix = 2;
+
+        while (self::withTrashed()
+            ->where('slug', $slug)
+            ->when($ignoreId, fn ($query) => $query->whereKeyNot($ignoreId))
+            ->exists()) {
+            $ending = '-' . $suffix++;
+            $slug = rtrim(substr($base, 0, 255 - strlen($ending)), '-') . $ending;
+        }
+
+        return $slug;
     }
 
     public function category()
@@ -66,5 +94,10 @@ class Blog extends Model
     public function getThumbnailUrlAttribute(): string
     {
         return $this->thumbnail ? asset('storage/' . $this->thumbnail) : asset('assets/images/user.png');
+    }
+
+    public function getThumbnailAltTextAttribute(): string
+    {
+        return $this->thumbnail_alt ?: $this->title;
     }
 }

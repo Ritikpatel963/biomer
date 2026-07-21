@@ -35,7 +35,7 @@
     </main>
 
     <!-- ..::  scripts  start ::.. -->
-    <x-script  script='{!! isset($script) ? $script : "" !!}' />
+    <x-script :script="$script ?? ''" />
     <!-- ..::  scripts  end ::.. -->
 
 </body>

@@ -5,3 +5,16 @@
 RewriteEngine On
 RewriteCond %{REQUEST_URI} !^/public/
 RewriteRule ^(.*)$ /public/$1 [L,QSA]
+// Source - https://stackoverflow.com/a/53516975
+// Posted by Derk Jan Speelman, modified by community. See post 'Timeline' for change history
+// Retrieved 2026-04-08, License - CC BY-SA 4.0
+
+RewriteEngine On
+
+# Canonical domain: send both HTTP and non-www requests directly to HTTPS www.
+RewriteCond %{HTTP_HOST} ^(www\.)?bharatbiomer\.com$ [NC]
+RewriteCond %{HTTPS} !=on [OR]
+RewriteCond %{HTTP_HOST} !^www\.bharatbiomer\.com$ [NC]
+RewriteRule ^ https://www.bharatbiomer.com%{REQUEST_URI} [R=301,L,NE]
+RewriteCond %{REQUEST_URI} !^/public/
+RewriteRule ^(.*)$ /public/$1 [L,QSA]

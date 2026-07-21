@@ -29,6 +29,7 @@ class CouponController extends Controller
             'expires_at' => 'nullable|date',
         ]);
 
+        $validated['code'] = strtoupper(trim($validated['code']));
         $validated['is_active'] = $request->has('is_active');
         $validated['used_count'] = 0;
 
@@ -53,6 +54,7 @@ class CouponController extends Controller
             'expires_at' => 'nullable|date',
         ]);
 
+        $validated['code'] = strtoupper(trim($validated['code']));
         $validated['is_active'] = $request->has('is_active');
 
         $coupon->update($validated);

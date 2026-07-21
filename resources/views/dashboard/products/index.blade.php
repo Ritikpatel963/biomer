@@ -16,13 +16,22 @@
             <a href="{{ route('dashboard.categories.index') }}" class="btn btn-outline-secondary btn-sm">Categories</a>
             <a href="{{ route('dashboard.brands.index') }}" class="btn btn-outline-secondary btn-sm">Brands</a>
             <a href="{{ route('dashboard.tags.index') }}" class="btn btn-outline-secondary btn-sm">Tags</a>
-            <a href="{{ route('dashboard.products.create') }}" class="btn btn-primary btn-sm">Add Product</a>
+            @can('create products')
+                <a href="{{ route('dashboard.products.create') }}" class="btn btn-primary btn-sm">Add Product</a>
+            @endcan
         </div>
     </div>
 
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show mx-3 mt-3 mb-0">
             {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show mx-3 mt-3 mb-0">
+            {{ session('error') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     @endif
@@ -93,19 +102,26 @@
                             </td>
                             <td>
                                 <div class="d-flex flex-wrap gap-2">
+                                    @can('edit products')
                                     <a href="{{ route('dashboard.products.edit', $product) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+                                    @endcan
+                                    @can('delete products')
                                     <form action="{{ route('dashboard.products.destroy', $product) }}" method="POST" onsubmit="return confirm('Delete product \'{{ addslashes($product->name) }}\'?')">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
                                     </form>
+                                    @endcan
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
                             <td colspan="9" class="text-center py-5 text-muted">
-                                No products found. <a href="{{ route('dashboard.products.create') }}">Add your first product.</a>
+                                No products found.
+                                @can('create products')
+                                    <a href="{{ route('dashboard.products.create') }}">Add your first product.</a>
+                                @endcan
                             </td>
                         </tr>
                     @endforelse

@@ -12,13 +12,14 @@
         <div class="admin-page-card__header">
             <div>
                 <span class="admin-page-card__eyebrow">Content Management</span>
-                <h2 class="admin-page-card__title">Blog Management</h2>
-                <p class="admin-page-card__desc">All blog data now sits inside the same card pattern as the settings pages, so the layout stays consistent while the content changes.</p>
+                
             </div>
             <div class="admin-page-card__actions">
+                @can('create blogs')
                 <a href="{{ route('addBlog') }}" class="btn btn-primary d-flex align-items-center gap-2">
                     <i class="ri-add-line"></i> Add New Post
                 </a>
+                @endcan
             </div>
         </div>
 
@@ -32,7 +33,7 @@
         <div class="admin-section-card mt-4">
             <div class="admin-section-card__header d-flex align-items-center justify-content-between flex-wrap gap-3">
                 <h5 class="card-title mb-0">All Blog Posts</h5>
-                <span class="text-muted small">{{ $blogs->count() }} posts</span>
+                <span class="text-muted small">{{ $blogs->total() }} posts</span>
             </div>
             <div class="admin-section-card__body">
                 <div class="table-responsive">
@@ -50,12 +51,12 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($blogs as $blog)
+                            @forelse ($blogs as $blog)
                                 <tr>
-                                    <td>{{ $loop->iteration }}</td>
+                                    <td>{{ $blogs->firstItem() + $loop->index }}</td>
                                     <td>
                                         <img src="{{ $blog->thumbnail_url }}"
-                                            alt=""
+                                            alt="{{ $blog->thumbnail_alt_text }}"
                                             class="w-48-px h-48-px object-fit-cover radius-8">
                                     </td>
                                     <td>
@@ -88,11 +89,14 @@
                                                 title="View">
                                                 <i class="ri-eye-line"></i>
                                             </a>
+                                            @can('edit blogs')
                                             <a href="{{ route('editBlog', $blog->id) }}"
                                                 class="btn btn-sm btn-primary-100 text-primary-600 px-12 py-6 radius-8"
                                                 title="Edit">
                                                 <i class="ri-edit-2-line"></i>
                                             </a>
+                                            @endcan
+                                            @can('delete blogs')
                                             <form action="{{ route('destroyBlog', $blog->id) }}" method="POST"
                                                 onsubmit="return confirm('Delete this post? This cannot be undone.')">
                                                 @csrf
@@ -102,35 +106,26 @@
                                                     <i class="ri-delete-bin-6-line"></i>
                                                 </button>
                                             </form>
+                                            @endcan
                                         </div>
                                     </td>
                                 </tr>
-                            @endforeach
+                            @empty
+                                <tr>
+                                    <td colspan="8" class="text-center py-4 text-muted">No blog posts found.</td>
+                                </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
+                @if($blogs->hasPages())
+                    <div class="d-flex justify-content-center mt-4">
+                        {{ $blogs->links() }}
+                    </div>
+                @endif
             </div>
         </div>
     </div>
 </div>
 
 @endsection
-
-@push('scripts')
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
-<script>
-    $('#blogsTable').DataTable({
-        pageLength: 10,
-        order: [[0, 'asc']],
-        columnDefs: [
-            { orderable: false, targets: [1, 7] }
-        ],
-        language: {
-            search: 'Search posts:',
-            lengthMenu: 'Show _MENU_ posts',
-        }
-    });
-</script>
-@endpush

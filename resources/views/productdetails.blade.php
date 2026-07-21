@@ -1,6 +1,10 @@
 @extends('layout.frontlayout')
 @section('title', $product->meta_title ?? $product->name . ' – Bharat Biomer')
 
+@php
+  $featuredImageUrl = $product->featured_image ? Storage::url($product->featured_image) : null;
+@endphp
+
 @push('meta')
   <meta name="description" content="{{ $product->meta_description ?? $product->short_description ?? 'Premium organic products from Bharat Biomer' }}">
   <meta name="keywords" content="{{ $product->meta_keyword ?? $product->name . ', organic, products' }}">
@@ -11,16 +15,16 @@
   <meta property="og:title" content="{{ $product->meta_title ?? $product->name }}">
   <meta property="og:description" content="{{ $product->meta_description ?? $product->short_description ?? 'Premium organic product' }}">
   <meta property="og:url" content="{{ url()->current() }}">
-  @if($product->featured_image)
-    <meta property="og:image" content="{{ Storage::url($product->featured_image) }}">
+  @if($featuredImageUrl)
+    <meta property="og:image" content="{{ url($featuredImageUrl) }}">
   @endif
   
   {{-- Twitter Card Tags --}}
   <meta name="twitter:card" content="product">
   <meta name="twitter:title" content="{{ $product->meta_title ?? $product->name }}">
   <meta name="twitter:description" content="{{ $product->meta_description ?? $product->short_description ?? 'Premium organic product' }}">
-  @if($product->featured_image)
-    <meta name="twitter:image" content="{{ Storage::url($product->featured_image) }}">
+  @if($featuredImageUrl)
+    <meta name="twitter:image" content="{{ url($featuredImageUrl) }}">
   @endif
   
   {{-- Product Schema.org Structured Data --}}
@@ -30,7 +34,7 @@
     "@type": "Product",
     "name": "{{ $product->name }}",
     "description": "{{ $product->meta_description ?? $product->short_description ?? $product->description }}",
-    "image": "{{ $product->featured_image ? Storage::url($product->featured_image) : asset('assets/images/product-bottle.svg') }}",
+    "image": "{{ $featuredImageUrl ? url($featuredImageUrl) : asset('assets/images/product-bottle.svg') }}",
     "brand": {
       "@type": "Brand",
       "name": "{{ $product->brand->name ?? 'Bharat Biomer' }}"
@@ -51,30 +55,18 @@
 @endpush
 
 @section('content')
-<div class="pd-page">
+<div class="pd-page pd-no-motion" data-no-motion
+     data-cart-add-url="{{ route('cart.add') }}"
+     data-review-store-url="{{ route('reviews.store', $product) }}">
 
   <!-- ========================
        SECTION 1: Hero
   ======================== -->
-  <section class="prodh__section">
-    <div class="container">
-      <div class="row">
-        <div class="col-12 col-lg-8">
-
-          <div class="prodh__badge mb-3">
-            <img src="{{ asset('assets/images/flask-icon.svg') }}" alt="flask" class="prodh__badge-icon"/>
-            <span class="prodh__badge-text">
-              {{ $product->category->name ?? 'Product Details' }}
-            </span>
-          </div>
-
-          <h1 class="prodh__heading">{{ $product->name }}</h1>
-          <p class="prodh__desc">{{ $product->short_description }}</p>
-
-        </div>
-      </div>
-    </div>
-  </section>
+  <x-front-breadcrumb
+    :badge="$product->category->name ?? 'Product Details'"
+    :title="$product->name"
+    :icon="asset('assets/images/flask-icon.svg')"
+  />
 
   <!-- ========================
        SECTION 2: Product Detail
@@ -87,12 +79,12 @@
             <div class="row g-0">
 
               <!-- ── LEFT: Images ── -->
-              <div class="col-12 col-md-5">
+              <div class="col-12 col-md-5 pd__gallery-column">
 
                 {{-- Main Image --}}
                 <div class="pd__img-main-wrap">
-                  @if($product->featured_image)
-                    <img src="{{ Storage::url($product->featured_image) }}"
+                  @if($featuredImageUrl)
+                    <img src="{{ $featuredImageUrl }}"
                          alt="{{ $product->name }}"
                          class="avan__product-img"
                          id="mainImage">
@@ -107,10 +99,10 @@
                 {{-- Gallery Thumbnails --}}
                 @if($product->images->count())
                 <div class="pd__thumbs">
-                  @if($product->featured_image)
-                    <img src="{{ Storage::url($product->featured_image) }}"
+                  @if($featuredImageUrl)
+                    <img src="{{ $featuredImageUrl }}"
                          class="pd__thumb pd__thumb--active"
-                         onclick="changeImage(this, '{{ Storage::url($product->featured_image) }}')">
+                         onclick="changeImage(this, '{{ $featuredImageUrl }}')">
                   @endif
                   @foreach($product->images as $img)
                     <img src="{{ Storage::url($img->image_path) }}"
@@ -136,7 +128,11 @@
                     @endforeach
                   </div>
 
-                  <h3 class="avan__product-title">{{ $product->name }}</h3>
+                  <h1 class="avan__product-title">{{ $product->name }}</h1>
+
+                  @if($product->short_description)
+                    <p class="pd__short-desc">{{ $product->short_description }}</p>
+                  @endif
 
                   @if($product->technical_content)
                     <p class="pd__technical">{{ $product->technical_content }}</p>
@@ -223,17 +219,12 @@
                     </p>
                   @endif
 
-                  {{-- ── Key Features ── --}}
-                  @if($product->description)
-                  <h5 class="avan__features-heading mt-3">Description</h5>
-                  <p class="avan__product-desc">{{ $product->description }}</p>
-                  @endif
 
                   {{-- ── CTA Buttons ── --}}
                   <div class="pd__cta-wrap">
                     <button class="pd__cta-btn pd__cta-btn--primary" id="addToCartBtn"
                             data-product-id="{{ $product->id }}">
-                      <iconify-icon icon="fa6-solid:cart-shopping" class="btn-icon"></iconify-icon>
+                      <i class="ri-shopping-cart-2-line btn-icon" aria-hidden="true"></i>
                       <span>Add to Cart</span>
                     </button>
                     <a href="{{ route('products.index') }}" class="pd__cta-btn pd__cta-btn--outline">
@@ -257,19 +248,14 @@
   @if($product->technical_content || $product->tags->count())
   <section class="avan__section" style="padding-top:0;">
     <div class="container">
-      <div class="row">
-        <div class="col-12">
-          <div class="avan__header">
-            <div class="avan__header-top">
-              <span class="avan__check">✓</span>
-              <h3 class="avan__header-title">Product Details</h3>
-            </div>
-          </div>
+      <div class="avan__header">
+        <div class="avan__header-top">
+          <svg class="avan__check" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: #2d7a45; flex-shrink: 0;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          <h3 class="avan__header-title">Product Details</h3>
         </div>
       </div>
 
       <div class="row g-3">
-
         @if($product->technical_content)
         <div class="col-12 col-sm-6 col-lg-3">
           <div class="avan__feature-item">
@@ -283,7 +269,6 @@
           </div>
         </div>
         @endif
-
         @if($product->brand)
         <div class="col-12 col-sm-6 col-lg-3">
           <div class="avan__feature-item">
@@ -297,7 +282,6 @@
           </div>
         </div>
         @endif
-
         @if($product->category)
         <div class="col-12 col-sm-6 col-lg-3">
           <div class="avan__feature-item">
@@ -311,7 +295,6 @@
           </div>
         </div>
         @endif
-
         @if($product->variations->count())
         <div class="col-12 col-sm-6 col-lg-3">
           <div class="avan__feature-item">
@@ -325,10 +308,8 @@
           </div>
         </div>
         @endif
-
       </div>
 
-      {{-- Tags / Crop Suitability --}}
       @if($product->tags->count())
       <div class="row mt-4">
         <div class="col-12">
@@ -342,6 +323,43 @@
       </div>
       @endif
 
+    </div>
+  </section>
+  @endif
+
+  @if($product->description)
+  <section class="avan__section" style="padding-top:0;">
+    <div class="container">
+      <div class="avan__header">
+        <div class="avan__header-top">
+          <svg class="avan__check" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: #2d7a45; flex-shrink: 0;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+          <h2 class="avan__header-title" style="font-size:1.5rem;">Product Description</h2>
+        </div>
+      </div>
+      <div class="avan__product-desc" style="max-width:100%;">
+        {!! \App\Services\HtmlSanitizer::clean($product->description) !!}
+      </div>
+    </div>
+  </section>
+  @endif
+
+  @if($product->faqs->count())
+  <section class="avan__section" style="padding-top:0;">
+    <div class="container">
+      <div class="avan__header">
+        <div class="avan__header-top">
+          <svg class="avan__check" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: #2d7a45; flex-shrink: 0;"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          <h2 class="avan__header-title" style="font-size:1.5rem;">Frequently Asked Questions</h2>
+        </div>
+      </div>
+      <div class="pd__faq-list">
+        @foreach($product->faqs as $faq)
+        <details class="pd__faq-item">
+          <summary class="pd__faq-question">{{ $faq->question }}</summary>
+          <div class="pd__faq-answer">{{ $faq->answer }}</div>
+        </details>
+        @endforeach
+      </div>
     </div>
   </section>
   @endif
@@ -482,7 +500,7 @@
             </div>
 
             <textarea id="reviewText" class="rv__textarea form-control mb-3" rows="3"
-                      placeholder="Share your experience with this product (optional)…" maxlength="1000"></textarea>
+                      placeholder="Share your experience with this product" minlength="3" maxlength="1000" required></textarea>
             <button class="pd__cta-btn pd__cta-btn--primary" id="submitReviewBtn" style="width:auto;padding:10px 28px;">
               Submit Review
             </button>
@@ -529,579 +547,3 @@
 
 </div>
 @endsection
-
-
-@push('styles')
-<style>
-  /* ── Animation for validation feedback ────────────── */
-  @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-4px); }
-    75% { transform: translateX(4px); }
-  }
-
-  /* ── Image Gallery ─────────────────────────── */
-  .pd__img-main-wrap {
-    position: relative;
-    overflow: hidden;
-  }
-  .pd__thumbs {
-    display: flex;
-    gap: 10px;
-    padding: 12px 16px;
-    flex-wrap: wrap;
-  }
-  .pd__thumb {
-    width: 60px;
-    height: 60px;
-    object-fit: cover;
-    border-radius: 8px;
-    border: 2px solid #e8f0e4;
-    cursor: pointer;
-    transition: border-color 0.2s;
-  }
-  .pd__thumb--active,
-  .pd__thumb:hover {
-    border-color: #2d7a45;
-  }
-
-  /* ── Price Box ─────────────────────────────── */
-  .pd__price-box {
-    background: #f4faf0;
-    border: 1px solid #c8e6c9;
-    border-radius: 12px;
-    padding: 14px 18px;
-    margin-bottom: 20px;
-    display: inline-block;
-    min-width: 200px;
-  }
-  .pd__price-label {
-    font-size: 0.78rem;
-    color: #7aab7a;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: .5px;
-    display: block;
-    margin-bottom: 2px;
-  }
-  .pd__price-row {
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
-  }
-  .pd__price {
-    font-size: 2rem;
-    font-weight: 800;
-    color: #2d7a45;
-    line-height: 1;
-  }
-  .pd__price-note {
-    font-size: 0.78rem;
-    color: #9aab9a;
-  }
-
-  /* ── Technical label ───────────────────────── */
-  .pd__technical {
-    font-size: 0.85rem;
-    color: #7aab7a;
-    margin-bottom: 12px;
-    font-style: italic;
-  }
-
-  /* ── Variation Buttons ─────────────────────── */
-  .pd__variation-wrap {
-    margin-bottom: 18px;
-  }
-  .pd__variation-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 10px;
-  }
-  .pd__var-btn {
-    padding: 8px 20px;
-    border-radius: 8px;
-    border: 2px solid #c8e6c9;
-    background: #fff;
-    color: #2d7a45;
-    font-weight: 600;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-  .pd__var-btn:hover {
-    border-color: #2d7a45;
-    background: #f4faf0;
-  }
-  .pd__var-btn--active {
-    border-color: #2d7a45;
-    background: #2d7a45;
-    color: #fff;
-  }
-
-  /* ── Variant Cards Grid ────────────────────── */
-  .pd__variant-cards-section {
-    padding-top: 1.5rem;
-    border-top: 1px solid #e8f0e4;
-  }
-  .pd__variant-cards-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 12px;
-    margin-top: 12px;
-  }
-  .pd__variant-card {
-    background: #fff;
-    border: 2px solid #e8f0e4;
-    border-radius: 12px;
-    padding: 12px;
-    cursor: pointer;
-    text-align: center;
-  }
-  .pd__variant-card:hover {
-    border-color: #2d7a45;
-    box-shadow: none;
-  }
-  .pd__variant-card-img {
-    width: 100%;
-    height: 100px;
-    object-fit: cover;
-    border-radius: 8px;
-    margin-bottom: 8px;
-  }
-  .pd__variant-card-title {
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: #2d7a45;
-    margin-bottom: 4px;
-  }
-  .pd__variant-card-price {
-    font-size: 1.1rem;
-    font-weight: 800;
-    color: #2d7a45;
-    margin-bottom: 4px;
-  }
-  .pd__variant-card-unit {
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: #7aab7a;
-  }
-  .pd__variant-card-stock {
-    font-size: 0.75rem;
-    margin-bottom: 0;
-  }
-
-  /* ── Stock ─────────────────────────────────── */
-  .pd__stock {
-    font-size: 0.85rem;
-    margin-bottom: 0;
-  }
-  .pd__stock--in   { color: #2d7a45; font-weight: 600; }
-  .pd__stock--low  { color: #b45309; font-weight: 600; }
-  .pd__stock--out  { color: #dc3545; font-weight: 600; }
-
-  /* ── CTA Buttons ───────────────────────────── */
-  .pd__cta-wrap {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-    margin-top: 24px;
-  }
-  .pd__cta-btn {
-    padding: 12px 28px;
-    border-radius: 10px;
-    font-size: 0.95rem;
-    font-weight: 700;
-    cursor: pointer;
-    border: none;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    transition: all 0.2s ease;
-  }
-  .pd__cta-btn--primary {
-    background: #2d7a45;
-    color: #fff;
-    flex: 1;
-  }
-  .pd__cta-btn--primary:hover { background: #245e36; }
-  .pd__cta-btn--outline {
-    background: transparent;
-    color: #2d7a45;
-    border: 2px solid #2d7a45;
-  }
-  .pd__cta-btn--outline:hover { background: #f4faf0; }
-
-  /* ── Reviews ─────────────────────────────────── */
-  .rv__summary-card {
-    background: #f4faf0;
-    border: 1px solid #c8e6c9;
-    border-radius: 16px;
-    padding: 24px 20px;
-    text-align: center;
-  }
-  .rv__avg-score {
-    font-size: 3.5rem;
-    font-weight: 800;
-    color: #2d7a45;
-    line-height: 1;
-    margin-bottom: 8px;
-  }
-  .rv__stars-row { display: flex; justify-content: center; gap: 3px; margin-bottom: 6px; }
-  .rv__star { font-size: 1.1rem; color: #d1d5db; }
-  .rv__star--filled { color: #f59e0b; }
-  .rv__star--sm { font-size: 0.85rem; }
-  .rv__total-label { font-size: 0.82rem; color: #6b7280; margin-bottom: 16px; }
-  .rv__bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-  .rv__bar-label { font-size: 0.78rem; color: #4b5563; width: 32px; text-align: right; white-space: nowrap; }
-  .rv__bar-track { flex: 1; height: 7px; background: #e5e7eb; border-radius: 99px; overflow: hidden; }
-  .rv__bar-fill { height: 100%; background: #f59e0b; border-radius: 99px; transition: width .5s ease; }
-  .rv__bar-count { font-size: 0.75rem; color: #9ca3af; width: 16px; }
-
-  .rv__form-card {
-    background: #fff;
-    border: 1px solid #c8e6c9;
-    border-radius: 14px;
-    padding: 20px 22px;
-  }
-  .rv__form-title { color: #2d7a45; font-weight: 700; margin-bottom: 12px; font-size: 1rem; }
-  
-  /* ── Rating Section ─────────────────────────────── */
-  .rv__rating-section { 
-    background: #f9fcf8;
-    padding: 16px;
-    border-radius: 12px;
-    border-left: 4px solid #f59e0b;
-  }
-  .rv__rating-label { 
-    display: block;
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: #2d7a45;
-    margin-bottom: 8px;
-  }
-  
-  .rv__star-picker { 
-    display: flex; 
-    align-items: center; 
-    gap: 6px;
-  }
-  .rv__pick-star { 
-    font-size: 2rem;
-    color: #d1d5db;
-    cursor: pointer;
-    transition: color 0.2s, transform 0.15s;
-    display: inline-block;
-    line-height: 1;
-  }
-  .rv__pick-star:hover { 
-    color: #fbbf24;
-    transform: none;
-  }
-  .rv__pick-star.active { 
-    color: #f59e0b;
-  }
-  .rv__pick-label { 
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: #2d7a45;
-    min-width: 140px;
-  }
-  .rv__rating-hint {
-    display: block;
-    margin-top: 8px;
-    color: #6b7280;
-    font-size: 0.8rem;
-    font-style: italic;
-  }
-  
-  .rv__textarea { border: 1.5px solid #c8e6c9; border-radius: 10px; resize: vertical; font-size: 0.9rem; }
-  .rv__textarea:focus { border-color: #2d7a45; box-shadow: 0 0 0 3px rgba(45,122,69,.12); outline: none; }
-
-  .rv__item {
-    border-bottom: 1px solid #e8f0e4;
-    padding: 16px 0;
-  }
-  .rv__item:last-child { border-bottom: none; }
-  .rv__item-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 8px; }
-  .rv__avatar {
-    width: 42px; height: 42px;
-    background: #2d7a45;
-    color: #fff;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.1rem; font-weight: 700; flex-shrink: 0;
-  }
-  .rv__name { font-weight: 600; color: #1f2937; margin: 0 0 2px; font-size: 0.95rem; }
-  .rv__date { font-size: 0.75rem; color: #9ca3af; }
-  .rv__text { font-size: 0.9rem; color: #4b5563; margin: 0; line-height: 1.6; padding-left: 54px; }
-
-  .rv__login-prompt, .rv__already-msg {
-    background: #f4faf0;
-    border: 1px solid #c8e6c9;
-    border-radius: 10px;
-    padding: 14px 18px;
-    font-size: 0.9rem;
-    color: #374151;
-  }
-</style>
-@endpush
-
-@push('scripts')
-<script>
-  // ── Variation selector ───────────────────────────────────────────────
-  function selectVariation(el) {
-    const variantId = el.dataset.id || el.dataset.variantId;
-    if (!variantId) {
-      return;
-    }
-
-    document.querySelectorAll('.pd__variant-card').forEach(card => {
-      if (card.dataset.variantId == variantId || card.dataset.id == variantId) {
-        card.classList.add('pd__variant-card--active');
-        card.style.borderColor = '#2d7a45';
-        card.style.backgroundColor = '#f9fcf8';
-      } else {
-        card.classList.remove('pd__variant-card--active');
-        card.style.borderColor = '#e8f0e4';
-        card.style.backgroundColor = '#fff';
-      }
-    });
-
-    const price = parseFloat(el.dataset.price).toLocaleString('en-IN', {
-      minimumFractionDigits: 2, maximumFractionDigits: 2
-    });
-    document.getElementById('displayPrice').textContent = '₹' + price;
-
-    const unit = el.dataset.unit || 'unit';
-    const priceUnitEl = document.getElementById('priceUnit');
-    if (priceUnitEl) {
-      priceUnitEl.textContent = '/ ' + unit;
-    }
-
-    document.getElementById('priceNote') && (document.getElementById('priceNote').textContent = el.dataset.value);
-
-    const stock = parseInt(el.dataset.stock);
-    const stockEl = document.getElementById('stockInfo');
-    if (stock > 10) {
-      stockEl.innerHTML = `<span class="pd__stock--in">✓ In Stock (${stock} available)</span>`;
-    } else if (stock > 0) {
-      stockEl.innerHTML = `<span class="pd__stock--low">⚠ Low Stock (${stock} left)</span>`;
-    } else {
-      stockEl.innerHTML = `<span class="pd__stock--out">✕ Out of Stock</span>`;
-    }
-
-    if (el.dataset.image) {
-      document.getElementById('mainImage').src = el.dataset.image;
-      document.querySelectorAll('.pd__thumb').forEach(t => t.classList.remove('pd__thumb--active'));
-    }
-
-    document.getElementById('addToCartBtn').dataset.variationId = variantId;
-  }
-
-  // ── Thumbnail gallery ────────────────────────────────────────────────
-  function changeImage(thumb, src) {
-    document.getElementById('mainImage').src = src;
-    document.querySelectorAll('.pd__thumb').forEach(t => t.classList.remove('pd__thumb--active'));
-    thumb.classList.add('pd__thumb--active');
-  }
-
-  function updateGlobalCartBadge(count) {
-    if (count > 0) {
-      document.querySelectorAll('.bb-cart-badge').forEach(badge => {
-        badge.textContent = count;
-      });
-
-      document.querySelectorAll('.bb-cart-icon').forEach(icon => {
-        if (!icon.querySelector('.bb-cart-badge')) {
-          const badge = document.createElement('span');
-          badge.className = 'bb-cart-badge';
-          badge.textContent = count;
-          icon.appendChild(badge);
-        }
-      });
-    } else {
-      document.querySelectorAll('.bb-cart-badge').forEach(badge => badge.remove());
-    }
-  }
-
-  // ── Add to Cart ──────────────────────────────────────────────────────
-  document.getElementById('addToCartBtn').addEventListener('click', function () {
-    const productId   = this.dataset.productId;
-    const variationId = this.dataset.variationId || null;
-
-    fetch('/cart/add', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-      },
-      body: JSON.stringify({ product_id: productId, variation_id: variationId, quantity: 1 })
-    })
-    .then(r => r.json())
-    .then(d => {
-      if (d.success) {
-        const btn = document.getElementById('addToCartBtn');
-        btn.textContent = '✓ Added to Cart!';
-        btn.style.background = '#4caf72';
-        if (d.cart_count !== undefined) {
-          updateGlobalCartBadge(d.cart_count);
-        }
-        setTimeout(() => {
-          const label = btn.querySelector('span');
-          if (label) {
-            label.textContent = 'Add to Cart';
-          }
-          btn.style.background = '';
-        }, 2500);
-      }
-    })
-    .catch(() => alert('Could not add to cart. Please try again.'));
-  });
-
-  // ── Star Picker ──────────────────────────────────────────────────────
-  const pickStars = document.querySelectorAll('.rv__pick-star');
-  let selectedRating = 0;
-  const starLabels = ['','⭐ Terrible','⭐⭐ Poor','⭐⭐⭐ Average','⭐⭐⭐⭐ Good','⭐⭐⭐⭐⭐ Excellent'];
-
-  pickStars.forEach(star => {
-    star.addEventListener('mouseover', () => {
-      const val = parseInt(star.dataset.value);
-      pickStars.forEach((s, idx) => {
-        const starValue = parseInt(s.dataset.value);
-        if (starValue <= val) {
-          s.classList.add('active');
-          s.classList.remove('ri-star-line');
-          s.classList.add('ri-star-fill');
-        } else {
-          s.classList.remove('active');
-          s.classList.remove('ri-star-fill');
-          s.classList.add('ri-star-line');
-        }
-      });
-      // Show hover label
-      document.getElementById('starLabel').textContent = starLabels[val];
-      document.getElementById('starLabel').style.color = '#f59e0b';
-    });
-
-    star.addEventListener('mouseout', () => {
-      pickStars.forEach(s => {
-        const v = parseInt(s.dataset.value);
-        s.classList.toggle('active', v <= selectedRating);
-        if (v <= selectedRating) {
-          s.classList.remove('ri-star-line');
-          s.classList.add('ri-star-fill');
-        } else {
-          s.classList.remove('ri-star-fill');
-          s.classList.add('ri-star-line');
-        }
-      });
-      // Reset label if no selection
-      if (selectedRating === 0) {
-        document.getElementById('starLabel').textContent = 'Select rating';
-        document.getElementById('starLabel').style.color = '#6b7280';
-      }
-    });
-
-    star.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      const val = parseInt(star.dataset.value);
-      selectedRating = val;
-      
-      // Update all stars to show selection
-      pickStars.forEach(s => {
-        const sVal = parseInt(s.dataset.value);
-        if (sVal <= val) {
-          s.classList.add('active');
-          s.classList.remove('ri-star-line');
-          s.classList.add('ri-star-fill');
-        } else {
-          s.classList.remove('active');
-          s.classList.remove('ri-star-fill');
-          s.classList.add('ri-star-line');
-        }
-      });
-      
-      // Update label with selected value
-      document.getElementById('starLabel').textContent = starLabels[val];
-      document.getElementById('starLabel').style.color = '#2d7a45';
-      
-      // Visual feedback for selection
-      const ratingHint = document.getElementById('ratingHint');
-      if (ratingHint) {
-        ratingHint.textContent = `✓ Rating selected: ${val} star${val !== 1 ? 's' : ''}`;
-        ratingHint.style.color = '#2d7a45';
-        ratingHint.style.fontWeight = '600';
-      }
-    });
-  });
-
-  // Initialize first star display
-  if (pickStars.length > 0) {
-    pickStars.forEach(s => {
-      s.classList.remove('ri-star-fill');
-      s.classList.add('ri-star-line');
-    });
-  }
-
-  // ── Submit review ────────────────────────────────────────────────────
-  const submitBtn = document.getElementById('submitReviewBtn');
-  if (submitBtn) {
-    submitBtn.addEventListener('click', function () {
-      if (!selectedRating) {
-        document.getElementById('starLabel').textContent = '⚠ Please select a rating!';
-        document.getElementById('starLabel').style.color = '#dc3545';
-        document.getElementById('ratingHint').textContent = 'You must select a star rating before submitting';
-        document.getElementById('ratingHint').style.color = '#dc3545';
-        document.getElementById('ratingHint').style.fontWeight = '600';
-        // Add shake animation
-        const starPicker = document.getElementById('starPicker');
-        starPicker.style.animation = 'none';
-        setTimeout(() => { starPicker.style.animation = 'shake 0.3s'; }, 10);
-        return;
-      }
-      const text    = document.getElementById('reviewText').value;
-      const msgEl   = document.getElementById('reviewMsg');
-      submitBtn.disabled = true;
-      submitBtn.textContent = 'Submitting…';
-
-      fetch('{{ route("reviews.store", $product) }}', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-        },
-        body: JSON.stringify({ rating: selectedRating, review_text: text })
-      })
-      .then(r => r.json())
-      .then(d => {
-        msgEl.style.display = 'block';
-        if (d.success) {
-          msgEl.style.color = '#2d7a45';
-          msgEl.textContent = d.message;
-          document.getElementById('reviewFormWrap').style.opacity = '0.6';
-          submitBtn.textContent = '✓ Submitted';
-          if (window.BharatBiomerModal && d.modal) {
-            window.BharatBiomerModal.show(d.modal);
-          }
-        } else {
-          msgEl.style.color = '#dc3545';
-          msgEl.textContent = d.message;
-          submitBtn.disabled = false;
-          submitBtn.textContent = 'Submit Review';
-        }
-      })
-      .catch(() => {
-        msgEl.style.display = 'block';
-        msgEl.style.color = '#dc3545';
-        msgEl.textContent = 'Something went wrong. Please try again.';
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Submit Review';
-      });
-    });
-  }
-</script>
-@endpush

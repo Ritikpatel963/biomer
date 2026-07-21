@@ -66,8 +66,9 @@
                             <label class="form-label fw-semibold">Meta Title <span class="text-muted">(50-60 chars)</span></label>
                             <input type="text" name="meta_title" id="meta_title" maxlength="255"
                                 class="form-control @error('meta_title') is-invalid @enderror"
-                                value="{{ old('meta_title', $page->meta_title) }}" placeholder="E.g., About Our Solutions | Bharat Biomer">
-                            <small class="text-muted d-block mt-1"><span id="meta_title_count">0</span>/255 chars</small>
+                                value="{{ old('meta_title', $page->meta_title) }}" placeholder="E.g., About Our Solutions | Bharat Biomer"
+                                data-page-edit-counter-input data-counter-target="meta_title_count">
+                            <small class="text-muted d-block mt-1"><span id="meta_title_count" data-page-edit-counter>0</span>/255 chars</small>
                             @error('meta_title')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
 
@@ -75,8 +76,9 @@
                             <label class="form-label fw-semibold">Meta Description <span class="text-muted">(150-160 chars)</span></label>
                             <textarea name="meta_description" id="meta_description" rows="3" maxlength="500"
                                 class="form-control @error('meta_description') is-invalid @enderror"
-                                placeholder="Summary for search results...">{{ old('meta_description', $page->meta_description) }}</textarea>
-                            <small class="text-muted d-block mt-1"><span id="meta_description_count">0</span>/500 chars</small>
+                                placeholder="Summary for search results..."
+                                data-page-edit-counter-input data-counter-target="meta_description_count">{{ old('meta_description', $page->meta_description) }}</textarea>
+                            <small class="text-muted d-block mt-1"><span id="meta_description_count" data-page-edit-counter>0</span>/500 chars</small>
                             @error('meta_description')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
 
@@ -84,8 +86,9 @@
                             <label class="form-label fw-semibold">Meta Keywords</label>
                             <textarea name="meta_keyword" id="meta_keyword" rows="3" maxlength="500"
                                 class="form-control @error('meta_keyword') is-invalid @enderror"
-                                placeholder="comma-separated keywords...">{{ old('meta_keyword', $page->meta_keyword) }}</textarea>
-                            <small class="text-muted d-block mt-1"><span id="meta_keyword_count">0</span>/500 chars</small>
+                                placeholder="comma-separated keywords..."
+                                data-page-edit-counter-input data-counter-target="meta_keyword_count">{{ old('meta_keyword', $page->meta_keyword) }}</textarea>
+                            <small class="text-muted d-block mt-1"><span id="meta_keyword_count" data-page-edit-counter>0</span>/500 chars</small>
                             @error('meta_keyword')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
                     </div>
@@ -117,18 +120,3 @@
     </div>
 </form>
 @endsection
-
-@push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    ['meta_title', 'meta_description', 'meta_keyword'].forEach(function (id) {
-        const input = document.getElementById(id);
-        const counter = document.getElementById(id + '_count');
-        if (!input || !counter) return;
-        const update = () => counter.textContent = input.value.length;
-        input.addEventListener('input', update);
-        update();
-    });
-});
-</script>
-@endpush

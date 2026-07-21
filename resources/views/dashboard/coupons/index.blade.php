@@ -12,7 +12,9 @@
             <h5 class="card-title mb-1">Coupons</h5>
             <p class="text-secondary-light mb-0">Manage promotional codes and usage limits.</p>
         </div>
-        <a href="{{ route('dashboard.coupons.create') }}" class="btn btn-primary btn-sm">Add Coupon</a>
+        @can('create products')
+            <a href="{{ route('dashboard.coupons.create') }}" class="btn btn-primary btn-sm">Add Coupon</a>
+        @endcan
     </div>
 
     @if(session('success'))
@@ -57,18 +59,22 @@
                             <td class="text-muted small">{{ $coupon->expires_at ? \Carbon\Carbon::parse($coupon->expires_at)->format('d M Y') : 'Never' }}</td>
                             <td>
                                 <div class="d-flex flex-wrap gap-2">
+                                    @can('edit products')
                                     <a href="{{ route('dashboard.coupons.edit', $coupon) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+                                    @endcan
+                                    @can('delete products')
                                     <form action="{{ route('dashboard.coupons.destroy', $coupon) }}" method="POST" onsubmit="return confirm('Delete coupon \'{{ addslashes($coupon->code) }}\'?')">
                                         @csrf
                                         @method('DELETE')
                                         <button class="btn btn-sm btn-outline-danger">Delete</button>
                                     </form>
+                                    @endcan
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="9" class="text-center py-5 text-muted">No coupons yet. <a href="{{ route('dashboard.coupons.create') }}">Add one.</a></td>
+                            <td colspan="9" class="text-center py-5 text-muted">No coupons yet. @can('create products')<a href="{{ route('dashboard.coupons.create') }}">Add one.</a>@endcan</td>
                         </tr>
                     @endforelse
                 </tbody>

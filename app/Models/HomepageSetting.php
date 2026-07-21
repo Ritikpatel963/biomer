@@ -4,288 +4,430 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class HomepageSetting extends Model
+class HomePageSetting extends Model
 {
     protected $fillable = [
-        'hero_enabled',
-        'hero_slider_enabled',
-        'hero_slides',
-        'why_bharat_title',
-        'why_bharat_items',
-        'what_we_do_title',
-        'what_we_do_description',
-        'what_we_do_label',
-        'what_we_do_image_url',
-        'what_we_do_items',
-        'who_we_serve_title',
-        'who_we_serve_items',
-        'key_highlights_title',
-        'key_highlights_subtitle',
-        'key_highlights_items',
-        'video_reviews_enabled',
-        'video_reviews_title',
-        'video_reviews_subtitle',
-        'video_reviews_items',
+        'problem_heading',
+        'problem_paragraph',
+        'problem_items',
+        'solution_heading',
+        'solution_paragraph',
+        'solution_items',
+        'why_heading',
+        'why_paragraph',
+        'why_items',
+        'stats_background_image',
+        'stats_items',
+        'story_heading',
+        'story_paragraph',
+        'story_button_text',
+        'story_button_url',
+        'story_items',
     ];
 
     protected $casts = [
-        'hero_enabled' => 'boolean',
-        'hero_slider_enabled' => 'boolean',
-        'hero_slides' => 'array',
-        'why_bharat_items' => 'array',
-        'what_we_do_items' => 'array',
-        'who_we_serve_items' => 'array',
-        'key_highlights_items' => 'array',
-        'video_reviews_enabled' => 'boolean',
-        'video_reviews_items' => 'array',
+        'problem_items' => 'array',
+        'solution_items' => 'array',
+        'why_items' => 'array',
+        'stats_items' => 'array',
+        'story_items' => 'array',
     ];
 
     public static function defaults(): array
     {
         return [
-            'hero_enabled' => true,
-            'hero_slider_enabled' => false,
-            'hero_slides' => [
+            'problem_heading' => 'Farming today needs more than fertilizers',
+            'problem_paragraph' => 'Modern farmers face multiple crop and soil challenges every season.',
+            'problem_items' => [
                 [
-                    'headline_prefix' => 'Nature-powered biology for',
-                    'headline_highlight' => 'high-performance',
-                    'headline_suffix' => 'farming',
-                    'description' => 'Bharat Biomer develops advanced biological solutions that improve crop productivity, resilience, and soil health naturally.',
-                    'secondary_description' => 'Harnessing beneficial microbes like PPFM to help crops perform better under stress, improve flowering, and reduce chemical dependency.',
-                    'primary_button_text' => 'Explore Our Technology',
-                    'primary_button_url' => '/technology',
-                    'secondary_button_text' => 'Contact Us',
-                    'secondary_button_url' => '/contact',
-                    'media_type' => 'image',
-                    'media_url' => 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=900&auto=format&fit=crop&q=80',
-                    'is_active' => true,
+                    'image_path' => 'assets/bharat-biomer/plant.png',
+                    'heading' => 'Soil degradation',
+                    'paragraph' => 'Continuous farming reduces soil organic matter and health.',
                 ],
                 [
-                    'headline_prefix' => 'Smarter inputs for',
-                    'headline_highlight' => 'resilient',
-                    'headline_suffix' => 'crops',
-                    'description' => 'Boost crop vigor with targeted biological formulations that work with plant physiology and local field conditions.',
-                    'secondary_description' => 'Designed to improve nutrient efficiency, stress tolerance, and consistency across growth stages.',
-                    'primary_button_text' => 'View Products',
-                    'primary_button_url' => '/products',
-                    'secondary_button_text' => 'Learn More',
-                    'secondary_button_url' => '/technology',
-                    'media_type' => 'image',
-                    'media_url' => 'https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=900&auto=format&fit=crop&q=80',
-                    'is_active' => true,
+                    'image_path' => 'assets/bharat-biomer/root.png',
+                    'heading' => 'Weak root development',
+                    'paragraph' => 'Poor root growth limits nutrient and water absorption.',
                 ],
                 [
-                    'headline_prefix' => 'Microbial science with',
-                    'headline_highlight' => 'field-proven',
-                    'headline_suffix' => 'results',
-                    'description' => 'Our solutions are built to perform in real farm environments and deliver measurable crop response.',
-                    'secondary_description' => 'Low-dose, high-impact products that support sustainability and profitability together.',
-                    'primary_button_text' => 'Farmer Stories',
-                    'primary_button_url' => '/about',
-                    'secondary_button_text' => 'Contact Team',
-                    'secondary_button_url' => '/contact',
-                    'media_type' => 'image',
-                    'media_url' => 'https://images.unsplash.com/photo-1501004318641-b39e6451bec6?w=900&auto=format&fit=crop&q=80',
-                    'is_active' => true,
+                    'image_path' => 'assets/bharat-biomer/npk.png',
+                    'heading' => 'Nutrient inefficiency',
+                    'paragraph' => 'Nutrients are not utilized effectively by the crop.',
                 ],
                 [
-                    'headline_prefix' => 'Built for Indian',
-                    'headline_highlight' => 'soil and climate',
-                    'headline_suffix' => 'needs',
-                    'description' => 'Bharat Biomer innovations align with regional agronomy, helping farmers improve outcomes season after season.',
-                    'secondary_description' => 'From flowering support to stress management, every solution is practical and easy to adopt.',
-                    'primary_button_text' => 'Get Started',
-                    'primary_button_url' => '/contact',
-                    'secondary_button_text' => 'Our Mission',
-                    'secondary_button_url' => '/about',
-                    'media_type' => 'image',
-                    'media_url' => 'https://images.unsplash.com/photo-1465379944081-7f47de8d74ac?w=900&auto=format&fit=crop&q=80',
-                    'is_active' => true,
+                    'image_path' => 'assets/bharat-biomer/pest.png',
+                    'heading' => 'Pest and stress impact',
+                    'paragraph' => 'Pests, diseases and climate stress reduce crop potential.',
+                ],
+                [
+                    'image_path' => 'assets/bharat-biomer/plant-1.png',
+                    'heading' => 'Lower yield and quality',
+                    'paragraph' => 'All these factors lead to low productivity and poor produce quality.',
                 ],
             ],
-            'why_bharat_title' => 'Why Bharat Biomer',
-            'why_bharat_items' => [
-                ['title' => 'Science-driven biological innovation', 'description' => 'Advanced research and development in microbial solutions'],
-                ['title' => 'Designed for Indian crops, soil & climate', 'description' => 'Tailored solutions for local agricultural conditions'],
-                ['title' => 'Low dosage, high impact solutions', 'description' => 'Maximum efficiency with minimal application'],
-                ['title' => 'Sustainable, residue-free, & farmer-friendly', 'description' => 'Environmentally safe and easy to use'],
+            'solution_heading' => 'Solutions by category',
+            'solution_paragraph' => 'Clear, crop-focused biological inputs that support healthier growth and better yield outcomes.',
+            'solution_items' => [
+                [
+                    'image_path' => 'assets/bharat-biomer/farmer3-card.webp',
+                    'icon_path' => 'assets/bharat-biomer/science.png',
+                    'heading' => 'Bio-Stimulants',
+                    'paragraph' => 'Enhance plant growth, boost immunity and improve yield naturally.',
+                    'url' => '#',
+                ],
+                [
+                    'image_path' => 'assets/bharat-biomer/farmerland-card.webp',
+                    'icon_path' => 'assets/bharat-biomer/research.png',
+                    'heading' => 'Microbial Solutions',
+                    'paragraph' => 'Beneficial microbes that improve soil health and nutrient availability.',
+                    'url' => '#',
+                ],
+                [
+                    'image_path' => 'assets/bharat-biomer/farmer1-card.webp',
+                    'icon_path' => 'assets/bharat-biomer/plant.png',
+                    'heading' => 'Crop Nutrition Support',
+                    'paragraph' => 'Optimized nutrition for stronger growth and better productivity.',
+                    'url' => '#',
+                ],
+                [
+                    'image_path' => 'assets/bharat-biomer/footerfarmer-card.webp',
+                    'icon_path' => 'assets/bharat-biomer/plant-1.png',
+                    'heading' => 'Residue-free Farming',
+                    'paragraph' => 'Safe, natural solutions for clean produce and sustainable farming.',
+                    'url' => '#',
+                ],
             ],
-            'what_we_do_title' => 'What We Do',
-            'what_we_do_description' => 'We develop and commercialize microbial bio-stimulants and biological inputs that improve plant physiology, nutrient efficiency, and resilience against environmental stress.',
-            'what_we_do_label' => 'Our solutions work across:',
-            'what_we_do_image_url' => 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=800&auto=format&fit=crop&q=80',
-            'what_we_do_items' => [
-                ['label' => 'Field crops'],
-                ['label' => 'Horticulture'],
-                ['label' => 'Vegetables & fruits'],
-                ['label' => 'Flowers & plantation crops'],
+            'why_heading' => 'Why Bharat Biomer',
+            'why_paragraph' => 'Built for performance, crop relevance and long-term soil health.',
+            'why_items' => [
+                [
+                    'image_path' => 'assets/bharat-biomer/research.png',
+                    'heading' => 'Research-driven formulations',
+                    'paragraph' => 'Developed using advanced R&D and scientific innovation.',
+                ],
+                [
+                    'image_path' => 'assets/bharat-biomer/shield.png',
+                    'heading' => 'Field-tested performance',
+                    'paragraph' => 'Proven results across diverse agro-climatic conditions.',
+                ],
+                [
+                    'image_path' => 'assets/bharat-biomer/tour-guide.png',
+                    'heading' => 'Crop-specific guidance',
+                    'paragraph' => 'Expert recommendations tailored to each crop and stage.',
+                ],
+                [
+                    'image_path' => 'assets/bharat-biomer/science.png',
+                    'heading' => 'Sustainable biological approach',
+                    'paragraph' => 'Eco-friendly solutions for long-term soil and environment health.',
+                ],
+                [
+                    'image_path' => 'assets/bharat-biomer/heart-handshake.png',
+                    'heading' => 'Reliable partner network',
+                    'paragraph' => 'Strong distribution and support network across India.',
+                ],
             ],
-            'who_we_serve_title' => 'Who We Serve',
-            'who_we_serve_items' => [
-                ['label' => 'Farmers & Progressive Growers'],
-                ['label' => 'Farmer Producer Organizations'],
-                ['label' => 'Agri-input distributors & retailers'],
-                ['label' => 'CSR foundations & NGOs'],
-                ['label' => 'Research institutions & policymakers'],
+            'stats_background_image' => 'assets/bharat-biomer/farmerland.jpg',
+            'stats_items' => [
+                [
+                    'icon_path' => 'assets/bharat-biomer/group.png',
+                    'number' => '10,000+',
+                    'heading' => 'Farmers Served',
+                    'paragraph' => 'Across India',
+                ],
+                [
+                    'icon_path' => 'assets/bharat-biomer/field.png',
+                    'number' => '2,50,000+',
+                    'heading' => 'Acres Impacted',
+                    'paragraph' => 'And Growing',
+                ],
+                [
+                    'icon_path' => 'assets/bharat-biomer/scientific-research.png',
+                    'number' => '500+',
+                    'heading' => 'Crop Trials',
+                    'paragraph' => 'Successful Trials',
+                ],
+                [
+                    'icon_path' => 'assets/bharat-biomer/helping-hand.png',
+                    'number' => '150+',
+                    'heading' => 'Channel Partners',
+                    'paragraph' => 'Pan India Network',
+                ],
             ],
-            'key_highlights_title' => 'Key Highlights',
-            'key_highlights_subtitle' => 'Proven benefits for your crops',
-            'key_highlights_items' => [
-                ['title' => 'Improves flowering & fruit set', 'description' => 'Enhanced reproductive growth for better yields'],
-                ['title' => 'Enhances nutrient uptake', 'description' => 'Better absorption and utilization of nutrients'],
-                ['title' => 'Reduces heat & drought stress', 'description' => 'Improved resilience against environmental challenges'],
-                ['title' => 'Sustainable & residue-free', 'description' => 'Safe for the environment and consumers'],
+            'story_heading' => 'Stories from the field',
+            'story_paragraph' => 'Field outcomes, grower stories and dealer success journeys.',
+            'story_button_text' => 'View More Stories',
+            'story_button_url' => '#',
+            'story_items' => [
+                [
+                    'thumbnail_path' => 'assets/bharat-biomer/farmer1.jpg',
+                    'video_url' => '',
+                    'duration' => '2:15',
+                    'heading' => 'Tomato yield improvement',
+                    'paragraph' => 'See how Bharat Biomer solutions increased yield and quality.',
+                ],
+                [
+                    'thumbnail_path' => 'assets/bharat-biomer/farmer2.jpg',
+                    'video_url' => '',
+                    'duration' => '2:02',
+                    'heading' => 'Healthy cotton growth',
+                    'paragraph' => 'Stronger plants, more bolls and better profits for farmers.',
+                ],
+                [
+                    'thumbnail_path' => 'assets/bharat-biomer/farmer3.jpg',
+                    'video_url' => '',
+                    'duration' => '1:48',
+                    'heading' => 'Dealer success story',
+                    'paragraph' => 'Our partner sharing growth journey with Bharat Biomer.',
+                ],
+                [
+                    'thumbnail_path' => '',
+                    'video_url' => '',
+                    'duration' => '',
+                    'heading' => '',
+                    'paragraph' => '',
+                ],
+                [
+                    'thumbnail_path' => '',
+                    'video_url' => '',
+                    'duration' => '',
+                    'heading' => '',
+                    'paragraph' => '',
+                ],
+                [
+                    'thumbnail_path' => '',
+                    'video_url' => '',
+                    'duration' => '',
+                    'heading' => '',
+                    'paragraph' => '',
+                ],
             ],
-            'video_reviews_enabled' => true,
-            'video_reviews_title' => 'Parent Video Reviews',
-            'video_reviews_subtitle' => 'Share up to 6 Instagram reel reviews from farmers, partners, and dealers. Desktop shows tabs and mobile gets a swipe-friendly carousel.',
-            'video_reviews_items' => [],
         ];
     }
 
     public static function currentMerged(): array
     {
         $defaults = static::defaults();
-        $record = static::first();
+        $settings = static::query()->latest('id')->first();
 
-        if (!$record) {
+        if (! $settings) {
             return $defaults;
         }
 
         return [
-            'hero_enabled' => (bool) $record->hero_enabled,
-            'hero_slider_enabled' => (bool) $record->hero_slider_enabled,
-            'hero_slides' => static::mergeSlides($record->hero_slides, $defaults['hero_slides']),
-            'why_bharat_title' => $record->why_bharat_title ?: $defaults['why_bharat_title'],
-            'why_bharat_items' => static::mergeItems($record->why_bharat_items, $defaults['why_bharat_items'], ['title', 'description']),
-            'what_we_do_title' => $record->what_we_do_title ?: $defaults['what_we_do_title'],
-            'what_we_do_description' => $record->what_we_do_description ?: $defaults['what_we_do_description'],
-            'what_we_do_label' => $record->what_we_do_label ?: $defaults['what_we_do_label'],
-            'what_we_do_image_url' => $record->what_we_do_image_url ?: $defaults['what_we_do_image_url'],
-            'what_we_do_items' => static::mergeItems($record->what_we_do_items, $defaults['what_we_do_items'], ['label']),
-            'who_we_serve_title' => $record->who_we_serve_title ?: $defaults['who_we_serve_title'],
-            'who_we_serve_items' => static::mergeItems($record->who_we_serve_items, $defaults['who_we_serve_items'], ['label']),
-            'key_highlights_title' => $record->key_highlights_title ?: $defaults['key_highlights_title'],
-            'key_highlights_subtitle' => $record->key_highlights_subtitle ?: $defaults['key_highlights_subtitle'],
-            'key_highlights_items' => static::mergeItems($record->key_highlights_items, $defaults['key_highlights_items'], ['title', 'description']),
-            'video_reviews_enabled' => (bool) $record->video_reviews_enabled,
-            'video_reviews_title' => $record->video_reviews_title ?: $defaults['video_reviews_title'],
-            'video_reviews_subtitle' => $record->video_reviews_subtitle ?: $defaults['video_reviews_subtitle'],
-            'video_reviews_items' => static::mergeVideoItems($record->video_reviews_items),
+            'problem_heading' => $settings->problem_heading ?: $defaults['problem_heading'],
+            'problem_paragraph' => $settings->problem_paragraph ?: $defaults['problem_paragraph'],
+            'problem_items' => static::mergeProblemItems($settings->problem_items, $defaults['problem_items']),
+            'solution_heading' => $settings->solution_heading ?: $defaults['solution_heading'],
+            'solution_paragraph' => $settings->solution_paragraph ?: $defaults['solution_paragraph'],
+            'solution_items' => static::mergeSolutionItems($settings->solution_items, $defaults['solution_items']),
+            'why_heading' => $settings->why_heading ?: $defaults['why_heading'],
+            'why_paragraph' => $settings->why_paragraph ?: $defaults['why_paragraph'],
+            'why_items' => static::mergeBasicItems($settings->why_items, $defaults['why_items']),
+            'stats_background_image' => $settings->stats_background_image ?: $defaults['stats_background_image'],
+            'stats_items' => static::mergeStatsItems($settings->stats_items, $defaults['stats_items']),
+            'story_heading' => $settings->story_heading ?: $defaults['story_heading'],
+            'story_paragraph' => $settings->story_paragraph ?: $defaults['story_paragraph'],
+            'story_button_text' => $settings->story_button_text ?: $defaults['story_button_text'],
+            'story_button_url' => $settings->story_button_url ?: $defaults['story_button_url'],
+            'story_items' => static::mergeStoryItems($settings->story_items, $defaults['story_items']),
         ];
     }
 
-    public static function instagramEmbedUrl(?string $url): ?string
+    public static function imageUrl(?string $path): string
+    {
+        $path = trim((string) $path);
+
+        if ($path === '') {
+            return asset('assets/bharat-biomer/plant.png');
+        }
+
+        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+            return $path;
+        }
+
+        $normalizedPath = ltrim($path, '/');
+
+        if (str_starts_with($normalizedPath, 'storage/')) {
+            return asset($normalizedPath);
+        }
+
+        if (str_starts_with($normalizedPath, 'assets/')) {
+            return asset($normalizedPath);
+        }
+
+        return asset('storage/' . $normalizedPath);
+    }
+
+    public static function videoEmbedUrl(?string $url): string
     {
         $url = trim((string) $url);
+
         if ($url === '') {
-            return null;
+            return '';
         }
 
-        $path = trim((string) parse_url($url, PHP_URL_PATH), '/');
-        $segments = $path === '' ? [] : explode('/', $path);
-
-        if (count($segments) < 2) {
-            return null;
+        if (preg_match('/src=["\']([^"\']+)["\']/i', $url, $matches)) {
+            $url = $matches[1];
         }
 
-        $type = $segments[0];
-        $shortcode = $segments[1] ?? null;
+        $parts = parse_url($url);
 
-        if (!$shortcode || !in_array($type, ['reel', 'p', 'tv'], true)) {
-            return null;
+        if (! is_array($parts) || empty($parts['host'])) {
+            return $url;
         }
 
-        return 'https://www.instagram.com/' . $type . '/' . $shortcode . '/embed';
-    }
+        $host = strtolower($parts['host']);
+        $path = trim($parts['path'] ?? '', '/');
 
-    protected static function mergeSlides(?array $items, array $defaults): array
-    {
-        $items = is_array($items) ? array_values($items) : [];
-        $merged = [];
-
-        foreach (range(0, 3) as $index) {
-            $default = $defaults[$index] ?? $defaults[0];
-            $item = $items[$index] ?? [];
-            $merged[] = [
-                'headline_prefix' => trim((string) ($item['headline_prefix'] ?? $default['headline_prefix'] ?? '')),
-                'headline_highlight' => trim((string) ($item['headline_highlight'] ?? $default['headline_highlight'] ?? '')),
-                'headline_suffix' => trim((string) ($item['headline_suffix'] ?? $default['headline_suffix'] ?? '')),
-                'description' => trim((string) ($item['description'] ?? $default['description'] ?? '')),
-                'secondary_description' => trim((string) ($item['secondary_description'] ?? $default['secondary_description'] ?? '')),
-                'primary_button_text' => trim((string) ($item['primary_button_text'] ?? $default['primary_button_text'] ?? '')),
-                'primary_button_url' => trim((string) ($item['primary_button_url'] ?? $default['primary_button_url'] ?? '')),
-                'secondary_button_text' => trim((string) ($item['secondary_button_text'] ?? $default['secondary_button_text'] ?? '')),
-                'secondary_button_url' => trim((string) ($item['secondary_button_url'] ?? $default['secondary_button_url'] ?? '')),
-                'media_type' => in_array(($item['media_type'] ?? $default['media_type'] ?? 'image'), ['image', 'video'], true) ? ($item['media_type'] ?? $default['media_type']) : 'image',
-                'media_url' => trim((string) ($item['media_url'] ?? $default['media_url'] ?? '')),
-                'is_active' => (bool) ($item['is_active'] ?? $default['is_active'] ?? false),
-            ];
-        }
-
-        return $merged;
-    }
-
-    protected static function mergeItems(?array $items, array $defaults, array $keys): array
-    {
-        $items = is_array($items) ? array_values($items) : [];
-        $merged = [];
-
-        foreach ($defaults as $index => $default) {
-            $item = $items[$index] ?? [];
-            $row = [];
-
-            foreach ($keys as $key) {
-                $row[$key] = trim((string) ($item[$key] ?? $default[$key] ?? ''));
+        if (str_contains($host, 'youtube.com')) {
+            if (str_starts_with($path, 'embed/')) {
+                return 'https://www.youtube.com/embed/' . substr($path, 6);
             }
 
-            $merged[] = $row;
+            if (str_starts_with($path, 'shorts/')) {
+                return 'https://www.youtube.com/embed/' . substr($path, 7);
+            }
+
+            parse_str($parts['query'] ?? '', $query);
+
+            if (! empty($query['v'])) {
+                return 'https://www.youtube.com/embed/' . $query['v'];
+            }
         }
 
-        return $merged;
+        if (str_contains($host, 'youtu.be') && $path !== '') {
+            return 'https://www.youtube.com/embed/' . $path;
+        }
+
+        if (str_contains($host, 'vimeo.com') && $path !== '') {
+            return 'https://player.vimeo.com/video/' . $path;
+        }
+
+        return $url;
     }
 
-    protected static function mergeVideoItems(?array $items): array
+    protected static function mergeProblemItems(?array $items, array $defaults): array
     {
+        if ($items === null) {
+            return $defaults;
+        }
+
         $items = is_array($items) ? array_values($items) : [];
         $merged = [];
 
-        foreach (array_slice($items, 0, 6) as $item) {
-            $instagramUrl = trim((string) ($item['instagram_url'] ?? ''));
-            if ($instagramUrl === '') {
+        foreach ($items as $item) {
+            if (! is_array($item)) {
                 continue;
             }
 
-            $isDirectVideo = (bool) preg_match('/\.(mp4|webm|ogg)(\?.*)?$/i', $instagramUrl);
-            $videoUrl = null;
-
-            if ($isDirectVideo) {
-                if (str_starts_with($instagramUrl, 'http://') || str_starts_with($instagramUrl, 'https://')) {
-                    $videoUrl = $instagramUrl;
-                } else {
-                    $normalizedPath = ltrim($instagramUrl, '/');
-                    if (str_starts_with($normalizedPath, 'storage/')) {
-                        $videoUrl = asset($normalizedPath);
-                    } elseif (str_starts_with($normalizedPath, 'public/')) {
-                        $videoUrl = asset('storage/' . ltrim(substr($normalizedPath, 7), '/'));
-                    } else {
-                        $videoUrl = asset('storage/' . $normalizedPath);
-                    }
-                }
-            }
-
             $merged[] = [
-                'title' => trim((string) ($item['title'] ?? 'Video Review')),
-                'instagram_url' => $instagramUrl,
-                'embed_url' => static::instagramEmbedUrl($instagramUrl),
-                'video_url' => $videoUrl,
-                'is_active' => (bool) ($item['is_active'] ?? true),
+                'image_path' => trim((string) ($item['image_path'] ?? '')),
+                'heading' => trim((string) ($item['heading'] ?? '')),
+                'paragraph' => trim((string) ($item['paragraph'] ?? '')),
             ];
         }
 
-        return array_values(array_filter(
-            $merged,
-            fn ($item) => $item['is_active'] && (!empty($item['embed_url']) || !empty($item['video_url']))
-        ));
+        return $merged;
+    }
+
+    protected static function mergeSolutionItems(?array $items, array $defaults): array
+    {
+        if ($items === null) {
+            return $defaults;
+        }
+
+        $items = is_array($items) ? array_values($items) : [];
+        $merged = [];
+
+        foreach ($items as $item) {
+            if (! is_array($item)) {
+                continue;
+            }
+
+            $merged[] = [
+                'image_path' => trim((string) ($item['image_path'] ?? '')),
+                'icon_path' => trim((string) ($item['icon_path'] ?? '')),
+                'heading' => trim((string) ($item['heading'] ?? '')),
+                'paragraph' => trim((string) ($item['paragraph'] ?? '')),
+                'url' => trim((string) ($item['url'] ?? '#')),
+            ];
+        }
+
+        return $merged;
+    }
+
+    protected static function mergeBasicItems(?array $items, array $defaults): array
+    {
+        if ($items === null) {
+            return $defaults;
+        }
+
+        $items = is_array($items) ? array_values($items) : [];
+        $merged = [];
+
+        foreach ($items as $item) {
+            if (! is_array($item)) {
+                continue;
+            }
+
+            $merged[] = [
+                'image_path' => trim((string) ($item['image_path'] ?? '')),
+                'heading' => trim((string) ($item['heading'] ?? '')),
+                'paragraph' => trim((string) ($item['paragraph'] ?? '')),
+            ];
+        }
+
+        return $merged;
+    }
+
+    protected static function mergeStatsItems(?array $items, array $defaults): array
+    {
+        if ($items === null) {
+            return $defaults;
+        }
+
+        $items = is_array($items) ? array_values($items) : [];
+        $merged = [];
+
+        foreach ($items as $item) {
+            if (! is_array($item)) {
+                continue;
+            }
+
+            $merged[] = [
+                'icon_path' => trim((string) ($item['icon_path'] ?? '')),
+                'number' => trim((string) ($item['number'] ?? '')),
+                'heading' => trim((string) ($item['heading'] ?? '')),
+                'paragraph' => trim((string) ($item['paragraph'] ?? '')),
+            ];
+        }
+
+        return $merged;
+    }
+
+    protected static function mergeStoryItems(?array $items, array $defaults): array
+    {
+        if ($items === null) {
+            return $defaults;
+        }
+
+        $items = is_array($items) ? array_values($items) : [];
+        $merged = [];
+
+        foreach ($items as $item) {
+            if (! is_array($item)) {
+                continue;
+            }
+
+            $merged[] = [
+                'thumbnail_path' => trim((string) ($item['thumbnail_path'] ?? '')),
+                'video_url' => trim((string) ($item['video_url'] ?? '')),
+                'duration' => trim((string) ($item['duration'] ?? '')),
+                'heading' => trim((string) ($item['heading'] ?? '')),
+                'paragraph' => trim((string) ($item['paragraph'] ?? '')),
+            ];
+        }
+
+        return $merged;
     }
 }

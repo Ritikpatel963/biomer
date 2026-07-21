@@ -14,16 +14,19 @@ use App\Models\ProductReview;
 use App\Models\BlogReview;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class DashboardController extends Controller
 {
+    private const ANALYTICS_EXPORT_ROW_LIMIT = 10000;
+
     public function index()
     {
         $metrics = $this->dashboardMetrics();
         [$salesLabels, $salesData] = $this->monthlySales();
 
         $latestCustomers = Customer::withCount(['orders', 'wishlists'])->latest()->take(5)->get();
-        $latestOrders = Order::with('customer')->latest()->take(5)->get();
+        $latestOrders = Order::with(['customer', 'items'])->latest()->take(5)->get();
 
         return view('dashboard/index', array_merge($metrics, compact(
             'latestCustomers',
@@ -37,200 +40,40 @@ class DashboardController extends Controller
     {
         $metrics = $this->dashboardMetrics();
         [$salesLabels, $salesData] = $this->monthlySales();
+        $analyticsData = $this->analyticsData($metrics);
 
-        $customersWithOrders = Customer::has('orders')->count();
-        $customersWithoutOrders = max($metrics['totalCustomers'] - $customersWithOrders, 0);
-
-        $usersByCity = Customer::query()
-            ->selectRaw("COALESCE(NULLIF(city, ''), 'Unknown') as label, COUNT(*) as total")
-            ->groupBy('label')
-            ->orderByDesc('total')
-            ->take(15)
-            ->get();
-
-        $usersByAudience = Customer::query()
-            ->selectRaw("COALESCE(NULLIF(audience_type, ''), 'Not selected') as label, COUNT(*) as total")
-            ->groupBy('label')
-            ->orderByDesc('total')
-            ->get();
-
-        $orderStatusBreakdown = Order::query()
-            ->selectRaw("COALESCE(NULLIF(status, ''), 'unknown') as label, COUNT(*) as total, COALESCE(SUM(total_amount), 0) as amount")
-            ->groupBy('label')
-            ->orderByDesc('total')
-            ->get();
-
-        $paymentStatusBreakdown = Order::query()
-            ->selectRaw("COALESCE(NULLIF(payment_status, ''), 'unknown') as label, COUNT(*) as total, COALESCE(SUM(total_amount), 0) as amount")
-            ->groupBy('label')
-            ->orderByDesc('total')
-            ->get();
-
-        $paymentGatewayBreakdown = Order::query()
-            ->selectRaw("COALESCE(NULLIF(payment_gateway, ''), 'Not selected') as label, COUNT(*) as total, COALESCE(SUM(total_amount), 0) as amount")
-            ->groupBy('label')
-            ->orderByDesc('total')
-            ->get();
-
-        $recentCustomers = Customer::withCount(['orders', 'wishlists'])
-            ->withSum('orders', 'total_amount')
-            ->latest()
-            ->take(15)
-            ->get();
-
-        $recentOrders = Order::with('customer')->latest()->take(15)->get();
-
-        $recentInvoices = Order::with('customer')
-            ->where('payment_status', 'paid')
-            ->latest()
-            ->take(15)
-            ->get();
-
-        $topSellingProducts = OrderItem::query()
-            ->selectRaw('product_id, product_name, SUM(quantity) as total_quantity, COALESCE(SUM(subtotal), 0) as total_sales')
-            ->groupBy('product_id', 'product_name')
-            ->orderByDesc('total_quantity')
-            ->take(10)
-            ->get();
-
-        $topWishlistProducts = Wishlist::with('product')
-            ->select('product_id', DB::raw('COUNT(*) as total'))
-            ->groupBy('product_id')
-            ->orderByDesc('total')
-            ->take(10)
-            ->get();
-
-        $lowStockProducts = Product::query()
-            ->where('manage_stock', true)
-            ->where('stock_quantity', '<=', 5)
-            ->orderBy('stock_quantity')
-            ->take(10)
-            ->get();
-
-        $returnStatusBreakdown = OrderReturn::query()
-            ->selectRaw("COALESCE(NULLIF(status, ''), 'unknown') as label, COUNT(*) as total, COALESCE(SUM(refund_amount), 0) as amount")
-            ->groupBy('label')
-            ->orderByDesc('total')
-            ->get();
-
-        $recentReturns = OrderReturn::with(['order', 'customer'])->latest()->take(10)->get();
-
-        $reviewStatusBreakdown = [
-            'product' => ProductReview::query()
-                ->selectRaw("COALESCE(NULLIF(status, ''), 'unknown') as label, COUNT(*) as total")
-                ->groupBy('label')
-                ->orderByDesc('total')
-                ->get(),
-            'blog' => BlogReview::query()
-                ->selectRaw("COALESCE(NULLIF(status, ''), 'unknown') as label, COUNT(*) as total")
-                ->groupBy('label')
-                ->orderByDesc('total')
-                ->get(),
-        ];
-
-        $cartReport = [
-            'tracked' => false,
-            'message' => 'Cart data is stored in visitor sessions only, so active add-to-cart reports are not available in the database.',
-        ];
-
-        return view('dashboard.analytics', array_merge($metrics, compact(
-            'customersWithOrders',
-            'customersWithoutOrders',
-            'usersByCity',
-            'usersByAudience',
-            'orderStatusBreakdown',
-            'paymentStatusBreakdown',
-            'paymentGatewayBreakdown',
-            'recentCustomers',
-            'recentOrders',
-            'recentInvoices',
-            'topSellingProducts',
-            'topWishlistProducts',
-            'lowStockProducts',
-            'returnStatusBreakdown',
-            'recentReturns',
-            'reviewStatusBreakdown',
-            'cartReport',
-            'salesLabels',
-            'salesData'
-        )));
+        return view('dashboard.analytics', array_merge(
+            $metrics,
+            $analyticsData,
+            compact('salesLabels', 'salesData')
+        ));
     }
 
     public function exportAnalytics(Request $request)
     {
+        $admin = $request->user('web');
+
+        if (!$admin?->hasRole('super-admin')) {
+            abort(403, 'Only super admins can export analytics reports.');
+        }
+
+        Log::info('Analytics export by admin: ' . $admin->id, [
+            'admin_email' => $admin->email,
+            'ip' => $request->ip(),
+            'sections' => $request->input('sections', []),
+            'row_limit' => self::ANALYTICS_EXPORT_ROW_LIMIT,
+        ]);
+
         $metrics = $this->dashboardMetrics();
         [$salesLabels, $salesData] = $this->monthlySales();
-
-        $customersWithOrders = Customer::has('orders')->count();
-        $customersWithoutOrders = max($metrics['totalCustomers'] - $customersWithOrders, 0);
-
-        $usersByCity = Customer::query()
-            ->selectRaw("COALESCE(NULLIF(city, ''), 'Unknown') as label, COUNT(*) as total")
-            ->groupBy('label')
-            ->orderByDesc('total')
-            ->get();
-
-        $usersByAudience = Customer::query()
-            ->selectRaw("COALESCE(NULLIF(audience_type, ''), 'Not selected') as label, COUNT(*) as total")
-            ->groupBy('label')
-            ->orderByDesc('total')
-            ->get();
-
-        $orderStatusBreakdown = Order::query()
-            ->selectRaw("COALESCE(NULLIF(status, ''), 'unknown') as label, COUNT(*) as total, COALESCE(SUM(total_amount), 0) as amount")
-            ->groupBy('label')
-            ->orderByDesc('total')
-            ->get();
-
-        $paymentStatusBreakdown = Order::query()
-            ->selectRaw("COALESCE(NULLIF(payment_status, ''), 'unknown') as label, COUNT(*) as total, COALESCE(SUM(total_amount), 0) as amount")
-            ->groupBy('label')
-            ->orderByDesc('total')
-            ->get();
-
-        $paymentGatewayBreakdown = Order::query()
-            ->selectRaw("COALESCE(NULLIF(payment_gateway, ''), 'Not selected') as label, COUNT(*) as total, COALESCE(SUM(total_amount), 0) as amount")
-            ->groupBy('label')
-            ->orderByDesc('total')
-            ->get();
-
-        $customers = Customer::withCount(['orders', 'wishlists'])
-            ->withSum('orders', 'total_amount')
-            ->latest()
-            ->get();
-
-        $orders = Order::with('customer')->latest()->get();
-        $invoices = Order::with('customer')->where('payment_status', 'paid')->latest()->get();
-
-        $topSellingProducts = OrderItem::query()
-            ->selectRaw('product_id, product_name, SUM(quantity) as total_quantity, COALESCE(SUM(subtotal), 0) as total_sales')
-            ->groupBy('product_id', 'product_name')
-            ->orderByDesc('total_quantity')
-            ->get();
-
-        $wishlistProducts = Wishlist::with('product')
-            ->select('product_id', DB::raw('COUNT(*) as total'))
-            ->groupBy('product_id')
-            ->orderByDesc('total')
-            ->get();
-
-        $wishlistDetails = Wishlist::with(['customer', 'product'])->latest()->get();
-
-        $lowStockProducts = Product::query()
-            ->where('manage_stock', true)
-            ->where('stock_quantity', '<=', 5)
-            ->orderBy('stock_quantity')
-            ->get();
-
-        $returns = OrderReturn::with(['order', 'customer', 'orderItem'])->latest()->get();
-
-        $productReviews = ProductReview::with(['product', 'customer'])->latest()->get();
-        $blogReviews = BlogReview::with(['blog', 'customer'])->latest()->get();
+        $analyticsData = $this->analyticsData($metrics, true);
+        extract($analyticsData);
 
         $sheets = [
             'Summary' => [
                 ['Metric', 'Value'],
                 ['Generated At', now()->format('d M Y h:i A')],
+                ['Detail Sheet Row Limit', self::ANALYTICS_EXPORT_ROW_LIMIT . ' latest rows per sheet'],
                 ['Total Customers', $metrics['totalCustomers']],
                 ['New Customers Last 30 Days', $metrics['newCustomersLast30']],
                 ['Customers With Orders', $customersWithOrders],
@@ -416,33 +259,204 @@ class DashboardController extends Controller
         ]);
     }
 
+    private function analyticsData(array $metrics, bool $forExport = false): array
+    {
+        $exportLimit = $forExport ? self::ANALYTICS_EXPORT_ROW_LIMIT : null;
+        $customersWithOrders = Customer::has('orders')->count();
+
+        $data = [
+            'customersWithOrders' => $customersWithOrders,
+            'customersWithoutOrders' => max($metrics['totalCustomers'] - $customersWithOrders, 0),
+            'usersByCity' => $this->limitQuery(
+                Customer::query()
+                    ->selectRaw("COALESCE(NULLIF(city, ''), 'Unknown') as label, COUNT(*) as total")
+                    ->groupBy('label')
+                    ->orderByDesc('total'),
+                $forExport ? $exportLimit : 15
+            )->get(),
+            'usersByAudience' => $this->limitQuery(
+                Customer::query()
+                    ->selectRaw("COALESCE(NULLIF(audience_type, ''), 'Not selected') as label, COUNT(*) as total")
+                    ->groupBy('label')
+                    ->orderByDesc('total'),
+                $exportLimit
+            )->get(),
+            'orderStatusBreakdown' => $this->limitQuery(
+                Order::query()
+                    ->selectRaw("COALESCE(NULLIF(status, ''), 'unknown') as label, COUNT(*) as total, COALESCE(SUM(total_amount), 0) as amount")
+                    ->groupBy('label')
+                    ->orderByDesc('total'),
+                $exportLimit
+            )->get(),
+            'paymentStatusBreakdown' => $this->limitQuery(
+                Order::query()
+                    ->selectRaw("COALESCE(NULLIF(payment_status, ''), 'unknown') as label, COUNT(*) as total, COALESCE(SUM(total_amount), 0) as amount")
+                    ->groupBy('label')
+                    ->orderByDesc('total'),
+                $exportLimit
+            )->get(),
+            'paymentGatewayBreakdown' => $this->limitQuery(
+                Order::query()
+                    ->selectRaw("COALESCE(NULLIF(payment_gateway, ''), 'Not selected') as label, COUNT(*) as total, COALESCE(SUM(total_amount), 0) as amount")
+                    ->groupBy('label')
+                    ->orderByDesc('total'),
+                $exportLimit
+            )->get(),
+            'topSellingProducts' => $this->limitQuery(
+                OrderItem::query()
+                    ->selectRaw('product_id, product_name, SUM(quantity) as total_quantity, COALESCE(SUM(subtotal), 0) as total_sales')
+                    ->groupBy('product_id', 'product_name')
+                    ->orderByDesc('total_quantity'),
+                $forExport ? $exportLimit : 10
+            )->get(),
+            'lowStockProducts' => $this->limitQuery(
+                Product::query()
+                    ->where('manage_stock', true)
+                    ->where('stock_quantity', '<=', 5)
+                    ->orderBy('stock_quantity'),
+                $forExport ? $exportLimit : 10
+            )->get(),
+            'returnStatusBreakdown' => OrderReturn::query()
+                ->selectRaw("COALESCE(NULLIF(status, ''), 'unknown') as label, COUNT(*) as total, COALESCE(SUM(refund_amount), 0) as amount")
+                ->groupBy('label')
+                ->orderByDesc('total')
+                ->get(),
+            'reviewStatusBreakdown' => [
+                'product' => ProductReview::query()
+                    ->selectRaw("COALESCE(NULLIF(status, ''), 'unknown') as label, COUNT(*) as total")
+                    ->groupBy('label')
+                    ->orderByDesc('total')
+                    ->get(),
+                'blog' => BlogReview::query()
+                    ->selectRaw("COALESCE(NULLIF(status, ''), 'unknown') as label, COUNT(*) as total")
+                    ->groupBy('label')
+                    ->orderByDesc('total')
+                    ->get(),
+            ],
+            'cartReport' => [
+                'tracked' => false,
+                'message' => 'Cart data is stored in visitor sessions only, so active add-to-cart reports are not available in the database.',
+            ],
+        ];
+
+        if (!$forExport) {
+            return array_merge($data, [
+                'recentCustomers' => Customer::withCount(['orders', 'wishlists'])
+                    ->withSum('orders', 'total_amount')
+                    ->latest()
+                    ->take(15)
+                    ->get(),
+                'recentOrders' => Order::with('customer')->latest()->take(15)->get(),
+                'recentInvoices' => Order::with('customer')
+                    ->where('payment_status', 'paid')
+                    ->latest()
+                    ->take(15)
+                    ->get(),
+                'topWishlistProducts' => Wishlist::with('product')
+                    ->select('product_id', DB::raw('COUNT(*) as total'))
+                    ->groupBy('product_id')
+                    ->orderByDesc('total')
+                    ->take(10)
+                    ->get(),
+                'recentReturns' => OrderReturn::with(['order', 'customer'])->latest()->take(10)->get(),
+            ]);
+        }
+
+        return array_merge($data, [
+            'customers' => Customer::withCount(['orders', 'wishlists'])
+                ->withSum('orders', 'total_amount')
+                ->latest()
+                ->limit(self::ANALYTICS_EXPORT_ROW_LIMIT)
+                ->get(),
+            'orders' => Order::with('customer')->latest()->limit(self::ANALYTICS_EXPORT_ROW_LIMIT)->get(),
+            'invoices' => Order::with('customer')->where('payment_status', 'paid')->latest()->limit(self::ANALYTICS_EXPORT_ROW_LIMIT)->get(),
+            'wishlistProducts' => Wishlist::with('product')
+                ->select('product_id', DB::raw('COUNT(*) as total'))
+                ->groupBy('product_id')
+                ->orderByDesc('total')
+                ->limit(self::ANALYTICS_EXPORT_ROW_LIMIT)
+                ->get(),
+            'wishlistDetails' => Wishlist::with(['customer', 'product'])->latest()->limit(self::ANALYTICS_EXPORT_ROW_LIMIT)->get(),
+            'returns' => OrderReturn::with(['order', 'customer', 'orderItem'])->latest()->limit(self::ANALYTICS_EXPORT_ROW_LIMIT)->get(),
+            'productReviews' => ProductReview::with(['product', 'customer'])->latest()->limit(self::ANALYTICS_EXPORT_ROW_LIMIT)->get(),
+            'blogReviews' => BlogReview::with(['blog', 'customer'])->latest()->limit(self::ANALYTICS_EXPORT_ROW_LIMIT)->get(),
+        ]);
+    }
+
+    private function limitQuery($query, ?int $limit)
+    {
+        return $limit ? $query->limit($limit) : $query;
+    }
+
     private function dashboardMetrics(): array
     {
         return Cache::remember('dashboard.metrics.v1', now()->addMinute(), function () {
-        $totalCustomers = Customer::count();
-        $totalOrders = Order::count();
-        $paidOrders = Order::where('payment_status', 'paid')->count();
-        $pendingOrders = Order::whereIn('status', ['pending', 'processing', 'confirmed'])->count();
-        $deliveredOrders = Order::where('status', 'delivered')->count();
-        $cancelledOrders = Order::where('status', 'cancelled')->count();
-        $ordersLast30 = Order::where('created_at', '>=', now()->subDays(30))->count();
-        $totalProducts = Product::count();
-        $activeProducts = Product::where('status', 'active')->count();
-        $totalCategories = Category::count();
-        $wishlistCount = Wishlist::count();
-        $wishlistCustomers = Wishlist::distinct('customer_id')->count('customer_id');
-        $totalRevenue = (float) Order::where('payment_status', 'paid')->sum('total_amount');
-        $last30DaysRevenue = (float) Order::where('payment_status', 'paid')
-            ->where('created_at', '>=', now()->subDays(30))
-            ->sum('total_amount');
-        $newCustomersLast30 = Customer::where('created_at', '>=', now()->subDays(30))->count();
+        $last30Days = now()->subDays(30);
+
+        $orderMetrics = Order::query()
+            ->selectRaw("
+                COUNT(*) as total_orders,
+                SUM(CASE WHEN payment_status = 'paid' THEN 1 ELSE 0 END) as paid_orders,
+                SUM(CASE WHEN status IN ('pending', 'processing', 'confirmed') THEN 1 ELSE 0 END) as pending_orders,
+                SUM(CASE WHEN status = 'delivered' THEN 1 ELSE 0 END) as delivered_orders,
+                SUM(CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END) as cancelled_orders,
+                SUM(CASE WHEN created_at >= ? THEN 1 ELSE 0 END) as orders_last_30,
+                COALESCE(SUM(CASE WHEN payment_status = 'paid' THEN total_amount ELSE 0 END), 0) as total_revenue,
+                COALESCE(SUM(CASE WHEN payment_status = 'paid' AND created_at >= ? THEN total_amount ELSE 0 END), 0) as last_30_days_revenue
+            ", [$last30Days, $last30Days])
+            ->first();
+
+        $customerMetrics = Customer::query()
+            ->selectRaw(
+                "COUNT(*) as total_customers,
+                SUM(CASE WHEN created_at >= ? THEN 1 ELSE 0 END) as new_customers_last_30",
+                [$last30Days]
+            )
+            ->first();
+
+        $productMetrics = Product::query()
+            ->selectRaw("
+                COUNT(*) as total_products,
+                SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) as active_products
+            ")
+            ->first();
+
+        $wishlistMetrics = Wishlist::query()
+            ->selectRaw('COUNT(*) as wishlist_count, COUNT(DISTINCT customer_id) as wishlist_customers')
+            ->first();
+
+        $miscCounts = collect(DB::select("
+            SELECT 'total_categories' as metric, COUNT(*) as total FROM categories
+            UNION ALL
+            SELECT 'return_count' as metric, COUNT(*) as total FROM order_returns
+            UNION ALL
+            SELECT 'product_review_count' as metric, COUNT(*) as total FROM product_reviews
+            UNION ALL
+            SELECT 'blog_review_count' as metric, COUNT(*) as total FROM blog_reviews
+        "))->pluck('total', 'metric');
+
+        $totalCustomers = (int) ($customerMetrics->total_customers ?? 0);
+        $newCustomersLast30 = (int) ($customerMetrics->new_customers_last_30 ?? 0);
+        $totalOrders = (int) ($orderMetrics->total_orders ?? 0);
+        $paidOrders = (int) ($orderMetrics->paid_orders ?? 0);
+        $pendingOrders = (int) ($orderMetrics->pending_orders ?? 0);
+        $deliveredOrders = (int) ($orderMetrics->delivered_orders ?? 0);
+        $cancelledOrders = (int) ($orderMetrics->cancelled_orders ?? 0);
+        $ordersLast30 = (int) ($orderMetrics->orders_last_30 ?? 0);
+        $totalRevenue = (float) ($orderMetrics->total_revenue ?? 0);
+        $last30DaysRevenue = (float) ($orderMetrics->last_30_days_revenue ?? 0);
+        $totalProducts = (int) ($productMetrics->total_products ?? 0);
+        $activeProducts = (int) ($productMetrics->active_products ?? 0);
+        $totalCategories = (int) ($miscCounts['total_categories'] ?? 0);
+        $wishlistCount = (int) ($wishlistMetrics->wishlist_count ?? 0);
+        $wishlistCustomers = (int) ($wishlistMetrics->wishlist_customers ?? 0);
         $averageOrderValue = $paidOrders > 0 ? $totalRevenue / $paidOrders : 0;
         $paymentSuccessRate = $totalOrders > 0 ? round(($paidOrders / $totalOrders) * 100, 1) : 0;
         $invoiceCount = $paidOrders;
         $invoiceValue = $totalRevenue;
-        $returnCount = OrderReturn::count();
-        $productReviewCount = ProductReview::count();
-        $blogReviewCount = BlogReview::count();
+        $returnCount = (int) ($miscCounts['return_count'] ?? 0);
+        $productReviewCount = (int) ($miscCounts['product_review_count'] ?? 0);
+        $blogReviewCount = (int) ($miscCounts['blog_review_count'] ?? 0);
 
         return compact(
             'totalCustomers',

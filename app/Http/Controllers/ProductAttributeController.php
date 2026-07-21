@@ -22,11 +22,16 @@ class ProductAttributeController extends Controller
     public function store(Request $request)
     {
         $validated = $this->validateAttribute($request);
+        $values = $this->parseValues($validated['values']);
+
+        if (empty($values)) {
+            return back()->withErrors(['values' => 'Add at least one attribute value.'])->withInput();
+        }
 
         GlobalProductAttribute::create([
             'name' => trim($validated['name']),
             'slug' => Str::slug($validated['name']),
-            'values' => $this->parseValues($validated['values']),
+            'values' => $values,
             'sort_order' => $validated['sort_order'] ?? 0,
             'is_active' => $request->boolean('is_active', true),
         ]);
@@ -38,11 +43,16 @@ class ProductAttributeController extends Controller
     public function update(Request $request, GlobalProductAttribute $attribute)
     {
         $validated = $this->validateAttribute($request, $attribute);
+        $values = $this->parseValues($validated['values']);
+
+        if (empty($values)) {
+            return back()->withErrors(['values' => 'Add at least one attribute value.'])->withInput();
+        }
 
         $attribute->update([
             'name' => trim($validated['name']),
             'slug' => Str::slug($validated['name']),
-            'values' => $this->parseValues($validated['values']),
+            'values' => $values,
             'sort_order' => $validated['sort_order'] ?? 0,
             'is_active' => $request->boolean('is_active'),
         ]);

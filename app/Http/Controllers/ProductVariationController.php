@@ -7,6 +7,7 @@ use App\Models\GlobalProductAttribute;
 use App\Models\Product;
 use App\Models\ProductAttribute;
 use App\Models\ProductVariation;
+use App\Support\SafeImageUpload;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
@@ -37,12 +38,12 @@ class ProductVariationController extends Controller
             'weight'          => 'nullable|numeric|min:0',
             'stock_quantity'  => 'required|integer|min:0',
             'is_default'      => 'nullable|boolean',
-            'image'           => 'nullable|image|max:2048',
+            'image'           => SafeImageUpload::VALIDATION_RULE,
         ]);
 
         $imagePath = null;
         if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('products/variations', 'public');
+            $imagePath = SafeImageUpload::storePublic($request->file('image'), 'products/variations');
         }
 
         if ($request->boolean('is_default')) {
@@ -71,12 +72,16 @@ class ProductVariationController extends Controller
 
     public function edit(Product $product, ProductVariation $variation)
     {
+        $this->ensureVariationBelongsToProduct($product, $variation);
+
         $globalAttributes = GlobalProductAttribute::active()->orderBy('sort_order')->orderBy('name')->get();
         return view('dashboard.variations.edit', compact('product', 'variation', 'globalAttributes'));
     }
 
     public function update(Request $request, Product $product, ProductVariation $variation)
     {
+        $this->ensureVariationBelongsToProduct($product, $variation);
+
         $request->validate([
             'sku'             => 'required|string|max:100|unique:product_variations,sku,' . $variation->id,
             'attribute_name'  => 'required|string|max:100',
@@ -85,12 +90,12 @@ class ProductVariationController extends Controller
             'weight'          => 'nullable|numeric|min:0',
             'stock_quantity'  => 'required|integer|min:0',
             'is_default'      => 'nullable|boolean',
-            'image'           => 'nullable|image|max:2048',
+            'image'           => SafeImageUpload::VALIDATION_RULE,
         ]);
 
         if ($request->hasFile('image')) {
             if ($variation->image_path) Storage::disk('public')->delete($variation->image_path);
-            $variation->image_path = $request->file('image')->store('products/variations', 'public');
+            $variation->image_path = SafeImageUpload::storePublic($request->file('image'), 'products/variations');
         }
 
         if ($request->boolean('is_default')) {
@@ -115,6 +120,8 @@ class ProductVariationController extends Controller
 
     public function destroy(Product $product, ProductVariation $variation)
     {
+        $this->ensureVariationBelongsToProduct($product, $variation);
+
         $wasDefault = $variation->is_default;
         if ($variation->image_path) Storage::disk('public')->delete($variation->image_path);
         $variation->delete();
@@ -216,5 +223,10 @@ class ProductVariationController extends Controller
     {
         $variation->update(['is_active' => !$variation->is_active]);
         return response()->json(['is_active' => $variation->is_active]);
+    }
+
+    private function ensureVariationBelongsToProduct(Product $product, ProductVariation $variation): void
+    {
+        abort_unless((int) $variation->product_id === (int) $product->id, 404);
     }
 }

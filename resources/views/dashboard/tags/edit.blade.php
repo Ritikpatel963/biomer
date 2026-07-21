@@ -31,14 +31,16 @@
                 <div class="col-md-6">
                     <label class="form-label fw-semibold">Tag Name <span class="text-danger">*</span></label>
                     <input type="text" name="name" class="form-control @error('name') is-invalid @enderror"
-                        value="{{ old('name', $tag->name) }}" placeholder="e.g. Cotton, Summer, Sale" required>
+                        value="{{ old('name', $tag->name) }}" placeholder="e.g. Cotton, Summer, Sale" required
+                        data-tag-edit-name>
                     @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>
 
                 <div class="col-md-6">
                     <label class="form-label fw-semibold">Slug</label>
                     <input type="text" name="slug" id="slugInput" class="form-control @error('slug') is-invalid @enderror"
-                        value="{{ old('slug', $tag->slug) }}" placeholder="e.g. cotton-summer-sale">
+                        value="{{ old('slug', $tag->slug) }}" placeholder="e.g. cotton-summer-sale"
+                        data-tag-edit-slug>
                     @error('slug')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     <small class="text-muted">Auto-generated from name. Lowercase letters, numbers and hyphens only.</small>
                 </div>
@@ -52,24 +54,3 @@
     </div>
 </div>
 @endsection
-
-@push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const nameInput = document.querySelector('input[name="name"]');
-    const slugInput = document.getElementById('slugInput');
-
-    nameInput.addEventListener('input', function () {
-        if (!slugInput.dataset.manual) {
-            slugInput.value = this.value.toLowerCase().trim()
-                .replace(/[^a-z0-9\s-]/g, '')
-                .replace(/\s+/g, '-');
-        }
-    });
-
-    slugInput.addEventListener('input', function () {
-        this.dataset.manual = 'true';
-    });
-});
-</script>
-@endpush

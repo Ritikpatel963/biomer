@@ -5,6 +5,7 @@
     $title    = 'Order Detail';
     $subTitle = 'Order Detail';
     $script   = '';
+    $canDownloadInvoices = auth()->user()?->hasRole('super-admin') ?? false;
 @endphp
 
 @section('content')
@@ -31,25 +32,34 @@
             <div class="d-flex align-items-center gap-3 flex-wrap">
 
                 {{-- ── Download Invoice Button ── --}}
-                <a href="{{ route('dashboard.orders.invoice', $order->order_number) }}"
-                   class="btn btn-success btn-sm px-16" target="_blank">
-                    
-                    Download Invoice
-                </a>
+                @if($canDownloadInvoices)
+                    <a href="{{ URL::temporarySignedRoute('dashboard.orders.invoice', now()->addMinutes(10), $order->order_number) }}"
+                       class="btn btn-success btn-sm px-16" target="_blank">
+                        
+                        Download Invoice
+                    </a>
+                @endif
 
                 {{-- ── AJAX Status Changer ── --}}
+                @can('edit orders')
                 <label class="fw-semibold mb-0">Status:</label>
-                <select id="statusSelect" class="form-select form-select-sm" style="width:160px;">
+                <select id="statusSelect" class="form-select form-select-sm" style="width:160px;" data-order-status-select>
                     @foreach(['pending','confirmed','processing','shipped','delivered','cancelled'] as $s)
                         <option value="{{ $s }}" {{ $order->status === $s ? 'selected' : '' }}>
                             {{ ucfirst($s) }}
                         </option>
                     @endforeach
                 </select>
-                <button id="saveStatusBtn" class="btn btn-primary btn-sm px-16">
+                <button
+                    id="saveStatusBtn"
+                    class="btn btn-primary btn-sm px-16"
+                    data-order-status-save
+                    data-status-url="{{ url('/dashboard/orders/' . $order->order_number . '/status') }}"
+                >
                     Save
                 </button>
-                <span id="statusMsg" class="text-sm fw-medium" style="display:none;"></span>
+                <span id="statusMsg" class="text-sm fw-medium" style="display:none;" data-order-status-message></span>
+                @endcan
 
             </div>
         </div>
@@ -201,46 +211,3 @@
 </div>
 
 @endsection
-
-@push('scripts')
-<script>
-document.getElementById('saveStatusBtn').addEventListener('click', function () {
-    const btn       = this;
-    const status    = document.getElementById('statusSelect').value;
-    const msg       = document.getElementById('statusMsg');
-    const orderNum  = '{{ $order->order_number }}';
-
-    btn.disabled    = true;
-    btn.textContent = 'Saving...';
-
-    fetch(`/dashboard/orders/${orderNum}/status`, {
-        method : 'PATCH',
-        headers: {
-            'Content-Type' : 'application/json',
-            'X-CSRF-TOKEN' : document.querySelector('meta[name="csrf-token"]').content,
-            'Accept'       : 'application/json',
-        },
-        body: JSON.stringify({ status })
-    })
-    .then(r => {
-        if (!r.ok) throw new Error('HTTP ' + r.status);
-        return r.json();
-    })
-    .then(d => {
-        btn.disabled    = false;
-        btn.textContent = 'Save';
-        msg.style.display = 'inline';
-        msg.style.color   = '#198754';
-        msg.textContent   = '✓ ' + d.message;
-        setTimeout(() => msg.style.display = 'none', 3000);
-    })
-    .catch(err => {
-        btn.disabled    = false;
-        btn.textContent = 'Save';
-        msg.style.display = 'inline';
-        msg.style.color   = '#dc3545';
-        msg.textContent   = '✗ Update failed: ' + err.message;
-    });
-});
-</script>
-@endpush

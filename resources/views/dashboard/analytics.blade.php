@@ -201,28 +201,30 @@
 
   
 
-    <form action="{{ route('dashboard.analytics.export') }}" method="GET" class="analytics-export-panel">
-        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
-            <div>
-                <h6 class="mb-1">Download Report</h6>
-                <p class="text-secondary-light mb-0">Choose which sheets should be included in the export.</p>
-            </div>
-            <div class="d-flex flex-wrap gap-2">
-                <button type="button" class="btn btn-outline-primary btn-sm" id="selectAllReports">Select All</button>
-                <button type="button" class="btn btn-outline-secondary btn-sm" id="clearReports">Clear</button>
-                <button type="submit" class="btn btn-primary btn-sm">Download Selected</button>
-            </div>
-        </div>
-
-        <div class="analytics-export-grid">
-            @foreach($exportSections as $section)
-                <div class="analytics-export-option">
-                    <input class="form-check-input analytics-export-checkbox" type="checkbox" name="sections[]" value="{{ $section }}" id="export-{{ \Illuminate\Support\Str::slug($section) }}" checked>
-                    <label for="export-{{ \Illuminate\Support\Str::slug($section) }}">{{ $section }}</label>
+    @if((auth()->user()?->role ?? null) === 'super-admin')
+        <form action="{{ route('dashboard.analytics.export') }}" method="GET" class="analytics-export-panel">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                <div>
+                    <h6 class="mb-1">Download Report</h6>
+                    <p class="text-secondary-light mb-0">Choose which sheets should be included in the export.</p>
                 </div>
-            @endforeach
-        </div>
-    </form>
+                <div class="d-flex flex-wrap gap-2">
+                    <button type="button" class="btn btn-outline-primary btn-sm" id="selectAllReports">Select All</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" id="clearReports">Clear</button>
+                    <button type="submit" class="btn btn-primary btn-sm">Download Selected</button>
+                </div>
+            </div>
+
+            <div class="analytics-export-grid">
+                @foreach($exportSections as $section)
+                    <div class="analytics-export-option">
+                        <input class="form-check-input analytics-export-checkbox" type="checkbox" name="sections[]" value="{{ $section }}" id="export-{{ \Illuminate\Support\Str::slug($section) }}" checked>
+                        <label for="export-{{ \Illuminate\Support\Str::slug($section) }}">{{ $section }}</label>
+                    </div>
+                @endforeach
+            </div>
+        </form>
+    @endif
 
     @push('scripts')
         <script>

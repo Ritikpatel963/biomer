@@ -1,113 +1,8 @@
 @extends('layout.frontlayout')
 @section('title', 'My Dashboard – Bharat Biomer')
 
-@push('styles')
-<style>
-* { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; }
-
-.db-cards {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px; margin-bottom: 30px;
-}
-.db-card {
-    display: flex; align-items: center; gap: 16px;
-    padding: 20px; border-radius: 10px;
-    background: #fff; border: 1px solid #e8f0e4;
-}
-.db-card:hover { box-shadow: none; }
-.db-card-icon {
-    width: 64px; height: 64px; border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0; color: #fff;
-}
-.db-card-icon svg { width: 32px; height: 32px; }
-.db-card-info h3 { font-size: 26px; font-weight: 700; color: #1a1a2e; line-height: 1.2; margin-bottom: 8px; margin: 0; }
-.db-card-info span { font-size: 13px; color: #777; text-transform: capitalize; margin: 0; }
-
-.card-green  .db-card-icon { background: #0aa848; }
-.card-blue   .db-card-icon { background: #66aaee; }
-.card-orange .db-card-icon { background: #ffa500; }
-.card-red    .db-card-icon { background: #e53935; }
-.card-purple .db-card-icon { background: purple; }
-
-.db-bottom { display: grid; grid-template-columns: 7fr 5fr; gap: 24px; }
-.db-panel { 
-    background: #fff; 
-    border-radius: 10px; 
-    padding: 24px; 
-    border: 1px solid #e8f0e4; 
-    margin-bottom: 20px; 
-}
-.db-panel h3 { font-size: 18px; font-weight: 600; color: #1a1a2e; margin: 0 0 14px 0; }
-
-.db-orders-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-.db-orders-table th { background: #f4faf0; color: #2d7a45; padding: 10px 12px; text-align: left; font-weight: 600; border-bottom: 2px solid #e8f0e4; font-size: 13px; }
-.db-orders-table td { padding: 10px 12px; border-bottom: 1px solid #f0f0f0; color: #555; vertical-align: middle; font-size: 14px; }
-.db-orders-table tr:last-child td { border-bottom: none; }
-.db-orders-table tr:hover td { background: #f9fdf7; }
-
-.db-status { display: inline-block; padding: 4px 11px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
-.db-status--pending    { background:#fff8e1; color:#b45309; }
-.db-status--confirmed  { background:#e8f5ed; color:#2d7a45; }
-.db-status--processing { background:#e8f5fd; color:#1a6fa8; }
-.db-status--shipped    { background:#f3e8fd; color:#6d28d9; }
-.db-status--delivered  { background:#e8f5ed; color:#2d7a45; }
-.db-status--cancelled  { background:#fdecea; color:#c0392b; }
-
-.db-view-link { color: #2d7a45; font-weight: 600; text-decoration: none; font-size: 13px; }
-.db-view-link:hover { text-decoration: underline; }
-
-.db-empty-order { 
-    text-align: center; 
-    color: #777; 
-    font-style: italic; 
-    padding: 2rem;
-    background: #fffbe6; 
-    border: 1px solid #ffe58f; 
-    border-radius: 8px; 
-    color: #856404; 
-    font-size: 14px; 
-}
-
-.db-quick-links { 
-    display: flex; 
-    flex-direction: column; 
-    gap: 10px; 
-}
-
-.db-quick-link {
-    display: flex; align-items: center; gap: 10px;
-    padding: 12px 16px; border-radius: 10px;
-    border: 1px solid #e8f0e4; text-decoration: none;
-    color: #555; font-size: 14px; font-weight: 500; 
-    transition: all .2s;
-    background: #fff;
-}
-.db-quick-link:hover { 
-    background: #f4faf0; 
-    border-color: #2d7a45; 
-    color: #2d7a45; 
-}
-.db-quick-link svg { 
-    width: 18px; 
-    height: 18px; 
-    flex-shrink: 0; 
-    color: #2d7a45; 
-}
-
-@media (max-width: 1024px) { 
-    .db-cards { grid-template-columns: repeat(2,1fr); } 
-    .db-bottom { grid-template-columns: 1fr; } 
-}
-@media (max-width: 480px) { 
-    .db-cards { grid-template-columns: 1fr; } 
-    .db-card-info h3 { font-size: 22px; } 
-}
-</style>
-@endpush
-
 @section('content')
-<div class="container py-5">
+<div class="container py-5 customer-dashboard">
     <div class="row">
         {{-- Sidebar --}}
         <div class="col-lg-3 mb-4 mb-lg-0">
@@ -116,7 +11,7 @@
 
         {{-- Main Content --}}
         <div class="col-lg-9">
-            <h1 class="mb-4" style="font-size: 2rem; font-weight: 800; color: #1a2e1a;">My Dashboard</h1>
+            <h1 class="db-page-title mb-4">My Dashboard</h1>
 
             {{-- ── Stats Cards ── --}}
             <div class="row g-4 mb-5">

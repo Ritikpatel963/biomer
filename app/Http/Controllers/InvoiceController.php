@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\SiteSetting;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class InvoiceController extends Controller
 {
@@ -17,11 +20,37 @@ class InvoiceController extends Controller
         return view('dashboard.invoices.index', compact('orders'));
     }
     // ── Admin Download ─────────────────────────────────────────────────
-    public function downloadAdmin($orderNumber)
+    public function downloadAdmin(Request $request, $orderNumber)
     {
+        $admin = $request->user('web');
+
+        if (!$admin?->hasRole('super-admin')) {
+            Log::warning('Blocked admin invoice download attempt', [
+                'admin_id' => $admin?->id,
+                'admin_email' => $admin?->email,
+                'admin_roles' => $admin?->getRoleNames()->all(),
+                'order_number' => $orderNumber,
+                'ip' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
+            abort(403, 'Only super admins can download customer invoices.');
+        }
+
         $order = Order::with(['items.product', 'customer'])
             ->where('order_number', $orderNumber)
             ->firstOrFail();
+
+        Log::info('Admin invoice download', [
+            'admin_id' => $admin->id,
+            'admin_email' => $admin->email,
+            'order_id' => $order->id,
+            'order_number' => $order->order_number,
+            'customer_id' => $order->customer_id,
+            'ip' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
         $company = $this->invoiceCompany();
 
         $pdf = Pdf::loadView('Invoices.invoice', compact('order', 'company'))
@@ -89,7 +118,7 @@ class InvoiceController extends Controller
 
     private function invoiceCompany(): array
     {
-        $settings = SiteSetting::first();
+        $settings = Cache::remember('site_settings', now()->addHour(), fn () => SiteSetting::first());
         $storageLogo = $settings?->logo_path ? public_path('storage/' . $settings->logo_path) : null;
         $publicLogo = public_path('assets/images/home-img/bb logo.png');
         $assetLogo = $settings?->logo_path ? asset('storage/' . $settings->logo_path) : asset('assets/images/home-img/bb logo.png');

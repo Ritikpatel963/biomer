@@ -1,6 +1,8 @@
 @extends('layout.frontlayout')
 
-@section('title', 'Privacy Policy – Bharat Biomer')
+@section('title', $pageSeo?->meta_title ?: 'Privacy Policy - Bharat Biomer')
+@section('seo_description', $pageSeo?->meta_description ?: 'Read Bharat Biomer privacy policy to understand how customer data is collected, used, protected, and shared.')
+@section('seo_keywords', $pageSeo?->meta_keyword ?: 'Bharat Biomer privacy policy, customer data, data security, cookies')
 
 @section('content')
     <section class="container py-5">

@@ -28,7 +28,7 @@
               <label class="form-label fw-semibold">Brand Name <span class="text-danger">*</span></label>
               <input type="text" name="name" class="form-control @error('name') is-invalid @enderror"
                 value="{{ old('name') }}" placeholder="e.g. GPC" required
-                oninput="autoSlug(this.value)">
+                data-brand-slug-source>
               @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
 
@@ -44,7 +44,7 @@
             <div class="mb-4">
               <label class="form-label fw-semibold">Brand Logo</label>
               <input type="file" name="logo" class="form-control" accept="image/*"
-                onchange="previewLogo(this)">
+                data-brand-logo-input>
               <img id="logoPreview" src="" alt="" style="display:none;width:100px;height:100px;object-fit:contain;margin-top:10px;border:1px solid #dee2e6;border-radius:8px;padding:4px;">
             </div>
 
@@ -59,18 +59,4 @@
   </div>
 </div>
 
-<script>
-  function autoSlug(val) {
-    document.getElementById('slugField').value =
-      val.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-  }
-  function previewLogo(input) {
-    const prev = document.getElementById('logoPreview');
-    if (input.files && input.files[0]) {
-      const reader = new FileReader();
-      reader.onload = e => { prev.src = e.target.result; prev.style.display = 'block'; };
-      reader.readAsDataURL(input.files[0]);
-    }
-  }
-</script>
 @endsection

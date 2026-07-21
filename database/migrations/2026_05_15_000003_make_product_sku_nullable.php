@@ -7,12 +7,16 @@ return new class extends Migration
 {
     public function up(): void
     {
-        DB::statement('ALTER TABLE products MODIFY sku VARCHAR(100) NULL');
+        if (config('database.default') !== 'sqlite') {
+            DB::statement('ALTER TABLE products MODIFY sku VARCHAR(100) NULL');
+        }
     }
 
     public function down(): void
     {
-        DB::statement('UPDATE products SET sku = CONCAT("PRODUCT-", id) WHERE sku IS NULL');
-        DB::statement('ALTER TABLE products MODIFY sku VARCHAR(100) NOT NULL');
+        if (config('database.default') !== 'sqlite') {
+            DB::statement('UPDATE products SET sku = CONCAT("PRODUCT-", id) WHERE sku IS NULL');
+            DB::statement('ALTER TABLE products MODIFY sku VARCHAR(100) NOT NULL');
+        }
     }
 };

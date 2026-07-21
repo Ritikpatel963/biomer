@@ -20,7 +20,7 @@ class CustomerAuthController extends Controller
         }
 
         $redirect = request('redirect');
-        if (is_string($redirect) && str_starts_with($redirect, url('/'))) {
+        if (is_string($redirect) && $this->isSafeRedirectUrl($redirect)) {
             session()->put('url.intended', $redirect);
         }
 
@@ -30,9 +30,13 @@ class CustomerAuthController extends Controller
     // ── Login ──────────────────────────────────────────────────────────
     public function login(Request $request)
     {
+        $request->merge([
+            'email' => trim((string) $request->input('email', '')),
+        ]);
+
         $request->validate([
-            'email'    => 'required|email',
-            'password' => 'required|min:6',
+            'email'    => 'required|email|max:255',
+            'password' => 'required|string|min:6',
         ]);
 
         $credentials = $request->only('email', 'password');
@@ -73,18 +77,27 @@ class CustomerAuthController extends Controller
     // ── Register ───────────────────────────────────────────────────────
     public function register(Request $request)
     {
-        $request->validate([
-            'name'                  => 'required|string|max:255',
-            'email'                 => 'required|email|unique:customers,email',
-            'phone'                 => 'nullable|string|max:15',
-            'password'              => 'required|min:6|confirmed',
+        $request->merge([
+            'name' => trim((string) $request->input('name', '')),
+            'email' => trim((string) $request->input('email', '')),
+            'phone' => trim((string) $request->input('phone', '')),
+        ]);
+
+        $validated = $request->validate([
+            'name'                  => 'required|string|min:2|max:255',
+            'email'                 => 'required|email|max:255|unique:customers,email',
+            'phone'                 => ['nullable', 'string', 'regex:/^[0-9+\-\s()]{7,20}$/'],
+            'password'              => ['required', 'min:8', 'confirmed', 'regex:/^(?=.*[a-zA-Z])(?=.*[0-9])/'],
             'password_confirmation' => 'required',
+        ], [
+            'password.regex' => 'Password must contain at least one letter and one number.',
+            'phone.regex' => 'Please enter a valid phone number.',
         ]);
 
         $customer = Customer::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'phone'    => $request->phone,
+            'name'     => $validated['name'],
+            'email'    => $validated['email'],
+            'phone'    => $validated['phone'] ?? null,
             'password' => Hash::make($request->password),
         ]);
 
@@ -106,8 +119,26 @@ class CustomerAuthController extends Controller
     public function logout(Request $request)
     {
         Auth::guard('customer')->logout();
+        $request->session()->invalidate();
         $request->session()->regenerateToken();
         return redirect()->route('customer.login')
             ->with('success', 'You have been logged out.');
+    }
+
+    private function isSafeRedirectUrl(string $redirect): bool
+    {
+        $parsedRedirect = parse_url($redirect);
+
+        if ($parsedRedirect === false) {
+            return false;
+        }
+
+        $redirectHost = $parsedRedirect['host'] ?? null;
+
+        if ($redirectHost === null) {
+            return str_starts_with($redirect, '/') && !str_starts_with($redirect, '//');
+        }
+
+        return strtolower($redirectHost) === strtolower(parse_url(url('/'), PHP_URL_HOST) ?? '');
     }
 }

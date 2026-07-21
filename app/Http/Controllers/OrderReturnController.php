@@ -7,6 +7,7 @@ use App\Models\OrderReturn;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class OrderReturnController extends Controller
 {
@@ -24,7 +25,7 @@ class OrderReturnController extends Controller
     {
         $order = Order::where('order_number', $orderNumber)
             ->where('customer_id', Auth::guard('customer')->id())
-            ->with(['orderItems.product'])
+            ->with(['items.product'])
             ->firstOrFail();
 
         // Only allow returns for delivered orders within 30 days
@@ -37,9 +38,13 @@ class OrderReturnController extends Controller
 
     public function store(Request $request, $orderNumber)
     {
+        $request->merge([
+            'description' => trim((string) $request->input('description', '')),
+        ]);
+
         $order = Order::where('order_number', $orderNumber)
             ->where('customer_id', Auth::guard('customer')->id())
-            ->with(['orderItems'])
+            ->with(['items'])
             ->firstOrFail();
 
         // Validate return request
@@ -47,20 +52,41 @@ class OrderReturnController extends Controller
             return back()->withErrors(['error' => 'Returns are only allowed for delivered orders within 30 days.']);
         }
 
+        $orderItemIds = $order->items->pluck('id')->all();
+
         $validator = Validator::make($request->all(), [
-            'order_item_id' => 'required|integer',
+            'order_item_id' => [
+                'required',
+                'integer',
+                Rule::exists('order_items', 'id'),
+                Rule::in($orderItemIds),
+            ],
             'reason' => 'required|string|in:defective,wrong_item,not_as_described,damaged,other',
-            'description' => 'required|string|max:500',
-            'refund_amount' => 'required|numeric|min:0|max:' . $order->total_amount,
+            'description' => 'required|string|min:10|max:500',
+            'refund_amount' => 'required|numeric|min:0',
+        ], [
+            'description.min' => 'Please describe the issue in at least 10 characters.',
         ]);
 
         if ($validator->fails()) {
             return back()->withErrors($validator)->withInput();
         }
 
-        $selectedItem = $order->orderItems->firstWhere('id', (int) $request->order_item_id);
+        $validated = $validator->validated();
+        $selectedItem = $order->items->firstWhere('id', (int) $validated['order_item_id']);
         if (!$selectedItem) {
             return back()->withErrors(['order_item_id' => 'Please select a valid order item.'])->withInput();
+        }
+
+        $refundMax = min(
+            (float) $selectedItem->subtotal,
+            (float) $order->net_amount
+        );
+
+        if ((float) $validated['refund_amount'] > $refundMax) {
+            return back()
+                ->withErrors(['refund_amount' => 'Refund amount cannot be greater than the refundable paid amount for this item.'])
+                ->withInput();
         }
 
         // Check if return already exists for this order item
@@ -75,10 +101,10 @@ class OrderReturnController extends Controller
             'order_id' => $order->id,
             'order_item_id' => $selectedItem->id,
             'customer_id' => Auth::guard('customer')->id(),
-            'reason' => $request->reason,
-            'description' => $request->description,
+            'reason' => $validated['reason'],
+            'description' => $validated['description'],
             'status' => 'pending',
-            'refund_amount' => $request->refund_amount,
+            'refund_amount' => $validated['refund_amount'],
             'requested_at' => now(),
         ]);
 
@@ -89,7 +115,7 @@ class OrderReturnController extends Controller
     {
         $return = OrderReturn::where('id', $id)
             ->where('customer_id', Auth::guard('customer')->id())
-            ->with(['order.orderItems.product'])
+            ->with(['order.items.product'])
             ->firstOrFail();
 
         return view('order-return-show', compact('return'));

@@ -1,31 +1,18 @@
 @extends('layout.frontlayout')
-@section('title', 'Bharat Biomer – Nature-Powered Biology')
+@section('title', $pageSeo?->meta_title ?: 'Impact & Field Results - Bharat Biomer')
+@section('seo_description', $pageSeo?->meta_description ?: 'See Bharat Biomer field results and impact from nature-powered biological solutions across crop performance, soil health, and sustainable agriculture.')
+@section('seo_keywords', $pageSeo?->meta_keyword ?: 'Bharat Biomer impact, field results, crop performance, sustainable agriculture, soil health')
 
 @section('content')
 
   <!-- ========================
        SECTION 1: Hero - Impact & Field Results
   ======================== -->
-  <section class="imph__section">
-    <div class="container">
-      <div class="row">
-        <div class="col-12 col-lg-8">
-
-          <!-- Badge -->
-          <div class="imph__badge mb-3">
-            <span class="imph__badge-text">FIELD RESULTS</span>
-          </div>
-
-          <!-- Heading -->
-          <h1 class="imph__heading">Impact & Field Results</h1>
-
-          <!-- Description -->
-          <p class="imph__desc">Real-world evidence of PPFM technology transforming agriculture across India</p>
-
-        </div>
-      </div>
-    </div>
-  </section>
+  <x-front-breadcrumb
+    badge="Field Results"
+    title="Impact & Field Results"
+    description="Real-world evidence of PPFM technology transforming agriculture across India"
+  />
 
   <!-- ========================
        SECTION 2: Observed Field Benefits

@@ -34,15 +34,22 @@ class AdminOrderController extends Controller
 
         $orders = $query->paginate(10)->withQueryString();
 
-        $statusCounts = [
-            'all'        => Order::count(),
-            'pending'    => Order::where('status', 'pending')->count(),
-            'confirmed'  => Order::where('status', 'confirmed')->count(),
-            'processing' => Order::where('status', 'processing')->count(),
-            'shipped'    => Order::where('status', 'shipped')->count(),
-            'delivered'  => Order::where('status', 'delivered')->count(),
-            'cancelled'  => Order::where('status', 'cancelled')->count(),
-        ];
+        $statusCounts = array_merge([
+            'all'        => 0,
+            'pending'    => 0,
+            'confirmed'  => 0,
+            'processing' => 0,
+            'shipped'    => 0,
+            'delivered'  => 0,
+            'cancelled'  => 0,
+        ], Order::query()
+            ->selectRaw('status, COUNT(*) as total')
+            ->groupBy('status')
+            ->pluck('total', 'status')
+            ->map(fn ($total) => (int) $total)
+            ->toArray());
+
+        $statusCounts['all'] = array_sum($statusCounts);
 
         return view('dashboard.orders.index', compact('orders', 'statusCounts'));
     }
@@ -68,7 +75,13 @@ class AdminOrderController extends Controller
         $oldStatus = $order->status;
         $newStatus = $request->status;
 
-        $order->update(['status' => $newStatus]);
+        $updateData = ['status' => $newStatus];
+
+        if ($newStatus === 'delivered' && !$order->delivered_at) {
+            $updateData['delivered_at'] = now();
+        }
+
+        $order->update($updateData);
 
         // Send status update email if status actually changed
         if ($oldStatus !== $newStatus) {

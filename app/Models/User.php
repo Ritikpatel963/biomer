@@ -6,10 +6,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasRoles;
 
     /**
      * The attributes that are mass assignable.
@@ -20,6 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
     ];
 
     /**
@@ -43,5 +45,32 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Ensure accounts created before Spatie roles were introduced keep working.
+     */
+    public function ensureActiveRoleAssignment(): bool
+    {
+        if ($this->roles()->where('status', 'active')->exists()) {
+            return true;
+        }
+
+        if (! $this->role || $this->role === 'user') {
+            return false;
+        }
+
+        $legacyRole = Role::query()
+            ->where('name', $this->role)
+            ->where('status', 'active')
+            ->first();
+
+        if (! $legacyRole) {
+            return false;
+        }
+
+        $this->syncRoles([$legacyRole]);
+
+        return true;
     }
 }

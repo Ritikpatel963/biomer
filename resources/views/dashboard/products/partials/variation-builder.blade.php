@@ -1,4 +1,9 @@
-<div class="card border-0 radius-12 mb-24 wc-product-data" id="productVariationBuilder">
+<div
+    class="card border-0 radius-12 mb-24 wc-product-data"
+    id="productVariationBuilder"
+    data-product-variation-builder
+    data-initial-var-index="{{ isset($product) ? $product->variations->count() : 0 }}"
+>
     <div class="card-header bg-base border-bottom py-16 px-24 d-flex justify-content-between align-items-center">
         <div>
             <h5 class="card-title mb-0">Product Data</h5>
@@ -133,7 +138,12 @@
                                         </button>
                                         <div class="wc-variation-actions">
                                             <span class="badge {{ $var->is_active ? 'bg-success-100 text-success-600' : 'bg-neutral-200 text-secondary-light' }}">{{ $var->is_active ? 'Enabled' : 'Disabled' }}</span>
-                                            <button type="button" class="btn btn-sm btn-outline-danger-600 remove-variation" onclick="removeExistingVariation({{ $var->id }}, this)">Remove</button>
+                                            <button
+                                                type="button"
+                                                class="btn btn-sm btn-outline-danger-600 remove-variation"
+                                                data-existing-variation-remove
+                                                data-variation-id="{{ $var->id }}"
+                                            >Remove</button>
                                             <button type="button" class="wc-row-toggle" aria-label="Toggle variation">
                                                 <iconify-icon icon="lucide:chevron-down"></iconify-icon>
                                             </button>

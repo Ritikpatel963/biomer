@@ -3,86 +3,43 @@
 @php
     $title = 'Bharat Biomer Admin Dashboard';
     $subTitle = 'Admin dashboard';
-    $script = '<script>window.dashboardSalesLabels = ' . json_encode($salesLabels) . '; window.dashboardSalesData = ' . json_encode($salesData) . ';</script>'
-        . '<script src="' . asset('assets/js/homeOneChart.js') . '"></script>';
+
+    $showSales = auth()->user()->can('view orders');
+    $script = '';
+    if ($showSales) {
+        $script = '<script>window.dashboardSalesLabels = ' . json_encode($salesLabels) . '; window.dashboardSalesData = ' . json_encode($salesData) . ';</script>'
+            . '<script src="' . asset('assets/js/homeOneChart.js') . '"></script>';
+    }
 
     $dashboardCards = [
-        ['label' => 'Total Customers', 'value' => number_format($totalCustomers), 'note' => number_format($newCustomersLast30) . ' new in last 30 days', 'tone' => 'primary'],
-        ['label' => 'Total Orders', 'value' => number_format($totalOrders), 'note' => number_format($ordersLast30) . ' orders in last 30 days', 'tone' => 'info'],
-        ['label' => 'Paid Orders', 'value' => number_format($paidOrders), 'note' => $paymentSuccessRate . '% payment success rate', 'tone' => 'success'],
-        ['label' => 'Revenue', 'value' => 'Rs. ' . number_format($totalRevenue, 2), 'note' => 'Rs. ' . number_format($last30DaysRevenue, 2) . ' in last 30 days', 'tone' => 'warning'],
-        ['label' => 'Average Order', 'value' => 'Rs. ' . number_format($averageOrderValue, 2), 'note' => number_format($pendingOrders) . ' pending or processing', 'tone' => 'secondary'],
-        ['label' => 'Wishlist Adds', 'value' => number_format($wishlistCount), 'note' => number_format($wishlistCustomers) . ' customers with wishlist', 'tone' => 'danger'],
-        ['label' => 'Active Products', 'value' => number_format($activeProducts), 'note' => number_format($totalProducts) . ' total products', 'tone' => 'info'],
-        ['label' => 'Categories', 'value' => number_format($totalCategories), 'note' => 'Catalog structure', 'tone' => 'primary'],
+        ['label' => 'Total Customers', 'value' => number_format($totalCustomers), 'note' => number_format($newCustomersLast30) . ' new in last 30 days', 'tone' => 'primary', 'permission' => 'view customers'],
+        ['label' => 'Total Orders', 'value' => number_format($totalOrders), 'note' => number_format($ordersLast30) . ' orders in last 30 days', 'tone' => 'info', 'permission' => 'view orders'],
+        ['label' => 'Paid Orders', 'value' => number_format($paidOrders), 'note' => $paymentSuccessRate . '% payment success rate', 'tone' => 'success', 'permission' => 'view orders'],
+        ['label' => 'Revenue', 'value' => 'Rs. ' . number_format($totalRevenue, 2), 'note' => 'Rs. ' . number_format($last30DaysRevenue, 2) . ' in last 30 days', 'tone' => 'warning', 'permission' => 'view orders'],
+        ['label' => 'Average Order', 'value' => 'Rs. ' . number_format($averageOrderValue, 2), 'note' => number_format($pendingOrders) . ' pending or processing', 'tone' => 'secondary', 'permission' => 'view orders'],
+        ['label' => 'Wishlist Adds', 'value' => number_format($wishlistCount), 'note' => number_format($wishlistCustomers) . ' customers with wishlist', 'tone' => 'danger', 'permission' => 'view customers'],
+        ['label' => 'Active Products', 'value' => number_format($activeProducts), 'note' => number_format($totalProducts) . ' total products', 'tone' => 'info', 'permission' => 'view products'],
+        ['label' => 'Categories', 'value' => number_format($totalCategories), 'note' => 'Catalog structure', 'tone' => 'primary', 'permission' => 'view products'],
     ];
+
+    $dashboardCards = array_filter($dashboardCards, function ($card) {
+        return auth()->user()->can($card['permission']);
+    });
 @endphp
 
 @section('content')
-    <style>
-        .admin-dashboard-heading {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 16px;
-            margin-bottom: 18px;
-        }
-
-        .admin-kpi-card {
-            border: 1px solid #e7edf3;
-            border-radius: 8px;
-            background: #fff;
-            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
-            height: 100%;
-        }
-
-        .admin-kpi-card .card-body {
-            padding: 18px;
-        }
-
-        .admin-kpi-label {
-            color: #64748b;
-            font-size: 13px;
-            font-weight: 700;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-        }
-
-        .admin-kpi-value {
-            color: #0f172a;
-            font-size: 24px;
-            font-weight: 800;
-            line-height: 1.2;
-            margin-bottom: 10px;
-        }
-
-        .admin-kpi-note {
-            color: #64748b;
-            font-size: 13px;
-            margin: 0;
-        }
-
-        .admin-kpi-strip {
-            border-radius: 8px 8px 0 0;
-            height: 4px;
-        }
-
-        .admin-kpi-strip.primary { background: #2563eb; }
-        .admin-kpi-strip.info { background: #0891b2; }
-        .admin-kpi-strip.success { background: #16a34a; }
-        .admin-kpi-strip.warning { background: #d97706; }
-        .admin-kpi-strip.secondary { background: #475569; }
-        .admin-kpi-strip.danger { background: #dc2626; }
-    </style>
+   
 
     <div class="admin-dashboard-heading flex-wrap">
         <div>
             <h5 class="mb-1">Business Overview</h5>
             <p class="text-secondary-light mb-0">Orders, users, payments, and catalog performance at a glance.</p>
         </div>
-        <a href="{{ route('dashboard.analytics') }}" class="btn btn-primary">
-            Full Analytics Report
-        </a>
+        @canany(['view products', 'view orders', 'view customers'])
+            <a href="{{ route('dashboard.analytics') }}" class="btn btn-primary">
+                Full Analytics Report
+            </a>
+        @endcanany
     </div>
 
     <div class="row row-cols-xxl-4 row-cols-lg-3 row-cols-sm-2 row-cols-1 g-3">
@@ -100,7 +57,14 @@
         @endforeach
     </div>
 
+    @if(empty($dashboardCards) && !$showSales && !($canViewCustomers = auth()->user()->can('view customers') || auth()->user()->can('view orders')))
+        <div class="card p-24 text-center mt-4">
+            <h6 class="mb-2">Welcome, {{ auth()->user()->name }}!</h6>
+            <p class="text-secondary-light mb-0">You have successfully logged in to the Bharat Biomer admin panel. Please use the sidebar navigation to manage the sections you have access to.</p>
+        </div>
+    @else
     <div class="row gy-4 mt-1">
+        @can('view orders')
         <div class="col-xxl-12 col-xl-12">
             <div class="card h-100">
                 <div class="card-body">
@@ -124,26 +88,39 @@
                 </div>
             </div>
         </div>
+        @endcan
 
+        @php
+            $canViewCustomers = auth()->user()->can('view customers');
+            $canViewOrders = auth()->user()->can('view orders');
+            $hasAnyTab = $canViewCustomers || $canViewOrders;
+        @endphp
+
+        @if($hasAnyTab)
         <div class="col-xxl-12 col-xl-12">
             <div class="card h-100">
                 <div class="card-body p-24">
                     <div class="d-flex flex-wrap align-items-center gap-1 justify-content-between mb-16">
                         <ul class="nav border-gradient-tab nav-pills mb-0" id="pills-tab" role="tablist">
+                            @if($canViewCustomers)
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link d-flex align-items-center active" id="pills-customers-tab" data-bs-toggle="pill" data-bs-target="#pills-customers" type="button" role="tab" aria-controls="pills-customers" aria-selected="true">
                                     Latest Customers
                                 </button>
                             </li>
+                            @endif
+                            @if($canViewOrders)
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link d-flex align-items-center" id="pills-orders-tab" data-bs-toggle="pill" data-bs-target="#pills-orders" type="button" role="tab" aria-controls="pills-orders" aria-selected="false" tabindex="-1">
+                                <button class="nav-link d-flex align-items-center {{ !$canViewCustomers ? 'active' : '' }}" id="pills-orders-tab" data-bs-toggle="pill" data-bs-target="#pills-orders" type="button" role="tab" aria-controls="pills-orders" aria-selected="{{ !$canViewCustomers ? 'true' : 'false' }}" tabindex="{{ !$canViewCustomers ? '0' : '-1' }}">
                                     Latest Orders
                                 </button>
                             </li>
+                            @endif
                         </ul>
                     </div>
 
                     <div class="tab-content" id="pills-tabContent">
+                        @if($canViewCustomers)
                         <div class="tab-pane fade show active" id="pills-customers" role="tabpanel" aria-labelledby="pills-customers-tab" tabindex="0">
                             <div class="table-responsive scroll-sm">
                                 <table class="table bordered-table sm-table mb-0">
@@ -177,8 +154,10 @@
                                 </table>
                             </div>
                         </div>
+                        @endif
 
-                        <div class="tab-pane fade" id="pills-orders" role="tabpanel" aria-labelledby="pills-orders-tab" tabindex="0">
+                        @if($canViewOrders)
+                        <div class="tab-pane fade {{ !$canViewCustomers ? 'show active' : '' }}" id="pills-orders" role="tabpanel" aria-labelledby="pills-orders-tab" tabindex="0">
                             <div class="table-responsive scroll-sm">
                                 <table class="table bordered-table sm-table mb-0">
                                     <thead>
@@ -210,9 +189,12 @@
                                 </table>
                             </div>
                         </div>
+                        @endif
                     </div>
                 </div>
             </div>
         </div>
+        @endif
     </div>
+    @endif
 @endsection

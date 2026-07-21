@@ -6,17 +6,21 @@
   }
 
   // sidebar submenu collapsible js
-  $(".sidebar-menu .dropdown").on("click", function(){
-    var item = $(this);
-    item.siblings(".dropdown").children(".sidebar-submenu").slideUp();
+  $(".sidebar-menu .dropdown > a").on("click", function(event){
+    event.preventDefault();
+
+    var item = $(this).parent();
+    var isOpen = item.hasClass("open") || item.hasClass("dropdown-open");
+
+    item.siblings(".dropdown").children(".sidebar-submenu").stop(true, true).slideUp();
 
     item.siblings(".dropdown").removeClass("dropdown-open");
 
     item.siblings(".dropdown").removeClass("open");
 
-    item.children(".sidebar-submenu").slideToggle();
+    item.children(".sidebar-submenu").stop(true, true).slideToggle();
 
-    item.toggleClass("dropdown-open");
+    item.toggleClass("dropdown-open open", !isOpen);
   });
 
   $(".sidebar-toggle").on("click", function(){
@@ -80,6 +84,10 @@ $('#selectAll').on('change', function () {
 })(window.jQuery);
 
 function initGsapAnimations() {
+  if (document.body && document.body.classList.contains("no-product-motion")) {
+    return;
+  }
+
   const hasGsap = typeof window.gsap !== "undefined";
   const hasScrollTrigger = typeof window.ScrollTrigger !== "undefined";
   const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -135,11 +143,16 @@ function initGsapAnimations() {
     return homepageSections.some((selector) => element.closest(selector));
   };
 
+  const isMotionExcluded = (element) => {
+    return !!element.closest("[data-no-motion]");
+  };
+
   const publicSections = uniqueElements(
     gsap
       .utils
       .toArray("main section")
       .filter((section) =>
+        !isMotionExcluded(section) &&
         section.querySelector("h1, h2, h3, p, img, iframe, [class*='card'], [class*='__card']")
       )
   );
@@ -215,15 +228,13 @@ function initGsapAnimations() {
       return;
     }
 
-    gsap.set(elements, {
-      autoAlpha: 0,
+    const fromVars = {
       y: options.y ?? 32,
       transformOrigin: "50% 50%",
-      willChange: "transform, opacity",
-    });
+      willChange: options.fade === false ? "transform" : "transform, opacity",
+    };
 
-    gsap.to(elements, {
-      autoAlpha: 1,
+    const toVars = {
       y: 0,
       duration: options.duration ?? 0.9,
       ease: options.ease ?? "power3.out",
@@ -234,7 +245,15 @@ function initGsapAnimations() {
         start: options.start ?? "top 82%",
         once: true,
       },
-    });
+    };
+
+    if (options.fade !== false) {
+      fromVars.autoAlpha = 0;
+      toVars.autoAlpha = 1;
+    }
+
+    gsap.set(elements, fromVars);
+    gsap.to(elements, toVars);
   };
 
   const animateSplitHeading = (element, options = {}) => {
@@ -472,7 +491,7 @@ function initGsapAnimations() {
     gsap
       .utils
       .toArray("main section h1, main section h2")
-      .filter((element) => !isHomepageElement(element))
+      .filter((element) => !isHomepageElement(element) && !isMotionExcluded(element))
   );
 
   genericHeadings.forEach((heading) => {
@@ -491,7 +510,7 @@ function initGsapAnimations() {
       .toArray(
         "main section h3, main section h4, main section h5, main section p, main section li, main section [class*='__badge'], main section [class*='__subtext'], main section [class*='__desc'], main section [class*='__title'], main section [class*='__heading'], main section [class*='__label'], main section [class*='__header']"
       )
-      .filter((element) => !isHomepageElement(element))
+      .filter((element) => !isHomepageElement(element) && !isMotionExcluded(element))
   );
 
   fadeInOnScroll(genericTextBlocks, {
@@ -506,6 +525,10 @@ function initGsapAnimations() {
       .toArray("main section a[class], main section button[class]")
       .filter((element) => {
         if (isHomepageElement(element)) {
+          return false;
+        }
+
+        if (isMotionExcluded(element)) {
           return false;
         }
 
@@ -525,7 +548,15 @@ function initGsapAnimations() {
       .utils
       .toArray("main section img, main section iframe")
       .filter((element) => {
+        if (element.id === "mainImage" || element.classList.contains("avan__product-img")) {
+          return false;
+        }
+
         if (isHomepageElement(element)) {
+          return false;
+        }
+
+        if (isMotionExcluded(element)) {
           return false;
         }
 
@@ -541,6 +572,7 @@ function initGsapAnimations() {
     y: 30,
     duration: 0.9,
     stagger: 0.06,
+    fade: false,
   });
 
   genericImages.forEach((element) => {
@@ -575,6 +607,10 @@ function initGsapAnimations() {
         .utils
         .toArray(section.querySelectorAll("img, iframe"))
         .filter((element) => {
+          if (element.id === "mainImage" || element.classList.contains("avan__product-img")) {
+            return false;
+          }
+
           const className = element.className || "";
           const src = element.getAttribute("src") || "";
           const parentWrapper = element.closest(".bb-hero-img-wrapper, .wwd-image-wrapper");
@@ -594,11 +630,9 @@ function initGsapAnimations() {
     gsap.fromTo(
       section,
       {
-        autoAlpha: 0.88,
         y: 56,
       },
       {
-        autoAlpha: 1,
         y: 0,
         ease: "none",
         scrollTrigger: {
@@ -637,11 +671,9 @@ function initGsapAnimations() {
         element,
         {
           yPercent: 10,
-          autoAlpha: 0.45,
         },
         {
           yPercent: -6,
-          autoAlpha: 1,
           ease: "none",
           scrollTrigger: {
             trigger: section,

@@ -153,19 +153,3 @@
         </div>
     </div>
 @endsection
-
-@push('scripts')
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            document.querySelectorAll('.edit-attribute-btn').forEach(function (button) {
-                button.addEventListener('click', function () {
-                    document.getElementById('editAttributeForm').setAttribute('action', this.dataset.action);
-                    document.getElementById('edit_attribute_name').value = this.dataset.name;
-                    document.getElementById('edit_attribute_values').value = this.dataset.values;
-                    document.getElementById('edit_attribute_sort_order').value = this.dataset.sortOrder || 0;
-                    document.getElementById('edit_attribute_active').checked = this.dataset.isActive === '1';
-                });
-            });
-        });
-    </script>
-@endpush

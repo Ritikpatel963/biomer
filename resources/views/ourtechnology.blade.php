@@ -1,23 +1,26 @@
 
 @extends('layout.frontlayout')
-@section('title', 'Our Technology – Bharat Biomer')
-@section('seo_description', 'Discover Bharat Biomer’s PPFM technology and how our biological innovations improve crop growth, resilience, and soil health.')
-@section('seo_keywords', 'PPFM technology, agriculture biotechnology, crop resilience, soil health, Bharat Biomer technology')
+@section('title', $pageSeo?->meta_title ?: 'Our Technology – Bharat Biomer')
+@section('seo_description', $pageSeo?->meta_description ?: 'Discover Bharat Biomer’s PPFM technology and how our biological innovations improve crop growth, resilience, and soil health.')
+@section('seo_keywords', $pageSeo?->meta_keyword ?: 'PPFM technology, agriculture biotechnology, crop resilience, soil health, Bharat Biomer technology')
 
 @section('content')
   <!-- ========================
        SECTION 1: Our Technology
   ======================== -->
-  <section class="ourtec__hero-section">
-    <div class="container h-100">
-      <div class="row h-100 justify-content-center align-items-center">
-        <div class="col-12">
-          <h2 class="ourtec__hero-title">Our Technology</h2>
+  <x-front-breadcrumb
+    badge="Technology"
+    title="Our Technology"
+    description="PPFM - Pink Pigmented Facultative Methylotrophs Explained"
+    align="center"
+  />
+  {{--
           <p class="ourtec__hero-subtitle">PPFM – Pink Pigmented Facultative Methylotrophs Explained</p>
         </div>
       </div>
     </div>
   </section>
+  --}}
 
   <!-- ========================
        SECTION 2: What is PPFM

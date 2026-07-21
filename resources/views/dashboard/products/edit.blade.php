@@ -6,6 +6,8 @@
     $subTitle = 'Edit Product';
 @endphp
 
+
+
 @section('content')
 
   {{-- Breadcrumb --}}
@@ -131,7 +133,7 @@
               <div class="col-12">
                 <label class="form-label fw-semibold">Full Description</label>
                 <textarea name="description" rows="5"
-                          class="form-control @error('description') is-invalid @enderror"
+                          class="form-control tinymce-editor @error('description') is-invalid @enderror"
                           placeholder="Detailed product description...">{{ old('description', $product->description) }}</textarea>
                 @error('description')<div class="invalid-feedback">{{ $message }}</div>@enderror
               </div>
@@ -196,8 +198,9 @@
                          alt="">
                     <button type="button"
                             class="btn btn-danger btn-sm position-absolute top-0 end-0 delete-gallery-img"
-                            data-id="{{ $img->id }}"
-                            data-url="{{ route('dashboard.products.destroyImage', $img) }}"
+                            data-product-edit-gallery-delete
+                            data-image-id="{{ $img->id }}"
+                            data-delete-url="{{ route('dashboard.products.destroyImage', $img) }}"
                             style="font-size:.65rem;padding:1px 5px;line-height:1.4;">✕</button>
                   </div>
                 </div>
@@ -218,7 +221,64 @@
 
       </div>
 
-      {{-- ── RIGHT COLUMN ────────────────────────────────────────────── --}}
+        {{-- FAQ Management --}}
+        <div class="card basic-data-table mb-4">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">Frequently Asked Questions</h5>
+            <button type="button" class="btn btn-sm btn-outline-success" id="addFaqBtn">+ Add FAQ</button>
+          </div>
+          <div class="card-body">
+            <div id="faqList">
+              @forelse($product->faqs as $faq)
+              <div class="faq-item border rounded p-3 mb-3 position-relative" data-faq-id="{{ $faq->id }}">
+                <div class="d-flex gap-2 position-absolute top-0 end-0 m-2">
+                  <button type="button" class="btn btn-xs btn-outline-secondary faq-edit-btn" style="font-size:.7rem;padding:2px 8px;">Edit</button>
+                  <button type="button" class="btn btn-xs btn-outline-danger faq-delete-btn" style="font-size:.7rem;padding:2px 8px;">✕</button>
+                </div>
+                <div class="faq-view">
+                  <p class="fw-semibold mb-1 faq-q-text">{{ $faq->question }}</p>
+                  <p class="text-muted mb-0 faq-a-text" style="font-size:.9rem;">{{ $faq->answer }}</p>
+                </div>
+                <div class="faq-edit-form d-none">
+                  <div class="mb-2">
+                    <label class="form-label fw-semibold">Question</label>
+                    <input type="text" class="form-control faq-q-input" value="{{ $faq->question }}">
+                  </div>
+                  <div class="mb-2">
+                    <label class="form-label fw-semibold">Answer</label>
+                    <textarea class="form-control faq-a-input" rows="2">{{ $faq->answer }}</textarea>
+                  </div>
+                  <button type="button" class="btn btn-sm btn-success faq-save-btn">Save</button>
+                  <button type="button" class="btn btn-sm btn-outline-secondary faq-cancel-btn">Cancel</button>
+                </div>
+              </div>
+              @empty
+              <p class="text-muted small" id="faqEmptyMsg">No FAQs yet. Click "Add FAQ" to create one.</p>
+              @endforelse
+              @if($product->faqs->isNotEmpty())
+              <p class="text-muted small d-none" id="faqEmptyMsg">No FAQs yet. Click "Add FAQ" to create one.</p>
+              @endif
+            </div>
+
+            {{-- New FAQ form (hidden by default) --}}
+            <div id="newFaqForm" class="border rounded p-3 d-none">
+              <div class="mb-2">
+                <label class="form-label fw-semibold">Question</label>
+                <input type="text" id="newFaqQ" class="form-control" placeholder="e.g. What is the shelf life?">
+              </div>
+              <div class="mb-2">
+                <label class="form-label fw-semibold">Answer</label>
+                <textarea id="newFaqA" class="form-control" rows="2" placeholder="Write the answer here..."></textarea>
+              </div>
+              <button type="button" id="saveNewFaqBtn" class="btn btn-sm btn-success">Add FAQ</button>
+              <button type="button" id="cancelNewFaqBtn" class="btn btn-sm btn-outline-secondary ms-2">Cancel</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+
       <div class="col-lg-4">
 
         {{-- Status & Classify --}}
@@ -282,19 +342,23 @@
               <img src="{{ Storage::url($product->featured_image) }}"
                    class="img-fluid radius-8 border mb-3"
                    style="max-height:160px;object-fit:cover;"
-                   id="featured-preview">
+                   id="featured-preview"
+                   data-product-edit-featured-preview>
             @else
               <div class="bg-neutral-200 radius-8 d-flex align-items-center justify-content-center mb-3"
-                   style="height:120px;" id="featured-placeholder">
+                   style="height:120px;" id="featured-placeholder"
+                   data-product-edit-featured-placeholder>
                 <span class="text-muted text-sm">No image uploaded</span>
               </div>
               <img src="" class="img-fluid radius-8 border mb-3 d-none"
-                   style="max-height:160px;object-fit:cover;" id="featured-preview">
+                   style="max-height:160px;object-fit:cover;" id="featured-preview"
+                   data-product-edit-featured-preview>
             @endif
 
             <input type="file" name="featured_image" id="featured_image_input"
                    accept="image/*"
-                   class="form-control form-control-sm @error('featured_image') is-invalid @enderror">
+                   class="form-control form-control-sm @error('featured_image') is-invalid @enderror"
+                   data-product-edit-featured-input>
             <small class="text-muted">Max 2MB. Leave blank to keep current.</small>
             @error('featured_image')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
 
@@ -334,37 +398,111 @@
 
 @push('scripts')
 <script>
-$(function () {
+(function () {
+    const csrf    = document.querySelector('meta[name="csrf-token"]').content;
+    const storeUrl  = '{{ route("dashboard.products.faqs.store", $product) }}';
+    const updateBase = '{{ url("dashboard/products/faqs") }}/';
+    const deleteBase = '{{ url("dashboard/products/faqs") }}/';
+    const faqList    = document.getElementById('faqList');
+    const emptyMsg   = document.getElementById('faqEmptyMsg');
+    const newForm    = document.getElementById('newFaqForm');
 
-  // ── Featured image live preview ────────────────────────────────
-  $('#featured_image_input').on('change', function () {
-    const file = this.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = e => {
-      $('#featured-preview').attr('src', e.target.result).removeClass('d-none');
-      $('#featured-placeholder').addClass('d-none');
-    };
-    reader.readAsDataURL(file);
-  });
+    function updateEmpty() {
+        if (!emptyMsg) return;
+        emptyMsg.classList.toggle('d-none', faqList.querySelectorAll('.faq-item').length > 0);
+    }
 
-  // ── Delete gallery image via AJAX ──────────────────────────────
-  $(document).on('click', '.delete-gallery-img', function () {
-    if (!confirm('Remove this image?')) return;
-    const btn = $(this);
-    $.ajax({
-      url    : btn.data('url'),
-      method : 'DELETE',
-      headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-      success() {
-        $(`#gallery-item-${btn.data('id')}`).fadeOut(300, function () { $(this).remove(); });
-      },
-      error() {
-        alert('Failed to delete image. Please try again.');
-      }
+    function buildFaqItem(faq) {
+        const div = document.createElement('div');
+        div.className = 'faq-item border rounded p-3 mb-3 position-relative';
+        div.dataset.faqId = faq.id;
+        div.innerHTML = `
+            <div class="d-flex gap-2 position-absolute top-0 end-0 m-2">
+                <button type="button" class="btn btn-xs btn-outline-secondary faq-edit-btn" style="font-size:.7rem;padding:2px 8px;">Edit</button>
+                <button type="button" class="btn btn-xs btn-outline-danger faq-delete-btn" style="font-size:.7rem;padding:2px 8px;">✕</button>
+            </div>
+            <div class="faq-view">
+                <p class="fw-semibold mb-1 faq-q-text">${faq.question}</p>
+                <p class="text-muted mb-0 faq-a-text" style="font-size:.9rem;">${faq.answer}</p>
+            </div>
+            <div class="faq-edit-form d-none">
+                <div class="mb-2"><label class="form-label fw-semibold">Question</label>
+                    <input type="text" class="form-control faq-q-input" value="${faq.question}"></div>
+                <div class="mb-2"><label class="form-label fw-semibold">Answer</label>
+                    <textarea class="form-control faq-a-input" rows="2">${faq.answer}</textarea></div>
+                <button type="button" class="btn btn-sm btn-success faq-save-btn">Save</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary faq-cancel-btn">Cancel</button>
+            </div>
+        `;
+        return div;
+    }
+
+    // Add FAQ
+    document.getElementById('addFaqBtn').addEventListener('click', () => {
+        newForm.classList.remove('d-none');
+        document.getElementById('newFaqQ').focus();
     });
-  });
+    document.getElementById('cancelNewFaqBtn').addEventListener('click', () => newForm.classList.add('d-none'));
+    document.getElementById('saveNewFaqBtn').addEventListener('click', async () => {
+        const q = document.getElementById('newFaqQ').value.trim();
+        const a = document.getElementById('newFaqA').value.trim();
+        if (!q || !a) return alert('Question and answer are required.');
+        const res = await fetch(storeUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
+            body: JSON.stringify({ question: q, answer: a, sort_order: faqList.querySelectorAll('.faq-item').length })
+        });
+        if (!res.ok) return alert('Failed to save FAQ.');
+        const data = await res.json();
+        faqList.appendChild(buildFaqItem(data.faq));
+        document.getElementById('newFaqQ').value = '';
+        document.getElementById('newFaqA').value = '';
+        newForm.classList.add('d-none');
+        updateEmpty();
+    });
 
-});
+    // Edit & Delete (event delegation)
+    faqList.addEventListener('click', async function (e) {
+        const item = e.target.closest('.faq-item');
+        if (!item) return;
+        const id = item.dataset.faqId;
+
+        if (e.target.classList.contains('faq-edit-btn')) {
+            item.querySelector('.faq-view').classList.add('d-none');
+            item.querySelector('.faq-edit-form').classList.remove('d-none');
+        }
+        if (e.target.classList.contains('faq-cancel-btn')) {
+            item.querySelector('.faq-view').classList.remove('d-none');
+            item.querySelector('.faq-edit-form').classList.add('d-none');
+        }
+        if (e.target.classList.contains('faq-save-btn')) {
+            const q = item.querySelector('.faq-q-input').value.trim();
+            const a = item.querySelector('.faq-a-input').value.trim();
+            if (!q || !a) return alert('Question and answer required.');
+            const res = await fetch(updateBase + id, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
+                body: JSON.stringify({ question: q, answer: a })
+            });
+            if (!res.ok) return alert('Failed to update FAQ.');
+            item.querySelector('.faq-q-text').textContent = q;
+            item.querySelector('.faq-a-text').textContent = a;
+            item.querySelector('.faq-view').classList.remove('d-none');
+            item.querySelector('.faq-edit-form').classList.add('d-none');
+        }
+        if (e.target.classList.contains('faq-delete-btn')) {
+            if (!confirm('Delete this FAQ?')) return;
+            const res = await fetch(deleteBase + id, {
+                method: 'DELETE',
+                headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' }
+            });
+            if (!res.ok) return alert('Failed to delete FAQ.');
+            item.remove();
+            updateEmpty();
+        }
+    });
+
+    updateEmpty();
+})();
 </script>
 @endpush

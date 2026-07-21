@@ -1,3 +1,5 @@
+@props(['script' => ''])
+
     <!-- jQuery library js -->
     <script src="{{ asset('assets/js/lib/jquery-3.7.1.min.js') }}"></script>
     <!-- Bootstrap js -->
@@ -13,7 +15,7 @@
             'dashboard.invoices.index'
         );
         $needsDatePicker = request()->routeIs('calendar', 'form*', 'dashboard.orders.*', 'dashboard.analytics');
-        $needsMediaUi = request()->routeIs('gallery', 'carousel', 'videos', 'dashboard.homepage-editor.*');
+        $needsMediaUi = request()->routeIs('gallery', 'carousel', 'videos');
     @endphp
     @if($needsCharts)
         <script src="{{ asset('assets/js/lib/apexcharts.min.js') }}"></script>
@@ -32,6 +34,7 @@
 
     <!-- main js -->
     <script src="{{ asset('assets/js/app.js') }}"></script>
+    <script src="{{ asset('assets/js/backend.js') }}?v={{ filemtime(public_path('assets/js/backend.js')) }}"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -68,6 +71,33 @@
             });
         });
     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.3/tinymce.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if (typeof tinymce !== 'undefined') {
+                tinymce.init({
+                    selector: '.tinymce-editor',
+                    height: 350,
+                    menubar: false,
+                    plugins: [
+                        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                        'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                        'insertdatetime', 'media', 'table', 'help', 'wordcount'
+                    ],
+                    toolbar: 'undo redo | blocks | ' +
+                        'bold italic backcolor | alignleft aligncenter ' +
+                        'alignright alignjustify | bullist numlist outdent indent | ' +
+                        'link image media table | removeformat | help',
+                    content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:16px } a { color: #0b63ce; font-weight: 600; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; } a:hover { color: #084a9b; }',
+                    setup: function (editor) {
+                        editor.on('change', function () {
+                            tinymce.triggerSave();
+                        });
+                    }
+                });
+            }
+        });
+    </script>
 
-    <?php echo (isset($script) ? $script   : '')?>
+    {!! $script !!}
     @stack('scripts')

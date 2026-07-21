@@ -12,17 +12,17 @@
         <div class="admin-page-card__header">
             <div>
                 <span class="admin-page-card__eyebrow">Tracking Setup</span>
-                <h2 class="admin-page-card__title">Google Analytics</h2>
-                <p class="admin-page-card__desc">Add or update your Google Analytics measurement ID. It is loaded automatically on the frontend when this field is filled.</p>
+                <!-- <h2 class="admin-page-card__title">Google Analytics</h2>
+                <p class="admin-page-card__desc">Add or update your Google Analytics measurement ID. It is loaded automatically on the frontend when this field is filled.</p> -->
             </div>
             <div class="admin-page-card__actions">
-                <a href="{{ route('dashboard.homepage-editor.edit') }}" class="btn btn-outline-secondary">Homepage Editor</a>
+                <a href="{{ route('dashboard.home-page.edit') }}" class="btn btn-outline-secondary">Home Page</a>
                 <a href="{{ route('dashboard.site-settings.edit') }}" class="btn btn-outline-secondary">Site Settings</a>
             </div>
         </div>
 
         <div class="admin-toolbar-tabs">
-            <a href="{{ route('dashboard.homepage-editor.edit') }}" class="admin-toolbar-tabs__link">Homepage Editor</a>
+            <a href="{{ route('dashboard.home-page.edit') }}" class="admin-toolbar-tabs__link">Home Page</a>
             <a href="{{ route('dashboard.site-settings.edit') }}" class="admin-toolbar-tabs__link">Site Settings</a>
             <a href="{{ route('dashboard.google-analytics.edit') }}" class="admin-toolbar-tabs__link active">Google Analytics</a>
         </div>
@@ -51,10 +51,10 @@
                 <div class="admin-section-card__body">
                     <div class="row g-3 align-items-end">
                         <div class="col-lg-8">
-                            <label class="form-label fw-semibold">Google Analytics ID</label>
+                            <label class="form-label fw-semibold">Google Analytics ID / GTM ID</label>
                             <input type="text" name="google_analytics_id" class="form-control @error('google_analytics_id') is-invalid @enderror"
-                                value="{{ old('google_analytics_id', $settings->google_analytics_id ?? '') }}" placeholder="G-XXXXXXXXXX">
-                            <small class="text-muted d-block mt-1">Example: <code>G-XXXXXXXXXX</code></small>
+                                value="{{ old('google_analytics_id', $settings->google_analytics_id ?? '') }}" placeholder="G-XXXXXXXXXX or GTM-XXXXXXX">
+                            <small class="text-muted d-block mt-1">Example: <code>G-XXXXXXXXXX</code> (Analytics) or <code>GTM-XXXXXXX</code> (Tag Manager)</small>
                             @error('google_analytics_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
                         <div class="col-lg-4">

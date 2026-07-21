@@ -141,6 +141,7 @@
                             <td class="text-secondary-light">{{ $review->created_at->format('d M Y') }}</td>
                             <td class="pe-3">
                                 <div class="d-flex justify-content-center gap-2">
+                                    @can('edit products')
                                     @if($review->status !== 'approved')
                                     <form action="{{ route('dashboard.reviews.approve', $review) }}" method="POST">
                                         @csrf
@@ -158,13 +159,16 @@
                                         </button>
                                     </form>
                                     @endif
+                                    @endcan
 
+                                    @can('delete products')
                                     <form action="{{ route('dashboard.reviews.destroy', $review) }}" method="POST" onsubmit="return confirm('Delete this review?')">
                                         @csrf @method('DELETE')
                                         <button type="submit" class="btn btn-sm btn-danger-focus text-danger-main px-10 py-3" title="Delete">
                                             <i class="ri-delete-bin-line"></i>
                                         </button>
                                     </form>
+                                    @endcan
                                 </div>
                             </td>
                         </tr>

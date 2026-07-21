@@ -1,37 +1,155 @@
 @extends('layout.frontlayout')
 
+@section('body_class', 'no-product-motion')
+
 @section('title', $blog->meta_title ?: $blog->title . ' - Bharat Biomer')
 @section('seo_description', $blog->meta_description ?: Str::limit(strip_tags($blog->description), 160))
 @section('seo_keywords', $blog->meta_tags)
+@section('canonical_url', $blog->canonical_url ?: route('frontend.blog.show', $blog->slug))
+@section('og_type', 'article')
+@section('social_image', $blog->thumbnail ? $blog->thumbnail_url : asset('assets/images/og-image.png'))
+@section('social_image_alt', $blog->thumbnail_alt_text)
 
 @php
     $isLoggedIn = (bool) $customer;
     $reviewCount = $reviews->count();
     $avgRating = $reviewCount ? round($reviews->avg('rating'), 1) : 0;
+    $canonicalUrl = $blog->canonical_url ?: route('frontend.blog.show', $blog->slug);
+    $publishedDate = $blog->published_at ?: $blog->created_at;
+    $publisherName = $siteSettings?->site_name ?? 'Bharat Biomer';
+    $authorName = $blog->author ?: $publisherName;
+    $articleText = trim(preg_replace('/\s+/', ' ', strip_tags($blog->description)));
+
+    $articleSchema = [
+        '@context' => 'https://schema.org',
+        '@type' => 'BlogPosting',
+        'headline' => $blog->title,
+        'description' => $blog->meta_description ?: Str::limit($articleText, 160),
+        'image' => [$blog->thumbnail ? $blog->thumbnail_url : asset('assets/images/og-image.png')],
+        'datePublished' => $publishedDate->toIso8601String(),
+        'dateModified' => $blog->updated_at->toIso8601String(),
+        'author' => [
+            '@type' => $blog->author ? 'Person' : 'Organization',
+            'name' => $authorName,
+            'description' => $blog->author_bio,
+        ],
+        'publisher' => [
+            '@type' => 'Organization',
+            'name' => $publisherName,
+            'logo' => [
+                '@type' => 'ImageObject',
+                'url' => $siteSettings?->logo_url ?? asset('assets/bharat-biomer/bblogo.webp'),
+            ],
+        ],
+        'mainEntityOfPage' => [
+            '@type' => 'WebPage',
+            '@id' => $canonicalUrl,
+        ],
+        'articleSection' => $blog->category?->name,
+        'keywords' => $blog->meta_tags ?: $blog->tags,
+        'wordCount' => str_word_count($articleText),
+        'inLanguage' => 'en',
+    ];
+
+    $articleSchema['author'] = array_filter($articleSchema['author'], static fn ($value) => $value !== null && $value !== '');
+    $articleSchema = array_filter($articleSchema, static fn ($value) => $value !== null && $value !== '');
+
+    $faqItems = collect($blog->faq_items ?? [])
+        ->filter(fn ($faq) => filled(data_get($faq, 'question')) && filled(data_get($faq, 'answer')))
+        ->values();
+
+    $faqSchema = $faqItems->isEmpty() ? null : [
+        '@context' => 'https://schema.org',
+        '@type' => 'FAQPage',
+        'mainEntity' => $faqItems->map(fn ($faq) => [
+            '@type' => 'Question',
+            'name' => data_get($faq, 'question'),
+            'acceptedAnswer' => [
+                '@type' => 'Answer',
+                'text' => data_get($faq, 'answer'),
+            ],
+        ])->all(),
+    ];
 @endphp
 
+@push('meta')
+    <meta property="article:published_time" content="{{ $publishedDate->toIso8601String() }}">
+    <meta property="article:modified_time" content="{{ $blog->updated_at->toIso8601String() }}">
+    <meta property="article:author" content="{{ $authorName }}">
+    @if($blog->category?->name)
+        <meta property="article:section" content="{{ $blog->category->name }}">
+    @endif
+    @foreach(collect(explode(',', (string) ($blog->meta_tags ?: $blog->tags)))->map(fn ($tag) => trim($tag))->filter() as $socialTag)
+        <meta property="article:tag" content="{{ $socialTag }}">
+    @endforeach
+    <script type="application/ld+json">{!! json_encode($articleSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) !!}</script>
+    @if($faqSchema)
+        <script type="application/ld+json">{!! json_encode($faqSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) !!}</script>
+    @endif
+@endpush
+
 @section('content')
-<section class="abth__section">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-12 col-lg-9 text-center">
-                <h1 class="abth__heading">{{ $blog->title }}</h1>
+<x-front-breadcrumb
+    badge="Blog"
+    :title="$blog->title"
+    :description="'By ' . ($blog->author ?? 'Bharat Biomer') . ' - ' . $publishedDate->format('M d, Y') . ' - ' . ($blog->reading_time ?? 5) . ' min read'"
+    align="center"
+/>
+{{-- 
                 <p class="abth__desc">By {{ $blog->author ?? 'Bharat Biomer' }} • {{ $blog->created_at->format('M d, Y') }} • {{ $blog->reading_time ?? 5 }} min read</p>
             </div>
         </div>
     </div>
 </section>
+--}}
 
-<section class="py-5">
+<section class="py-5 blog-detail-page">
     <div class="container">
         <div class="row g-4">
             <div class="col-lg-8">
                 <div class="card border-0 shadow-sm overflow-hidden mb-4">
                     @if($blog->thumbnail)
-                        <img src="{{ $blog->thumbnail_url }}" alt="{{ $blog->title }}" class="img-fluid w-100">
+                        <img
+                            src="{{ $blog->thumbnail_url }}"
+                            alt="{{ $blog->thumbnail_alt_text }}"
+                            class="blog-detail-hero-image"
+                            width="1200"
+                            height="675"
+                            decoding="async"
+                            fetchpriority="high"
+                        >
                     @endif
                     <div class="card-body p-4">
-                        {!! \App\Services\HtmlSanitizer::clean($blog->description) !!}
+                        @if(!empty($tableOfContents))
+                            <nav class="blog-toc mb-4" aria-labelledby="blogTocHeading">
+                                <h2 class="blog-toc__title" id="blogTocHeading">Table of Contents</h2>
+                                <ol class="blog-toc__list mb-0">
+                                    @foreach($tableOfContents as $heading)
+                                        <li class="blog-toc__item {{ $heading['level'] === 'h3' ? 'blog-toc__item--nested' : '' }}">
+                                            <a href="#{{ $heading['id'] }}">{{ $heading['title'] }}</a>
+                                        </li>
+                                    @endforeach
+                                </ol>
+                            </nav>
+                        @endif
+
+                        <article class="blog-article-content">
+                            {!! $renderedContent !!}
+                        </article>
+
+                        <div class="blog-author-box mt-4">
+                            <div class="blog-author-box__icon" aria-hidden="true"><i class="ri-user-line"></i></div>
+                            <div>
+                                <div class="blog-author-box__name">{{ $authorName }}</div>
+                                @if($blog->author_bio)
+                                    <p class="blog-author-box__bio">{{ $blog->author_bio }}</p>
+                                @endif
+                                <div class="blog-author-box__dates">
+                                    <span>Published {{ $publishedDate->format('M d, Y') }}</span>
+                                    <span>Last updated {{ $blog->updated_at->format('M d, Y') }}</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="px-4 pb-4">
                         <div class="blog-share-bar">
@@ -47,6 +165,52 @@
                         </div>
                     </div>
                 </div>
+
+                @if($faqItems->isNotEmpty())
+                    <section class="card border-0 shadow-sm p-4 mb-4" aria-labelledby="blogFaqHeading">
+                        <h2 class="h3 mb-4" id="blogFaqHeading">Frequently Asked Questions</h2>
+                        <div class="accordion" id="blogFaqAccordion">
+                            @foreach($faqItems as $index => $faq)
+                                <div class="accordion-item">
+                                    <h3 class="accordion-header" id="blogFaqQuestion{{ $index }}">
+                                        <button class="accordion-button {{ $index === 0 ? '' : 'collapsed' }}" type="button" data-bs-toggle="collapse" data-bs-target="#blogFaqAnswer{{ $index }}" aria-expanded="{{ $index === 0 ? 'true' : 'false' }}" aria-controls="blogFaqAnswer{{ $index }}">
+                                            {{ data_get($faq, 'question') }}
+                                        </button>
+                                    </h3>
+                                    <div id="blogFaqAnswer{{ $index }}" class="accordion-collapse collapse {{ $index === 0 ? 'show' : '' }}" aria-labelledby="blogFaqQuestion{{ $index }}" data-bs-parent="#blogFaqAccordion">
+                                        <div class="accordion-body">{!! nl2br(e(data_get($faq, 'answer'))) !!}</div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </section>
+                @endif
+
+                @if($relatedBlogs->isNotEmpty())
+                    <section class="card border-0 shadow-sm p-4 mb-4" aria-labelledby="relatedPostsHeading">
+                        <h2 class="h3 mb-4" id="relatedPostsHeading">Related Posts</h2>
+                        <div class="row g-3">
+                            @foreach($relatedBlogs as $relatedPost)
+                                <div class="col-md-4">
+                                    <article class="related-post-card h-100">
+                                        <a href="{{ route('frontend.blog.show', $relatedPost->slug) }}" class="related-post-card__image-link">
+                                            <img src="{{ $relatedPost->thumbnail_url }}" alt="{{ $relatedPost->thumbnail_alt_text }}" class="related-post-card__image">
+                                        </a>
+                                        <div class="related-post-card__body">
+                                            <div class="related-post-card__meta">{{ $relatedPost->category?->name ?? 'Blog' }}</div>
+                                            <h3 class="related-post-card__title">
+                                                <a href="{{ route('frontend.blog.show', $relatedPost->slug) }}">{{ $relatedPost->title }}</a>
+                                            </h3>
+                                            <time datetime="{{ ($relatedPost->published_at ?: $relatedPost->created_at)->toDateString() }}">
+                                                {{ ($relatedPost->published_at ?: $relatedPost->created_at)->format('M d, Y') }}
+                                            </time>
+                                        </div>
+                                    </article>
+                                </div>
+                            @endforeach
+                        </div>
+                    </section>
+                @endif
 
                 <div class="blog-review-card card border-0 shadow-sm p-4 mb-4" id="blog-review-form">
                     <div class="avan__header mb-4">
@@ -115,7 +279,7 @@
 
                                         <div class="col-12">
                                             <label class="form-label">Comment</label>
-                                            <textarea name="comment" class="rv__textarea form-control" rows="4" maxlength="1000" required>{{ old('comment') }}</textarea>
+                                            <textarea name="comment" class="rv__textarea form-control" rows="4" minlength="3" maxlength="1000" required>{{ old('comment') }}</textarea>
                                             @error('comment')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
                                         </div>
 
@@ -183,7 +347,7 @@
                                 <a href="{{ route('frontend.blog.show', $post->slug) }}" class="text-dark text-decoration-none">
                                     {{ $post->title }}
                                 </a>
-                                <p class="text-secondary small mb-0">{{ $post->created_at->format('M d, Y') }}</p>
+                                <p class="text-secondary small mb-0">{{ ($post->published_at ?: $post->created_at)->format('M d, Y') }}</p>
                             </li>
                         @endforeach
                     </ul>
@@ -204,272 +368,6 @@
     </div>
 </section>
 @endsection
-
-@push('styles')
-<style>
-    @keyframes shake {
-        0%, 100% { transform: translateX(0); }
-        25% { transform: translateX(-4px); }
-        75% { transform: translateX(4px); }
-    }
-
-    .blog-review-card {
-        overflow: hidden;
-    }
-
-    .rv__summary-card {
-        background: #f4faf0;
-        border: 1px solid #c8e6c9;
-        border-radius: 16px;
-        padding: 24px 20px;
-        text-align: center;
-    }
-
-    .rv__avg-score {
-        font-size: 3.5rem;
-        font-weight: 800;
-        color: #2d7a45;
-        line-height: 1;
-        margin-bottom: 8px;
-    }
-
-    .rv__stars-row {
-        display: flex;
-        justify-content: center;
-        gap: 3px;
-        margin-bottom: 6px;
-    }
-
-    .rv__star {
-        font-size: 1.1rem;
-        color: #d1d5db;
-    }
-
-    .rv__star--filled {
-        color: #f59e0b;
-    }
-
-    .rv__star--sm {
-        font-size: 0.85rem;
-    }
-
-    .rv__total-label {
-        font-size: 0.82rem;
-        color: #6b7280;
-        margin-bottom: 16px;
-    }
-
-    .rv__bar-row {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-bottom: 6px;
-    }
-
-    .rv__bar-label {
-        font-size: 0.78rem;
-        color: #4b5563;
-        width: 32px;
-        text-align: right;
-        white-space: nowrap;
-    }
-
-    .rv__bar-track {
-        flex: 1;
-        height: 7px;
-        background: #e5e7eb;
-        border-radius: 99px;
-        overflow: hidden;
-    }
-
-    .rv__bar-fill {
-        height: 100%;
-        background: #f59e0b;
-        border-radius: 99px;
-        transition: width .5s ease;
-    }
-
-    .rv__bar-count {
-        font-size: 0.75rem;
-        color: #9ca3af;
-        width: 16px;
-    }
-
-    .rv__form-card {
-        background: #fff;
-        border: 1px solid #c8e6c9;
-        border-radius: 14px;
-        padding: 20px 22px;
-    }
-
-    .rv__form-title {
-        color: #2d7a45;
-        font-weight: 700;
-        margin-bottom: 12px;
-        font-size: 1rem;
-    }
-
-    .rv__rating-section {
-        background: #f9fcf8;
-        padding: 16px;
-        border-radius: 12px;
-        border-left: 4px solid #f59e0b;
-    }
-
-    .rv__rating-label {
-        display: block;
-        font-size: 0.95rem;
-        font-weight: 700;
-        color: #2d7a45;
-        margin-bottom: 8px;
-    }
-
-    .rv__star-picker {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        flex-wrap: wrap;
-    }
-
-    .rv__pick-star {
-        font-size: 2rem;
-        color: #d1d5db;
-        cursor: pointer;
-        transition: color 0.2s, transform 0.15s;
-        display: inline-block;
-        line-height: 1;
-    }
-
-    .rv__pick-star:hover {
-        color: #fbbf24;
-    }
-
-    .rv__pick-star.active {
-        color: #f59e0b;
-    }
-
-    .rv__pick-label {
-        font-size: 0.95rem;
-        font-weight: 600;
-        color: #2d7a45;
-        min-width: 140px;
-    }
-
-    .rv__rating-hint {
-        display: block;
-        margin-top: 8px;
-        color: #6b7280;
-        font-size: 0.8rem;
-        font-style: italic;
-    }
-
-    .rv__textarea {
-        border: 1.5px solid #c8e6c9;
-        border-radius: 10px;
-        resize: vertical;
-        font-size: 0.9rem;
-    }
-
-    .rv__textarea:focus {
-        border-color: #2d7a45;
-        box-shadow: 0 0 0 3px rgba(45, 122, 69, .12);
-        outline: none;
-    }
-
-    .rv__item {
-        border-bottom: 1px solid #e8f0e4;
-        padding: 16px 0;
-    }
-
-    .rv__item:last-child {
-        border-bottom: none;
-    }
-
-    .rv__item-header {
-        display: flex;
-        align-items: flex-start;
-        gap: 12px;
-        margin-bottom: 8px;
-    }
-
-    .rv__avatar {
-        width: 42px;
-        height: 42px;
-        background: #2d7a45;
-        color: #fff;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.1rem;
-        font-weight: 700;
-        flex-shrink: 0;
-    }
-
-    .rv__name {
-        font-weight: 600;
-        color: #1f2937;
-        margin: 0 0 2px;
-        font-size: 0.95rem;
-    }
-
-    .rv__date {
-        font-size: 0.75rem;
-        color: #9ca3af;
-    }
-
-    .rv__text {
-        font-size: 0.9rem;
-        color: #4b5563;
-        margin: 0;
-        line-height: 1.6;
-        padding-left: 54px;
-    }
-
-    .rv__login-prompt,
-    .rv__already-msg {
-        background: #f4faf0;
-        border: 1px solid #c8e6c9;
-        border-radius: 10px;
-        padding: 14px 18px;
-        font-size: 0.9rem;
-        color: #374151;
-    }
-
-    .blog-share-bar {
-        border-top: 1px solid #e6efe0;
-        padding-top: 1rem;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        flex-wrap: wrap;
-    }
-
-    .blog-share-bar__label {
-        font-weight: 700;
-        color: #21422b;
-    }
-
-    .blog-share-bar__links {
-        display: flex;
-        gap: 10px;
-    }
-
-    .blog-share-bar__link {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        background: #edf6e8;
-        color: #2d7a45;
-        text-decoration: none;
-        cursor: pointer;
-    }
-</style>
-@endpush
 
 @push('scripts')
 <script>

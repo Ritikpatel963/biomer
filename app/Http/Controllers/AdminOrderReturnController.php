@@ -54,7 +54,7 @@ class AdminOrderReturnController extends Controller
 
     public function update(Request $request, $id)
     {
-        $return = OrderReturn::with(['orderItem'])->findOrFail($id);
+        $return = OrderReturn::with(['order', 'orderItem'])->findOrFail($id);
 
         $validated = $request->validate([
             'status' => 'required|in:pending,approved,rejected,refunded',
@@ -63,10 +63,14 @@ class AdminOrderReturnController extends Controller
             'return_tracking_number' => 'nullable|string|max:255',
         ]);
 
-        $refundMax = (float) ($return->orderItem->subtotal ?? $return->order?->total_amount ?? 0);
+        $refundMax = min(
+            (float) ($return->orderItem->subtotal ?? $return->order?->net_amount ?? 0),
+            (float) ($return->order?->net_amount ?? $return->order?->total_amount ?? 0)
+        );
+
         if (array_key_exists('refund_amount', $validated) && $validated['refund_amount'] !== null && (float) $validated['refund_amount'] > $refundMax) {
             return back()
-                ->withErrors(['refund_amount' => 'Refund amount cannot be greater than the item subtotal.'])
+                ->withErrors(['refund_amount' => 'Refund amount cannot be greater than the refundable paid amount for this item.'])
                 ->withInput();
         }
 

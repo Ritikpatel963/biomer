@@ -12,7 +12,9 @@
             <h5 class="card-title mb-1">Brands</h5>
             <p class="text-secondary-light mb-0">Manage product brand names and logos.</p>
         </div>
-        <a href="{{ route('dashboard.brands.create') }}" class="btn btn-primary btn-sm">Add Brand</a>
+        @can('create products')
+            <a href="{{ route('dashboard.brands.create') }}" class="btn btn-primary btn-sm">Add Brand</a>
+        @endcan
     </div>
 
     @if(session('success'))
@@ -53,18 +55,22 @@
                             <td>{{ $brand->created_at->format('d M Y') }}</td>
                             <td>
                                 <div class="d-flex flex-wrap gap-2">
+                                    @can('edit products')
                                     <a href="{{ route('dashboard.brands.edit', $brand) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+                                    @endcan
+                                    @can('delete products')
                                     <form action="{{ route('dashboard.brands.destroy', $brand) }}" method="POST" onsubmit="return confirm('Delete brand \'{{ addslashes($brand->name) }}\'?')">
                                         @csrf
                                         @method('DELETE')
                                         <button class="btn btn-sm btn-outline-danger">Delete</button>
                                     </form>
+                                    @endcan
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="text-center py-5 text-muted">No brands yet. <a href="{{ route('dashboard.brands.create') }}">Add the first one.</a></td>
+                            <td colspan="7" class="text-center py-5 text-muted">No brands yet. @can('create products')<a href="{{ route('dashboard.brands.create') }}">Add the first one.</a>@endcan</td>
                         </tr>
                     @endforelse
                 </tbody>

@@ -4,6 +4,7 @@
 @php
     $title    = 'Invoices';
     $subTitle = 'Invoices';
+    $canDownloadInvoices = auth()->user()?->hasRole('super-admin') ?? false;
 @endphp
 
 @section('content')
@@ -111,12 +112,14 @@
                                     Preview
                                 </a>
 
-                                {{-- Download Invoice --}}
-                                <a href="{{ route('dashboard.orders.invoice', $order->order_number) }}"
-                                   class="btn btn-sm btn-outline-success"
-                                   title="Download Invoice" target="_blank">
-                                    Download
-                                </a>
+                                @if($canDownloadInvoices)
+                                    {{-- Download Invoice --}}
+                                    <a href="{{ URL::temporarySignedRoute('dashboard.orders.invoice', now()->addMinutes(10), $order->order_number) }}"
+                                       class="btn btn-sm btn-outline-success"
+                                       title="Download Invoice" target="_blank">
+                                        Download
+                                    </a>
+                                @endif
                             </div>
                         </td>
 

@@ -21,14 +21,19 @@ class CartController extends Controller
 
     public function applyCoupon(Request $request)
     {
-        $request->validate(['code' => 'required|string']);
+        $request->merge([
+            'code' => strtoupper(trim((string) $request->input('code', ''))),
+        ]);
+
+        $request->validate(['code' => 'required|string|max:50']);
         $cart = session()->get('cart', []);
+        $code = $request->code;
         
         if (empty($cart)) {
             return response()->json(['success' => false, 'message' => 'Cart is empty.']);
         }
 
-        $coupon = \App\Models\Coupon::where('code', $request->code)->where('is_active', true)->first();
+        $coupon = \App\Models\Coupon::where('code', $code)->where('is_active', true)->first();
 
         if (!$coupon) {
             return response()->json(['success' => false, 'message' => 'Invalid or inactive coupon.']);
@@ -90,13 +95,20 @@ class CartController extends Controller
         $request->validate([
             'product_id'   => 'required|exists:products,id',
             'variation_id' => 'nullable|exists:product_variations,id',
-            'quantity'     => 'nullable|integer|min:1',
+            'quantity'     => 'nullable|integer|min:1|max:100',
         ]);
 
         $product   = Product::findOrFail($request->product_id);
         $variation = $request->variation_id
             ? ProductVariation::findOrFail($request->variation_id)
             : null;
+
+        if ($variation && ((int) $variation->product_id !== (int) $product->id || !$variation->is_active)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Please select a valid product pack.',
+            ], 422);
+        }
 
         $price = $variation ? $variation->price : $product->base_price;
         $key   = $product->id . ':' . ($variation ? $variation->id : '0');

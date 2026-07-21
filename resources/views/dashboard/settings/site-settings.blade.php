@@ -12,17 +12,17 @@
         <div class="admin-page-card__header">
             <div>
                 <span class="admin-page-card__eyebrow">Website Setup</span>
-                <h2 class="admin-page-card__title">Site Settings</h2>
-                <p class="admin-page-card__desc">Update your brand, contact details, logos, social links, and footer content from a single card-based admin page.</p>
+                <!-- <h2 class="admin-page-card__title">Site Settings</h2>
+                <p class="admin-page-card__desc">Update your brand, contact details, logos, social links, and footer content from a single card-based admin page.</p> -->
             </div>
             <div class="admin-page-card__actions">
-                <a href="{{ route('dashboard.homepage-editor.edit') }}" class="btn btn-outline-secondary">Homepage Editor</a>
+                <a href="{{ route('dashboard.home-page.edit') }}" class="btn btn-outline-secondary">Home Page</a>
                 <a href="{{ route('dashboard.google-analytics.edit') }}" class="btn btn-outline-secondary">Google Analytics</a>
             </div>
         </div>
 
         <div class="admin-toolbar-tabs">
-            <a href="{{ route('dashboard.homepage-editor.edit') }}" class="admin-toolbar-tabs__link">Homepage Editor</a>
+            <a href="{{ route('dashboard.home-page.edit') }}" class="admin-toolbar-tabs__link">Home Page</a>
             <a href="{{ route('dashboard.site-settings.edit') }}" class="admin-toolbar-tabs__link active">Site Settings</a>
             <a href="{{ route('dashboard.google-analytics.edit') }}" class="admin-toolbar-tabs__link">Google Analytics</a>
         </div>
@@ -156,7 +156,7 @@
                                         </div>
                                     @endif
                                     <input type="file" name="logo_path" class="form-control @error('logo_path') is-invalid @enderror" accept="image/*">
-                                    <small class="text-muted d-block mt-1">PNG, JPG, WEBP, or SVG. Max 2MB.</small>
+                                    <small class="text-muted d-block mt-1">PNG, JPG, or WEBP. Max 2MB.</small>
                                     @error('logo_path')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                 </div>
                                 <div class="col-12 col-lg-6">
@@ -167,35 +167,9 @@
                                         </div>
                                     @endif
                                     <input type="file" name="footer_logo_path" class="form-control @error('footer_logo_path') is-invalid @enderror" accept="image/*">
-                                    <small class="text-muted d-block mt-1">PNG, JPG, WEBP, or SVG. Max 2MB.</small>
+                                    <small class="text-muted d-block mt-1">PNG, JPG, or WEBP. Max 2MB.</small>
                                     @error('footer_logo_path')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-12">
-                    <div class="admin-section-card">
-                        <div class="admin-section-card__header">
-                            <h5 class="card-title mb-0">Home Banner Images</h5>
-                        </div>
-                        <div class="admin-section-card__body">
-                            <div class="row g-4">
-                                @for($i = 1; $i <= 4; $i++)
-                                    @php $field = 'home_banner_image_' . $i; @endphp
-                                    <div class="col-12 col-lg-6">
-                                        <label class="form-label fw-semibold">Banner Image {{ $i }}</label>
-                                        @if(!empty($settings->{$field}))
-                                            <div class="admin-logo-preview mb-3">
-                                                <img src="{{ asset('storage/' . $settings->{$field}) }}" alt="Banner Image {{ $i }}">
-                                            </div>
-                                        @endif
-                                        <input type="file" name="{{ $field }}" class="form-control @error($field) is-invalid @enderror" accept="image/*">
-                                        <small class="text-muted d-block mt-1">Recommended 1920x900, JPG/PNG/WEBP. Max 4MB.</small>
-                                        @error($field)<div class="invalid-feedback">{{ $message }}</div>@enderror
-                                    </div>
-                                @endfor
                             </div>
                         </div>
                     </div>
@@ -208,7 +182,7 @@
                         </div>
                         <div class="admin-section-card__body">
                             <textarea name="footer_text" rows="4" class="form-control @error('footer_text') is-invalid @enderror"
-                                placeholder="Copyright and other footer information">{{ old('footer_text', $settings->footer_text ?? '© ' . date('Y') . ' Bharat Biomer. All rights reserved.') }}</textarea>
+                                placeholder="Copyright and other footer information">{{ old('footer_text', $settings->footer_text ?? 'Copyright ' . date('Y') . ' Bharat Biomer. All rights reserved.') }}</textarea>
                             @error('footer_text')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
                     </div>

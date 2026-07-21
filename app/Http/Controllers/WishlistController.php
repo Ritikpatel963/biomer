@@ -28,7 +28,7 @@ class WishlistController extends Controller
     // ── Toggle (Add / Remove) ──────────────────────────────────────────
     public function toggle(Request $request)
     {
-        $request->validate(['product_id' => 'required|exists:products,id']);
+        $request->validate(['product_id' => 'required|integer|exists:products,id']);
 
         $customer  = $this->customer();
         $productId = $request->product_id;
@@ -61,6 +61,8 @@ class WishlistController extends Controller
     // ── Remove ─────────────────────────────────────────────────────────
     public function remove(Request $request)
     {
+        $request->validate(['product_id' => 'required|integer|exists:products,id']);
+
         Wishlist::where('customer_id', $this->customer()->id)
             ->where('product_id', $request->product_id)
             ->delete();

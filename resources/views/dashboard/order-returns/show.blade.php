@@ -43,6 +43,10 @@
                     'rejected' => 'bg-danger-focus text-danger-main',
                     'refunded' => 'bg-info-focus text-info-main',
                 ];
+                $refundMax = min(
+                    (float) ($return->orderItem->subtotal ?? $return->order?->net_amount ?? 0),
+                    (float) ($return->order?->net_amount ?? $return->order?->total_amount ?? 0)
+                );
             @endphp
             <span class="px-16 py-8 rounded-pill fw-semibold {{ $badges[$return->status] ?? 'bg-neutral-200 text-neutral-600' }}">
                 {{ ucfirst($return->status) }}
@@ -139,6 +143,7 @@
                 <h6 class="card-title mb-0">Update Return</h6>
             </div>
             <div class="card-body">
+                @can('edit orders')
                 <form action="{{ route('dashboard.returns.update', $return->id) }}" method="POST">
                     @csrf
 
@@ -157,10 +162,11 @@
                         <label class="form-label fw-medium">Refund Amount</label>
                         <input type="number" step="0.01" min="0" name="refund_amount"
                                class="form-control"
+                               max="{{ number_format($refundMax, 2, '.', '') }}"
                                value="{{ old('refund_amount', $return->refund_amount) }}"
                                placeholder="Enter refund amount">
                         <small class="text-secondary-light">
-                            Max item subtotal: ₹{{ number_format((float) ($return->orderItem->subtotal ?? 0), 2) }}
+                            Maximum refundable amount: ₹{{ number_format($refundMax, 2) }}
                         </small>
                     </div>
 
@@ -179,6 +185,9 @@
 
                     <button type="submit" class="btn btn-primary w-100">Save Return Update</button>
                 </form>
+                @else
+                    <div class="alert alert-info mb-0">Your role has view-only access to returns.</div>
+                @endcan
 
                 <hr>
 

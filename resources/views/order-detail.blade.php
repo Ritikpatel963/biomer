@@ -1,93 +1,8 @@
 @extends('layout.frontlayout')
 @section('title', 'Order #{{ $order->order_number }} – Bharat Biomer')
 
-@push('styles')
-<style>
-.od__back {
-    display: inline-flex; align-items: center; gap: 0.4rem;
-    color: #2d7a45; font-size: 0.88rem; font-weight: 600;
-    text-decoration: none; margin-bottom: 1.25rem; display: block;
-}
-.od__back:hover { color: #245e36; }
-
-.od__status-card {
-    background: #fff; border-radius: 16px; border: 1px solid #e8f0e4;
-    padding: 1.5rem; box-shadow: 0 2px 16px rgba(60,120,60,0.06);
-    margin-bottom: 1.5rem; display: flex; flex-wrap: wrap;
-    align-items: center; gap: 1.5rem;
-}
-.od__order-num { font-size: 1.1rem; font-weight: 800; color: #1a2e1a; }
-.od__order-date { font-size: 0.82rem; color: #6b7c6b; margin-top: 2px; }
-.od__status-right { margin-left: auto; display: flex; align-items: center; gap: 1rem; }
-.od__total-big { font-size: 1.4rem; font-weight: 800; color: #2d7a45; }
-
-.od__status {
-    display: inline-block; padding: 5px 16px; border-radius: 20px;
-    font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px;
-}
-.od__status--pending    { background:#fff8e1; color:#b45309; border:1px solid #fcd34d; }
-.od__status--confirmed  { background:#e8f5ed; color:#2d7a45; border:1px solid #a8d5b5; }
-.od__status--processing { background:#e8f5fd; color:#1a6fa8; border:1px solid #90caf9; }
-.od__status--shipped    { background:#f3e8fd; color:#6d28d9; border:1px solid #c4b5fd; }
-.od__status--delivered  { background:#e8f5ed; color:#2d7a45; border:1px solid #a8d5b5; }
-.od__status--cancelled  { background:#fdecea; color:#c0392b; border:1px solid #f5a9a4; }
-
-.od__progress-card {
-    background: #fff; border-radius: 16px; border: 1px solid #e8f0e4;
-    padding: 1.5rem; box-shadow: 0 2px 16px rgba(60,120,60,0.06); margin-bottom: 1.5rem;
-}
-.od__progress-steps { display: flex; align-items: center; }
-.od__step { display: flex; flex-direction: column; align-items: center; flex: 1; text-align: center; position: relative; }
-.od__step-circle {
-    width: 36px; height: 36px; border-radius: 50%;
-    border: 2px solid #c8e0c8; background: #fff;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 0.85rem; font-weight: 800; color: #9aab9a; z-index: 1; position: relative;
-}
-.od__step.done   .od__step-circle { background: #2d7a45; border-color: #2d7a45; color: #fff; }
-.od__step.active .od__step-circle { background: #e8f5ed; border-color: #2d7a45; color: #2d7a45; box-shadow: 0 0 0 4px rgba(45,122,69,0.15); }
-.od__step-label { font-size: 0.7rem; font-weight: 700; color: #9aab9a; margin-top: 6px; text-transform: uppercase; letter-spacing: 0.3px; }
-.od__step.done .od__step-label, .od__step.active .od__step-label { color: #2d7a45; }
-.od__step-line { flex: 1; height: 2px; background: #e8f0e4; margin: 0 -1px; margin-top: -20px; }
-.od__step-line.done { background: #2d7a45; }
-
-.od__card {
-    background: #fff; border-radius: 16px; border: 1px solid #e8f0e4;
-    padding: 1.5rem; box-shadow: 0 2px 16px rgba(60,120,60,0.06); margin-bottom: 1.5rem;
-}
-.od__card-title {
-    font-size: 0.95rem; font-weight: 800; color: #1a2e1a;
-    margin-bottom: 1.25rem; padding-bottom: 0.75rem; border-bottom: 2px solid #f0f5ee;
-}
-
-.od__item { display: flex; align-items: center; gap: 0.85rem; padding: 0.75rem 0; border-bottom: 1px solid #f0f5ee; }
-.od__item:last-of-type { border-bottom: none; }
-.od__item-img { width: 56px; height: 56px; object-fit: contain; background: #f4faf0; border-radius: 10px; padding: 5px; border: 1px solid #e8f0e4; flex-shrink: 0; }
-.od__item-placeholder { width: 56px; height: 56px; background: #f4faf0; border-radius: 10px; border: 1px solid #e8f0e4; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; }
-.od__item-name { font-size: 0.9rem; font-weight: 700; color: #1a2e1a; }
-.od__item-meta { font-size: 0.75rem; color: #6b7c6b; margin-top: 2px; }
-.od__item-price { font-size: 0.95rem; font-weight: 700; color: #2d7a45; margin-left: auto; white-space: nowrap; }
-
-.od__total-row { display: flex; justify-content: space-between; font-size: 0.88rem; color: #4a6b4a; padding: 0.45rem 0; border-bottom: 1px solid #f5f5f5; }
-.od__total-row:last-of-type { border-bottom: none; }
-.od__total-row.grand { font-size: 1.05rem; font-weight: 800; color: #1a2e1a; border-top: 2px solid #e8f0e4; border-bottom: none; padding-top: 0.75rem; margin-top: 0.25rem; }
-.od__total-row.grand span:last-child { color: #2d7a45; }
-
-.od__detail-row { display: flex; gap: 1rem; padding: 0.5rem 0; border-bottom: 1px solid #f5f5f5; font-size: 0.88rem; }
-.od__detail-row:last-child { border-bottom: none; }
-.od__detail-label { font-weight: 700; color: #4a6b4a; width: 100px; flex-shrink: 0; }
-.od__detail-value { color: #1a2e1a; }
-
-@media (max-width: 576px) {
-    .od__status-card { flex-direction: column; align-items: flex-start; }
-    .od__status-right { margin-left: 0; }
-    .od__step-label { font-size: 0.6rem; }
-}
-</style>
-@endpush
-
 @section('content')
-<div class="container my-4">
+<div class="container my-4 order-detail-page">
     <div class="row g-4">
         <div class="col-lg-3">
             @include('components.customer-sidebar')
@@ -97,8 +12,8 @@
 
 <a href="{{ route('orders.index') }}" class="od__back"><i class="ri-arrow-left-line" aria-hidden="true"></i> Back to My Orders</a>
 
-<h1 style="font-size:1.6rem; font-weight:800; color:#1a2e1a; margin-bottom:0.2rem;">Order Details</h1>
-<p style="font-size:0.88rem; color:#6b7c6b; margin-bottom:1.5rem;">Placed on {{ $order->created_at->format('d M Y, h:i A') }}</p>
+<h1 class="od__page-title">Order Details</h1>
+<p class="od__page-subtitle">Placed on {{ $order->created_at->format('d M Y, h:i A') }}</p>
 
 <div class="od__status-card">
     <div>
@@ -147,7 +62,7 @@
                 @else
                     <div class="od__item-placeholder"><i class="ri-box-3-line" aria-hidden="true"></i></div>
                 @endif
-                <div style="flex:1; min-width:0;">
+                <div class="od__item-info">
                     <div class="od__item-name">{{ $item->product_name }}</div>
                     @if($item->variation_name)
                         <div class="od__item-meta">{{ $item->variation_name }}</div>
@@ -161,9 +76,9 @@
             </div>
             @endforeach
 
-            <div style="margin-top:1rem;">
+            <div class="od__totals">
                 <div class="od__total-row"><span>Subtotal</span><span>₹{{ number_format($order->total_amount - $order->shipping_amount, 2) }}</span></div>
-                <div class="od__total-row"><span>Shipping</span><span style="color:#2d7a45; font-weight:700;">@if($order->shipping_amount > 0)₹{{ number_format($order->shipping_amount, 2) }}@else Free @endif</span></div>
+                <div class="od__total-row"><span>Shipping</span><span class="od__shipping-value">@if($order->shipping_amount > 0)₹{{ number_format($order->shipping_amount, 2) }}@else Free @endif</span></div>
                 <div class="od__total-row"><span>Tax (GST)</span><span>Included</span></div>
                 <div class="od__total-row grand"><span>Total</span><span>₹{{ number_format($order->total_amount, 2) }}</span></div>
             </div>
@@ -185,28 +100,28 @@
             @endif
         </div>
 
-        <div class="od__card" style="text-align:center;">
-            <div class="od__card-title" style="text-align:left;"><i class="ri-customer-service-2-line" aria-hidden="true"></i> Need Help?</div>
-            <p style="font-size:0.85rem; color:#6b7c6b; margin-bottom:1rem;">
+        <div class="od__card od__help-card">
+            <div class="od__card-title od__help-title"><i class="ri-customer-service-2-line" aria-hidden="true"></i> Need Help?</div>
+            <p class="od__help-text">
                 For any queries about this order, please contact our support team.
             </p>
             @if($order->canRequestReturn())
             <a href="{{ route('order-returns.create', $order->order_number) }}"
-               style="display:inline-block; padding:0.6rem 1.5rem; background:#fff4e5; color:#9a5b00; font-weight:700; font-size:0.85rem; border-radius:8px; text-decoration:none; border:1px solid #f3c77a; margin-bottom:0.75rem;">
+               class="od__help-btn od__help-btn--return">
                 Return Product
             </a>
             @elseif($order->orderReturn)
             <a href="{{ route('order-returns.show', $order->orderReturn->id) }}"
-               style="display:inline-block; padding:0.6rem 1.5rem; background:#f4faf0; color:#2d7a45; font-weight:700; font-size:0.85rem; border-radius:8px; text-decoration:none; border:1px solid #a8d5b5; margin-bottom:0.75rem;">
+               class="od__help-btn od__help-btn--status">
                 View Return Status
             </a>
             @endif
             <a href="mailto:support@bharatbiomer.com"
-               style="display:inline-block; padding:0.6rem 1.5rem; background:#2d7a45; color:#fff; font-weight:700; font-size:0.85rem; border-radius:8px; text-decoration:none;">
+               class="od__help-btn od__help-btn--support">
                 <i class="ri-mail-line" aria-hidden="true"></i> Email Support
             </a>
-            <div style="margin-top:0.75rem;">
-                <a href="{{ route('orders.index') }}" style="font-size:0.82rem; color:#2d7a45; font-weight:600; text-decoration:none;">
+            <div class="od__back-all-wrap">
+                <a href="{{ route('orders.index') }}" class="od__back-all">
                     <i class="ri-arrow-left-line" aria-hidden="true"></i> Back to All Orders
                 </a>
             </div>

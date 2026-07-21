@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Order;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -23,15 +24,25 @@ class ShiprocketService
 
     private function getToken(): ?string
     {
+        $cachedToken = Cache::get('shiprocket.token');
+        if ($cachedToken) {
+            return $cachedToken;
+        }
+
         try {
-            $response = Http::post($this->baseUrl . '/auth/login', [
+            $response = Http::timeout(10)->post($this->baseUrl . '/auth/login', [
                 'email' => $this->email,
                 'password' => $this->password,
             ]);
 
-            if ($response->successful() && isset($response->json()['token'])) {
-                return $response->json()['token'];
+            $token = $response->json('token');
+            if ($response->successful() && $token) {
+                Cache::put('shiprocket.token', $token, now()->addHours(23));
+
+                return $token;
             }
+
+            Log::error('Shiprocket auth failed: ' . $response->body());
         } catch (\Exception $e) {
             Log::error('Shiprocket auth failed: ' . $e->getMessage());
         }

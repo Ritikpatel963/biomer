@@ -31,6 +31,27 @@ return new class extends Migration
             if (!Schema::hasColumn('orders', 'return_status')) {
                 $table->enum('return_status', ['none', 'requested', 'approved', 'rejected', 'refunded'])->default('none');
             }
+            if (!Schema::hasColumn('orders', 'payment_gateway')) {
+                $table->string('payment_gateway')->nullable();
+            }
+            if (!Schema::hasColumn('orders', 'payment_status')) {
+                $table->string('payment_status')->default('pending');
+            }
+            if (!Schema::hasColumn('orders', 'razorpay_order_id')) {
+                $table->string('razorpay_order_id')->nullable();
+            }
+            if (!Schema::hasColumn('orders', 'razorpay_payment_id')) {
+                $table->string('razorpay_payment_id')->nullable();
+            }
+            if (!Schema::hasColumn('orders', 'cashfree_order_id')) {
+                $table->string('cashfree_order_id')->nullable();
+            }
+            if (!Schema::hasColumn('orders', 'cashfree_payment_id')) {
+                $table->string('cashfree_payment_id')->nullable();
+            }
+            if (!Schema::hasColumn('orders', 'shiprocket_order_id')) {
+                $table->string('shiprocket_order_id')->nullable();
+            }
         });
     }
 
@@ -45,6 +66,16 @@ return new class extends Migration
                 'coupon_id', 'discount_amount', 'tax_amount', 'net_amount', 
                 'return_reason', 'return_status'
             ]);
+            
+            $columnsToDrop = [];
+            foreach (['payment_gateway', 'payment_status', 'razorpay_order_id', 'razorpay_payment_id', 'cashfree_order_id', 'cashfree_payment_id', 'shiprocket_order_id'] as $col) {
+                if (Schema::hasColumn('orders', $col)) {
+                    $columnsToDrop[] = $col;
+                }
+            }
+            if (!empty($columnsToDrop)) {
+                $table->dropColumn($columnsToDrop);
+            }
         });
     }
 };

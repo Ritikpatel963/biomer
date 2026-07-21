@@ -8,9 +8,11 @@
         "php": "^8.2",
         "backpack/basset": "^2.0",
         "barryvdh/laravel-dompdf": "^3.1",
+        "ezyang/htmlpurifier": "^4.19",
         "laravel/framework": "^11.0",
         "laravel/tinker": "^2.9",
         "razorpay/razorpay": "^2.9",
+        "spatie/laravel-permission": "^6.25",
         "symfony/asset": "^7.1",
         "symfony/asset-mapper": "^7.1"
     },

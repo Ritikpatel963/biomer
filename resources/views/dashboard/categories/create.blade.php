@@ -28,7 +28,7 @@
               <label class="form-label fw-semibold">Category Name <span class="text-danger">*</span></label>
               <input type="text" name="name" class="form-control @error('name') is-invalid @enderror"
                 value="{{ old('name') }}" placeholder="e.g. Fertilizer" required
-                oninput="autoSlug(this.value)">
+                data-category-slug-source>
               @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
 
@@ -65,10 +65,4 @@
     </div>
   </div>
 </div>
-<script>
-  function autoSlug(val) {
-    document.getElementById('slugField').value =
-      val.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-  }
-</script>
 @endsection

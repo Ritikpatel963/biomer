@@ -79,16 +79,27 @@ class ProductReviewController extends Controller
             return response()->json(['success' => false, 'message' => 'You have already reviewed this product.'], 422);
         }
 
+        $request->merge([
+            'review_text' => trim((string) $request->input('review_text', '')),
+        ]);
+
         $validated = $request->validate([
-            'rating'      => 'required|integer|min:1|max:5',
-            'review_text' => 'nullable|string|max:1000',
+            'rating'      => ['required', 'integer', 'min:1', 'max:5'],
+            'review_text' => ['required', 'string', 'min:3', 'max:1000'],
+        ], [
+            'rating.required' => 'Please select a rating.',
+            'rating.min' => 'Please select a valid rating.',
+            'rating.max' => 'Please select a valid rating.',
+            'review_text.required' => 'Please enter your comment.',
+            'review_text.min' => 'Comment must be at least 3 characters.',
+            'review_text.max' => 'Comment cannot be more than 1000 characters.',
         ]);
 
         ProductReview::create([
             'product_id'  => $product->id,
             'customer_id' => $customer->id,
             'rating'      => $validated['rating'],
-            'review_text' => $validated['review_text'] ?? null,
+            'review_text' => $validated['review_text'],
             'status'      => 'pending',
         ]);
 

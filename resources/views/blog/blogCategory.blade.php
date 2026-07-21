@@ -17,6 +17,7 @@
 <div class="row gy-4">
 
     {{-- Add Category --}}
+    @can('create blogs')
     <div class="col-lg-4">
         <div class="card">
             <div class="card-header border-bottom">
@@ -46,6 +47,7 @@
             </div>
         </div>
     </div>
+    @endcan
 
     {{-- Categories Table --}}
     <div class="col-lg-8">
@@ -72,6 +74,7 @@
                                         <div class="d-flex align-items-center justify-content-center gap-8">
 
                                             {{-- Edit --}}
+                                            @can('edit blogs')
                                             <button type="button"
                                                     class="btn btn-sm btn-primary-100 text-primary-600 px-12 py-6 radius-8"
                                                     data-bs-toggle="modal"
@@ -79,8 +82,10 @@
                                                     onclick="setEdit({{ $category->id }}, '{{ addslashes($category->name) }}')">
                                                 <i class="ri-edit-2-line"></i>
                                             </button>
+                                            @endcan
 
                                             {{-- Delete -- each row has its own inline form --}}
+                                            @can('delete blogs')
                                             <form action="/blog/categories/{{ $category->id }}/delete" method="POST"
                                                   onsubmit="return confirm('Delete \'{{ addslashes($category->name) }}\'? This cannot be undone.')">
                                                 @csrf
@@ -89,6 +94,7 @@
                                                     <i class="ri-delete-bin-6-line"></i>
                                                 </button>
                                             </form>
+                                            @endcan
 
                                         </div>
                                     </td>
@@ -115,6 +121,7 @@
 </div>
 
 {{-- EDIT MODAL --}}
+@can('edit blogs')
 <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-sm modal-dialog-centered">
         <div class="modal-content radius-12">
@@ -145,6 +152,7 @@
         </div>
     </div>
 </div>
+@endcan
 
 @endsection
 

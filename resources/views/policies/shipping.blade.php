@@ -1,6 +1,8 @@
 @extends('layout.frontlayout')
 
-@section('title', 'Shipping Policy – Bharat Biomer')
+@section('title', $pageSeo?->meta_title ?: 'Shipping Policy - Bharat Biomer')
+@section('seo_description', $pageSeo?->meta_description ?: 'Read Bharat Biomer shipping policy, order processing, delivery timelines, shipping charges, tracking, and address information.')
+@section('seo_keywords', $pageSeo?->meta_keyword ?: 'Bharat Biomer shipping policy, delivery, order tracking, shipping charges')
 
 @section('content')
     <section class="container py-5">

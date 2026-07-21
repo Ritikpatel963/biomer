@@ -29,6 +29,8 @@
             </div>
         @endif
 
+        <div id="paymentGatewayStatus" class="alert d-none mb-24" role="alert"></div>
+
         <form action="{{ route('paymentGateway.update') }}" method="POST">
             @csrf
 
@@ -47,7 +49,7 @@
                                 <span class="text-lg fw-semibold text-primary-light">Razorpay</span>
                             </div>
                             <div class="form-switch switch-primary d-flex align-items-center justify-content-center">
-                                <input class="form-check-input" type="checkbox" name="razorpay_enabled" value="1" 
+                                <input class="form-check-input js-gateway-toggle" type="checkbox" name="razorpay_enabled" value="1" data-gateway="razorpay"
                                     {{ ($gateways->firstWhere('gateway_name', 'razorpay')?->is_enabled) ? 'checked' : '' }}>
                             </div>
                         </div>
@@ -74,18 +76,6 @@
                                     </div>
                                 </div>
 
-                                <div class="col-sm-6">
-                                    <label for="razorpay_key_id" class="form-label fw-semibold text-primary-light text-md mb-8">Key ID <span class="text-danger-600">*</span></label>
-                                    <input type="text" class="form-control radius-8" id="razorpay_key_id" name="razorpay_key_id" placeholder="Razorpay Key ID"
-                                        value="{{ $gateways->firstWhere('gateway_name', 'razorpay')?->api_key ?? '' }}">
-                                </div>
-
-                                <div class="col-sm-6">
-                                    <label for="razorpay_key_secret" class="form-label fw-semibold text-primary-light text-md mb-8">Key Secret <span class="text-danger-600">*</span></label>
-                                    <input type="password" class="form-control radius-8" id="razorpay_key_secret" name="razorpay_key_secret" placeholder="Razorpay Key Secret"
-                                        value="{{ $gateways->firstWhere('gateway_name', 'razorpay')?->secret_key ?? '' }}">
-                                </div>
-
                                 <div class="col-12">
                                     <button type="submit" class="btn btn-primary border border-primary-600 text-md px-24 py-8 radius-8 w-100 text-center">
                                         Save Changes
@@ -110,7 +100,7 @@
                                 <span class="text-lg fw-semibold text-primary-light">Cashfree</span>
                             </div>
                             <div class="form-switch switch-primary d-flex align-items-center justify-content-center">
-                                <input class="form-check-input" type="checkbox" name="cashfree_enabled" value="1"
+                                <input class="form-check-input js-gateway-toggle" type="checkbox" name="cashfree_enabled" value="1" data-gateway="cashfree"
                                     {{ ($gateways->firstWhere('gateway_name', 'cashfree')?->is_enabled) ? 'checked' : '' }}>
                             </div>
                         </div>
@@ -135,18 +125,6 @@
                                             <label for="cashfree_production" class="form-label fw-medium text-lg text-primary-light mb-0">Production</label>
                                         </div>
                                     </div>
-                                </div>
-
-                                <div class="col-sm-6">
-                                    <label for="cashfree_app_id" class="form-label fw-semibold text-primary-light text-md mb-8">App ID <span class="text-danger-600">*</span></label>
-                                    <input type="text" class="form-control radius-8" id="cashfree_app_id" name="cashfree_app_id" placeholder="Cashfree App ID"
-                                        value="{{ $gateways->firstWhere('gateway_name', 'cashfree')?->api_key ?? '' }}">
-                                </div>
-
-                                <div class="col-sm-6">
-                                    <label for="cashfree_secret_key" class="form-label fw-semibold text-primary-light text-md mb-8">Secret Key <span class="text-danger-600">*</span></label>
-                                    <input type="password" class="form-control radius-8" id="cashfree_secret_key" name="cashfree_secret_key" placeholder="Cashfree Secret Key"
-                                        value="{{ $gateways->firstWhere('gateway_name', 'cashfree')?->secret_key ?? '' }}">
                                 </div>
 
                                 <div class="col-12">
@@ -176,7 +154,7 @@
                                 <span class="text-lg fw-semibold text-primary-light">Cash on Delivery (COD)</span>
                             </div>
                             <div class="form-switch switch-primary d-flex align-items-center justify-content-center">
-                                <input class="form-check-input" type="checkbox" name="cod_enabled" value="1"
+                                <input class="form-check-input js-gateway-toggle" type="checkbox" name="cod_enabled" value="1" data-gateway="cod"
                                     {{ ($gateways->firstWhere('gateway_name', 'cod')?->is_enabled) ? 'checked' : '' }}>
                             </div>
                         </div>
@@ -186,11 +164,6 @@
                                     <p class="text-primary-light mb-0">
                                         <strong>Note:</strong> Enable this option to allow customers to pay cash on delivery. No additional configuration needed.
                                     </p>
-                                </div>
-                                <div class="col-12">
-                                    <button type="submit" class="btn btn-primary border border-primary-600 text-md px-24 py-8 radius-8 w-100 text-center">
-                                        Save Changes
-                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -202,5 +175,74 @@
 
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var statusBox = document.getElementById('paymentGatewayStatus');
+    var csrfMeta = document.querySelector('meta[name="csrf-token"]');
+    var csrfToken = csrfMeta ? csrfMeta.getAttribute('content') : '';
+
+    function showStatus(message, isSuccess) {
+        if (!statusBox) return;
+
+        statusBox.className = 'alert mb-24 ' + (isSuccess ? 'alert-success' : 'alert-danger');
+        statusBox.textContent = message;
+
+        window.clearTimeout(showStatus.timer);
+        showStatus.timer = window.setTimeout(function () {
+            statusBox.className = 'alert d-none mb-24';
+            statusBox.textContent = '';
+        }, 3000);
+    }
+
+    document.querySelectorAll('.js-gateway-toggle').forEach(function (toggle) {
+        toggle.addEventListener('change', function () {
+            var previousState = !toggle.checked;
+
+            toggle.disabled = true;
+
+            fetch('{{ route('paymentGateway.status') }}', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    gateway_name: toggle.dataset.gateway,
+                    is_enabled: toggle.checked ? 1 : 0
+                })
+            })
+                .then(function (response) {
+                    if (response.status === 419) {
+                        throw new Error('Session expired. Please refresh the page and try again.');
+                    }
+
+                    return response.json().then(function (data) {
+                        return { ok: response.ok, data: data };
+                    }).catch(function () {
+                        return { ok: response.ok, data: { message: 'Unable to update payment gateway status.' } };
+                    });
+                })
+                .then(function (result) {
+                    if (!result.ok) {
+                        throw new Error(result.data.message || 'Unable to update payment gateway status.');
+                    }
+
+                    showStatus(result.data.message || 'Payment gateway status updated.', true);
+                })
+                .catch(function (error) {
+                    toggle.checked = previousState;
+                    showStatus(error.message, false);
+                })
+                .finally(function () {
+                    toggle.disabled = false;
+                });
+        });
+    });
+});
+</script>
 
 @endsection

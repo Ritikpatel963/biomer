@@ -15,12 +15,8 @@ class AdminAuth
         }
 
         $user = Auth::guard('web')->user();
-        $adminEmails = array_map('strtolower', config('admin.emails', []));
-
-        $isAdmin = (bool) ($user->is_admin ?? false)
-            || in_array(($user->role ?? null), ['admin', 'super-admin'], true)
-            || in_array(($user->type ?? null), ['admin', 'super-admin'], true)
-            || in_array(strtolower((string) $user->email), $adminEmails, true);
+        $isAdmin = method_exists($user, 'ensureActiveRoleAssignment')
+            && $user->ensureActiveRoleAssignment();
 
         if (!$isAdmin) {
             abort(403);

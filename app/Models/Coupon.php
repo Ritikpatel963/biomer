@@ -16,4 +16,13 @@ class Coupon extends Model
         'expires_at',
         'is_active',
     ];
+
+    protected $casts = [
+        'value' => 'decimal:2',
+        'min_order_amount' => 'decimal:2',
+        'usage_limit' => 'integer',
+        'used_count' => 'integer',
+        'expires_at' => 'date',
+        'is_active' => 'boolean',
+    ];
 }

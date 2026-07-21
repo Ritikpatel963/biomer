@@ -3,7 +3,22 @@
         Options -MultiViews -Indexes
     </IfModule>
 
+    <IfModule mod_headers.c>
+        Header set X-Frame-Options "SAMEORIGIN"
+        Header set X-Content-Type-Options "nosniff"
+    </IfModule>
+
     RewriteEngine On
+
+    # Canonical domain: send both HTTP and non-www requests directly to HTTPS www.
+    RewriteCond %{HTTP_HOST} ^(www\.)?bharatbiomer\.com$ [NC]
+    RewriteCond %{HTTPS} !=on [OR]
+    RewriteCond %{HTTP_HOST} !^www\.bharatbiomer\.com$ [NC]
+    RewriteRule ^ https://www.bharatbiomer.com%{REQUEST_URI} [R=301,L,NE]
+
+    # Never execute PHP files from public storage, even if uploaded content
+    # reaches the storage symlink because of a future validation or server issue.
+    RewriteRule ^storage/.*\.php[0-9s]?$ - [F,L,NC]
 
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .

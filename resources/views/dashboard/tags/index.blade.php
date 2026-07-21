@@ -25,9 +25,11 @@
 <div class="card basic-data-table">
     <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
         <h5 class="card-title mb-0">Tags</h5>
+        @can('create products')
         <a href="{{ route('dashboard.tags.create') }}" class="btn btn-primary btn-sm">
             + Add Tag
         </a>
+        @endcan
     </div>
 
     @if(session('success'))
@@ -91,13 +93,16 @@
                         {{-- Actions --}}
                         <td>
                             {{-- Edit --}}
+                            @can('edit products')
                             <a href="{{ route('dashboard.tags.edit', $tag) }}"
                                class="btn btn-sm btn-outline-primary"
                                title="Edit Tag">
                                 Edit
                             </a>
+                            @endcan
 
                             {{-- Delete --}}
+                            @can('delete products')
                             <form action="{{ route('dashboard.tags.destroy', $tag) }}"
                                   method="POST" class="d-inline"
                                   onsubmit="return confirm('Delete tag \'{{ addslashes($tag->name) }}\'?')">
@@ -108,13 +113,16 @@
                                     Delete
                                 </button>
                             </form>
+                            @endcan
                         </td>
                     </tr>
                     @empty
                     <tr>
                         <td colspan="6" class="text-center py-5 text-muted">
                             No tags yet.
-                            <a href="{{ route('dashboard.tags.create') }}">Add the first one!</a>
+                            @can('create products')
+                                <a href="{{ route('dashboard.tags.create') }}">Add the first one!</a>
+                            @endcan
                         </td>
                     </tr>
                     @endforelse

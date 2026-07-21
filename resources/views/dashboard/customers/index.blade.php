@@ -56,7 +56,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($customers as $i => $customer)
+                    @foreach($customers as $i => $customer)
                     <tr>
                         <td>
                             <div class="form-check style-check d-flex align-items-center">
@@ -105,11 +105,7 @@
                             </a>
                         </td>
                     </tr>
-                    @empty
-                    <tr>
-                        <td colspan="9" class="text-center py-5 text-muted">No customers found.</td>
-                    </tr>
-                    @endforelse
+                    @endforeach
                 </tbody>
             </table>
         </div>

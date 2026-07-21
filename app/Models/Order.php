@@ -14,6 +14,16 @@ class Order extends Model
         'razorpay_order_id', 'razorpay_payment_id', 'payment_status',
         'payment_gateway', 'cashfree_order_id', 'cashfree_payment_id',
         'shiprocket_order_id', 'coupon_id', 'discount_amount', 'net_amount',
+        'delivered_at',
+    ];
+
+    protected $hidden = [
+        'razorpay_payment_id',
+        'cashfree_payment_id',
+        'cashfree_order_id',
+        'razorpay_order_id',
+        'shiprocket_order_id',
+        'coupon_id',
     ];
 
     protected $casts = [
@@ -28,11 +38,6 @@ class Order extends Model
     }
 
     public function items()
-    {
-        return $this->hasMany(OrderItem::class);
-    }
-
-    public function orderItems()
     {
         return $this->hasMany(OrderItem::class);
     }

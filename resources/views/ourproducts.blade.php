@@ -5,27 +5,12 @@
   <!-- ========================
        SECTION 1: Hero - Innovation
   ======================== -->
-  <section class="prodh__section">
-    <div class="container">
-      <div class="row">
-        <div class="col-12 col-lg-8">
-
-          <!-- Badge -->
-          <div class="prodh__badge mb-3">
-            <img src="assets/images/flask-icon.svg" alt="flask" class="prodh__badge-icon"/>
-            <span class="prodh__badge-text">Our Product Portfolio</span>
-          </div>
-
-          <!-- Heading -->
-          <h1 class="prodh__heading">Innovation in Every Formulation</h1>
-
-          <!-- Description -->
-          <p class="prodh__desc">Advanced bio-stimulants and agricultural solutions designed for modern farming challenges. From microbial formulations to smart fertilizers.</p>
-
-        </div>
-      </div>
-    </div>
-  </section>
+  <x-front-breadcrumb
+    badge="Our Product Portfolio"
+    title="Innovation in Every Formulation"
+    description="Advanced bio-stimulants and agricultural solutions designed for modern farming challenges. From microbial formulations to smart fertilizers."
+    :icon="asset('assets/images/flask-icon.svg')"
+  />
 
   <!-- ========================
        SECTION 2: Available Now
@@ -38,7 +23,7 @@
         <div class="col-12">
           <div class="avan__header">
             <div class="avan__header-top">
-              <span class="avan__check">✓</span>
+              
               <h3 class="avan__header-title">Available Now</h3>
             </div>
             <p class="avan__header-desc">Proven formulations ready for field application</p>

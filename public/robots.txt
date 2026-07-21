@@ -1,2 +1,9 @@
 User-agent: *
-Disallow:
+Disallow: /admin/
+Disallow: /checkout/
+Disallow: /cart/
+Disallow: /my-account/
+Disallow: /wishlist/
+Disallow: /order/
+
+Sitemap: https://www.bharatbiomer.com/sitemap.xml

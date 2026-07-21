@@ -59,11 +59,7 @@ class AuthenticationController extends Controller
 
     private function isAdmin($user): bool
     {
-        $adminEmails = array_map('strtolower', config('admin.emails', []));
-
-        return (bool) ($user->is_admin ?? false)
-            || in_array(($user->role ?? null), ['admin', 'super-admin'], true)
-            || in_array(($user->type ?? null), ['admin', 'super-admin'], true)
-            || in_array(strtolower((string) $user->email), $adminEmails, true);
+        return method_exists($user, 'ensureActiveRoleAssignment')
+            && $user->ensureActiveRoleAssignment();
     }
 }

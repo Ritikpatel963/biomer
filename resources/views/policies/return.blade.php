@@ -1,6 +1,8 @@
 @extends('layout.frontlayout')
 
-@section('title', 'Return Policy – Bharat Biomer')
+@section('title', $pageSeo?->meta_title ?: 'Return Policy - Bharat Biomer')
+@section('seo_description', $pageSeo?->meta_description ?: 'Read Bharat Biomer return policy, eligibility rules, return process, refunds, exchanges, and customer support information.')
+@section('seo_keywords', $pageSeo?->meta_keyword ?: 'Bharat Biomer return policy, refunds, exchanges, return process')
 
 @section('content')
     <section class="container py-5">

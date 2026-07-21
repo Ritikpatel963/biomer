@@ -50,7 +50,7 @@
                             <div class="text-muted small mt-1">Current logo. Upload a new one to replace it.</div>
                         </div>
                     @endif
-                    <input type="file" name="logo" class="form-control" accept="image/*" onchange="previewLogo(this)">
+                    <input type="file" name="logo" class="form-control" accept="image/*" data-brand-edit-logo-input>
                     <img id="logoPreview" src="" alt="" class="radius-8 border mt-2" style="display:none;width:100px;height:100px;object-fit:contain;padding:4px;">
                 </div>
 
@@ -63,17 +63,4 @@
     </div>
 </div>
 
-<script>
-function previewLogo(input) {
-    const preview = document.getElementById('logoPreview');
-    if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = event => {
-            preview.src = event.target.result;
-            preview.style.display = 'block';
-        };
-        reader.readAsDataURL(input.files[0]);
-    }
-}
-</script>
 @endsection

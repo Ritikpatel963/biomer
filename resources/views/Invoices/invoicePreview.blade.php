@@ -24,63 +24,11 @@
     });
     $tax = (float) ($order->tax_amount ?? 0);
     $tax = $tax > 0 ? $tax : $itemTax;
+    $canDownloadInvoices = (auth()->user()?->role ?? null) === 'super-admin';
 @endphp
 
 @section('content')
-    <style>
-        .invoice-preview-shell {
-            background: #fff;
-            border: 1px solid #e7edf3;
-            border-radius: 8px;
-            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.05);
-            margin: 0 auto;
-            max-width: 960px;
-            overflow: hidden;
-        }
-
-        .invoice-preview-head {
-            border-bottom: 1px solid #eef2f7;
-            display: flex;
-            gap: 20px;
-            justify-content: space-between;
-            padding: 28px;
-        }
-
-        .invoice-preview-box {
-            background: #f8fafc;
-            border: 1px solid #e7edf3;
-            border-radius: 8px;
-            padding: 18px;
-        }
-
-        .invoice-preview-total {
-            background: #0f766e;
-            color: #fff;
-            font-weight: 800;
-        }
-
-        .invoice-company-meta {
-            color: #64748b;
-            line-height: 1.6;
-            margin-top: 10px;
-        }
-
-        @media print {
-            .sidebar, .navbar-header, .dashboard-main-body > .d-flex, .card-header, .btn {
-                display: none !important;
-            }
-            .dashboard-main-body {
-                margin: 0 !important;
-                padding: 0 !important;
-            }
-            .invoice-preview-shell {
-                border: 0;
-                box-shadow: none;
-                max-width: 100%;
-            }
-        }
-    </style>
-
+  
     <div class="card">
         <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2">
             <div>
@@ -88,7 +36,9 @@
                 <p class="text-secondary-light mb-0">{{ optional($order->created_at)->format('d M Y') }}</p>
             </div>
             <div class="d-flex flex-wrap gap-2">
-                <a href="{{ route('dashboard.orders.invoice', $order->order_number) }}" class="btn btn-sm btn-outline-success" target="_blank">Download</a>
+                @if($canDownloadInvoices)
+                    <a href="{{ URL::temporarySignedRoute('dashboard.orders.invoice', now()->addMinutes(10), $order->order_number) }}" class="btn btn-sm btn-outline-success" target="_blank">Download</a>
+                @endif
                 <a href="{{ route('dashboard.orders.show', $order->order_number) }}" class="btn btn-sm btn-outline-primary">View Order</a>
                 <button type="button" class="btn btn-sm btn-primary" onclick="printInvoice()">Print</button>
             </div>
@@ -98,7 +48,7 @@
             <div class="invoice-preview-shell">
                 <div class="invoice-preview-head flex-wrap">
                     <div>
-                        <img src="{{ $company['logo_url'] }}" alt="{{ $company['name'] }}" style="max-width: 170px; max-height: 76px;">
+                        <img src="{{ $company['logo_url'] }}" alt="{{ $company['name'] }}" class="invoice-preview-logo">
                         <div class="invoice-company-meta">
                             <strong class="text-primary-light">{{ $company['name'] }}</strong><br>
                             {{ $company['tagline'] }}<br>
